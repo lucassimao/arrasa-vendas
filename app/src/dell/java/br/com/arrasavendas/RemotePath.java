@@ -21,8 +21,6 @@ public enum RemotePath {
 	}
 
     private static class Constants {
-        //private static final String host = "http://172.16.90.1:8080/arrasa-amiga";
-        //private static final String host = "http://192.168.1.8:8080/arrasa-amiga";
-        private static final String host = "http://www.arrasaamiga.com.br";
+       private static final String host = "http://172.16.90.1:8080/arrasa-amiga";
     }
 }

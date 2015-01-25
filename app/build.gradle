@@ -1,11 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+/*        config {
+            keyAlias 'android-keystore'
+            keyPassword '123456'
+            storeFile file('/home/lsimaocosta/Programming/android-keystore')
+            storePassword '123456'
+        }*/
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
-        applicationId "br.com.arrasaavendas"
+        applicationId "br.com.arrasavendas"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
@@ -15,6 +22,14 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+        dell {
+            //signingConfig signingConfigs.config
+        }
+        production {
+            //signingConfig signingConfigs.config
         }
     }
 }
