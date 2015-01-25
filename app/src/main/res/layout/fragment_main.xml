@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:gravity="center_vertical"
+              android:orientation="vertical"
+              tools:context="br.com.arrasaamiga.MainActivity$PlaceholderFragment">
+
+    <Button
+            android:layout_width="fill_parent"
+            android:onClick="onClickBtnNovaVenda"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Nova Venda"/>
+
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onClickBtnEntregas"
+            android:layout_margin="10dp"
+            android:text="Entregas"/>
+
+    <Button
+            android:onClick="onClickBtnEstoque"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Estoque"/>
+
+
+    <Button
+            android:onClick="onClickBtnCalcularFrete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Frete"/>
+
+</LinearLayout>
