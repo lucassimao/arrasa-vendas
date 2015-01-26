@@ -3,7 +3,9 @@ package br.com.arrasavendas.venda;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Cliente {
+import java.io.Serializable;
+
+public class Cliente implements Serializable {
 
 	private String nome;
 	private String celular, dddCelular;

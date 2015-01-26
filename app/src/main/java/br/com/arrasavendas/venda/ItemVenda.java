@@ -1,12 +1,13 @@
 package br.com.arrasavendas.venda;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ItemVenda {
+public class ItemVenda implements Serializable {
 
     private String nomeProduto;
     private String unidade;
