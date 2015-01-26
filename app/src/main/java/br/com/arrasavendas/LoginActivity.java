@@ -19,9 +19,11 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences sp = getSharedPreferences("br.com.arrasaamiga.auth", MODE_PRIVATE);
+        //TODO tratar a inexistencia do TOKEN
+        Application app = (Application) getApplication();
+        String accessToken = app.getAccessToken();
 
-        if (sp.getString("access_token", null) != null) {
+        if (accessToken != null) {
             showMainActivity();
             finish();
         }else{

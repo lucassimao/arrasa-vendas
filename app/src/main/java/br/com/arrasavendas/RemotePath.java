@@ -1,5 +1,6 @@
 package br.com.arrasavendas;
 
+
 public enum RemotePath {
 	EstoqueList(Constants.host + "/api/estoque?format=json"),
 	VendaPath(Constants.host + "/api/vendas?format=json"),
@@ -21,6 +22,7 @@ public enum RemotePath {
 	}
 
     private static class Constants {
-       private static final String host = "http://172.16.90.1:8080/arrasa-amiga";
+
+       private static final String host = Application.context().getResources().getString(R.string.remote_server);
     }
 }

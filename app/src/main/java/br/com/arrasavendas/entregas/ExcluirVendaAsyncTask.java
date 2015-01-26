@@ -1,8 +1,6 @@
 package br.com.arrasavendas.entregas;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import org.apache.http.HttpResponse;
@@ -12,6 +10,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
 
 
@@ -37,8 +36,8 @@ public class ExcluirVendaAsyncTask extends AsyncTask<Void, Void, HttpResponse> {
         DefaultHttpClient httpclient = new DefaultHttpClient();
         HttpDelete httpdelete = new HttpDelete(RemotePath.getVendaEntityPath(this.vendaId));
 
-        SharedPreferences sp = ctx.getSharedPreferences("br.com.arrasaamiga.auth", Activity.MODE_PRIVATE);
-        String accessToken = sp.getString("access_token", "");
+        Application app = (Application) ctx.getApplicationContext();
+        String accessToken = app.getAccessToken();
 
         try {
             httpdelete.setHeader("Authorization", "Bearer " + accessToken);

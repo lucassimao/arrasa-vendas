@@ -127,10 +127,9 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
 
 	private String downloadJSON() throws IOException {
 
-		SharedPreferences sp = ctx.getSharedPreferences("br.com.arrasaamiga.auth", Activity.MODE_PRIVATE);
-		//TODO tratar a inexistencia do TOKEN
-		String accessToken = sp.getString("access_token","");
-
+        //TODO tratar a inexistencia do TOKEN
+        Application app = (Application) ctx.getApplicationContext();
+		String accessToken = app.getAccessToken();
 
 		HttpClient client = new DefaultHttpClient();
 		

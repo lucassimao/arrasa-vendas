@@ -1,17 +1,16 @@
 package br.com.arrasavendas.venda;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.os.AsyncTask;
 
-import br.com.arrasavendas.RemotePath;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
+import br.com.arrasavendas.Application;
+import br.com.arrasavendas.RemotePath;
 
 public class SalvarVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 
@@ -45,8 +44,8 @@ public class SalvarVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 	
 	private HttpResponse makeRequest(JSONObject obj) throws Exception {
 
-		SharedPreferences sp = ctx.getSharedPreferences("br.com.arrasaamiga.auth", Activity.MODE_PRIVATE);
-		String accessToken = sp.getString("access_token", "");
+        Application app = (Application) ctx.getApplicationContext();
+        String accessToken = app.getAccessToken();
 
 		// instantiates httpclient to make request
 		DefaultHttpClient httpclient = new DefaultHttpClient();

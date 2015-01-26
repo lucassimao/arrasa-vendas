@@ -1,16 +1,8 @@
 package br.com.arrasavendas.entregas;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import br.com.arrasavendas.RemotePath;
+import android.os.AsyncTask;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPut;
@@ -19,7 +11,15 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import br.com.arrasavendas.Application;
+import br.com.arrasavendas.RemotePath;
 
 public class UpdateDataEntregaVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 
@@ -42,8 +42,8 @@ public class UpdateDataEntregaVendaAsyncTask extends AsyncTask<Void,Void,HttpRes
 	
 	@Override
 	protected HttpResponse doInBackground(Void... params) {
-		SharedPreferences sp = ctx.getSharedPreferences("br.com.arrasaamiga.auth", Activity.MODE_PRIVATE);
-		String accessToken = sp.getString("access_token","");
+        Application app = (Application) ctx.getApplicationContext();
+        String accessToken = app.getAccessToken();
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPut httPut = new HttpPut(RemotePath.getVendaEntityPath(this.vendaId));

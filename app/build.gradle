@@ -25,10 +25,12 @@ android {
         }
     }
     productFlavors {
-        dell {
+        development {
+            // muda o IP do servidor remoto para http://10.0.2.2:8080/arrasa-amiga
             //signingConfig signingConfigs.config
         }
         production {
+            // muda o IP do servidor remoto para http://www.arrasaamiga.com.br
             //signingConfig signingConfigs.config
         }
     }

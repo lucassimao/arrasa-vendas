@@ -108,17 +108,12 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha,Void, Ht
 
     private void salvarAutenticacao(String json) {
 
-
-        SharedPreferences sp = this.context.getSharedPreferences("br.com.arrasaamiga.auth", Activity.MODE_PRIVATE);
-        SharedPreferences.Editor editor =  sp.edit();
+        Application app = (Application) context.getApplicationContext();
 
         try {
             JSONObject obj = new JSONObject(json);
+            app.salvarToken(obj.getString("username"), obj.getString("roles"), obj.getString("access_token"));
 
-            editor.putString("username",obj.getString("username"));
-            editor.putString("roles",obj.getString("roles"));
-            editor.putString("access_token",obj.getString("access_token"));
-            editor.commit();
         } catch (JSONException e) {
             e.printStackTrace();
         }
