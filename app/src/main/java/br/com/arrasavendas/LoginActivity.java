@@ -26,7 +26,7 @@ public class LoginActivity extends Activity {
         if (accessToken != null) {
             showMainActivity();
             finish();
-        }else{
+        } else {
             setContentView(R.layout.activity_login);
             this.editTextLogin = (TextView) findViewById(R.id.editTextLogin);
             this.editTextSenha = (TextView) findViewById(R.id.editTextSenha);
@@ -37,35 +37,30 @@ public class LoginActivity extends Activity {
 
     public void onClickButtonLogin(View view) {
 
-        SharedPreferences sp = getSharedPreferences("br.com.arrasaamiga.auth", MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences(Application.ARRASAVENDAS_AUTH_PREFS_KEY, MODE_PRIVATE);
 
-        if (sp.getString("access_token", null) != null) {
-            showMainActivity();
-        } else {
-            String login = this.editTextLogin.getText().toString();
-            String senha = this.editTextSenha.getText().toString();
+        String login = this.editTextLogin.getText().toString();
+        String senha = this.editTextSenha.getText().toString();
 
-            final ProgressDialog progressDlg = ProgressDialog.show(this, "Autenticando", "Aguarde ...");
-            final LoginAsyncTask loginAsyncTask = new LoginAsyncTask(new Runnable() {
+        final ProgressDialog progressDlg = ProgressDialog.show(this, "Autenticando", "Aguarde ...");
+        final LoginAsyncTask loginAsyncTask = new LoginAsyncTask(new Runnable() {
 
-                @Override
-                public void run() {
-                    progressDlg.dismiss();
-                    showMainActivity();
+            @Override
+            public void run() {
+                progressDlg.dismiss();
+                showMainActivity();
 
-                }
-            }, new Runnable() {
-                @Override
-                public void run() {
-                    progressDlg.dismiss();
-                    Toast.makeText(LoginActivity.this,"Login ou senha inválido(s)",Toast.LENGTH_SHORT).show();
-                }
-            },this);
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                progressDlg.dismiss();
+                Toast.makeText(LoginActivity.this, "Login ou senha inválido(s)", Toast.LENGTH_SHORT).show();
+            }
+        }, this);
 
-            loginAsyncTask.execute(new LoginAsyncTask.LoginSenha(login, senha));
+        loginAsyncTask.execute(new LoginAsyncTask.LoginSenha(login, senha));
 
-
-        }
     }
 
     private void showMainActivity() {

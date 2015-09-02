@@ -4,7 +4,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.venda.Cliente;
+import br.com.arrasavendas.model.Cliente;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,9 +13,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import br.com.arrasavendas.venda.StatusVenda;
-import br.com.arrasavendas.venda.TurnoEntrega;
-import br.com.arrasavendas.venda.Venda;
+import br.com.arrasavendas.model.StatusVenda;
+import br.com.arrasavendas.model.TurnoEntrega;
+import br.com.arrasavendas.model.Venda;
 
 public class EditClienteDialog extends DialogFragment {
 

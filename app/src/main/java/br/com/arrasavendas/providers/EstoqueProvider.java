@@ -14,6 +14,9 @@ import android.util.Log;
 
 import br.com.arrasavendas.DatabaseHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class EstoqueProvider extends ContentProvider {
 
@@ -23,22 +26,19 @@ public class EstoqueProvider extends ContentProvider {
     // representa os produtos que tiver no minimo 1 item em estoque
     public static final Uri CONTENT_URI_PRODUTOS = Uri.parse(CONTENT_URI.toString() + "/produtos");
 
-    public static final Uri CONTENT_URI_UNIDADES = Uri.parse(CONTENT_URI.toString() + "/unidades");
-
     public final static String _ID = "_id";
     public final static String PRODUTO = "produto_nome";
+    public final static String PRODUTO_ASCII = "produto_nome_ascii";
     public final static String PRODUTO_ID = "produto_id";
     public final static String UNIDADE = "unidade";
     public final static String QUANTIDADE = "quantidade";
     public final static String PRECO_A_VISTA = "prevoAVista";
     public final static String PRECO_A_PRAZO = "prevoAPrazo";
 
-
     private static final UriMatcher uriMatcher;
     private static final int ESTOQUE_ALL = 1;
     private static final int ESTOQUE_ID = 2;
     private static final int ESTOQUE_PRODUTOS = 3;
-
 
     private SQLiteDatabase arrasaVendasDb;
 
@@ -119,6 +119,7 @@ public class EstoqueProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
 
+
         SQLiteQueryBuilder sqlBuilder = new SQLiteQueryBuilder();
         sqlBuilder.setTables(DatabaseHelper.TABLE_ESTOQUE);
         String groupBy = null;
@@ -128,7 +129,7 @@ public class EstoqueProvider extends ContentProvider {
             sqlBuilder.appendWhere(_ID + " = " + uri.getPathSegments().get(1));
         }
         if (uriMatcher.match(uri) == ESTOQUE_PRODUTOS) {
-            groupBy = PRODUTO;
+            groupBy = PRODUTO_ID;
             having = "AVG(quantidade) > 0";
         }
 

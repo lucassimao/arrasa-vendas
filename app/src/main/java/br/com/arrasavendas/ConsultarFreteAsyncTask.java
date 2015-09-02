@@ -1,4 +1,4 @@
-package br.com.arrasavendas.venda;
+package br.com.arrasavendas;
 
 import android.content.Context;
 import android.os.AsyncTask;

@@ -21,12 +21,12 @@ import br.com.arrasavendas.DownloadJSONFeedTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.providers.VendasProvider;
-import br.com.arrasavendas.venda.Cliente;
-import br.com.arrasavendas.venda.FormaPagamento;
-import br.com.arrasavendas.venda.ItemVenda;
-import br.com.arrasavendas.venda.StatusVenda;
-import br.com.arrasavendas.venda.TurnoEntrega;
-import br.com.arrasavendas.venda.Venda;
+import br.com.arrasavendas.model.Cliente;
+import br.com.arrasavendas.model.FormaPagamento;
+import br.com.arrasavendas.model.ItemVenda;
+import br.com.arrasavendas.model.StatusVenda;
+import br.com.arrasavendas.model.TurnoEntrega;
+import br.com.arrasavendas.model.Venda;
 
 public class EntregasActivity extends Activity {
 

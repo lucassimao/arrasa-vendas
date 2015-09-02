@@ -30,6 +30,7 @@
         android:id="@+id/listItemsEstoque"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:descendantFocusability="blocksDescendants"
         android:layout_above="@id/btn"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"

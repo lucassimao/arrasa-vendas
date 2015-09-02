@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="msg_excluir_imagens">
+        <item quantity="one"> A imagem será excluida. Certeza?</item>
+        <item quantity="other">%d imagens serão excluidas. Certeza?</item>
+    </plurals>
+
+    <plurals name="msg_confirmacao_exclusao">
+        <item quantity="one"> A imagem foi excluida </item>
+        <item quantity="other">%d imagens excluidas com sucesso</item>
+    </plurals>
+
+    <plurals name="msg_confirmacao_importacao_imagem">
+        <item quantity="one"> A imagem foi importada! </item>
+        <item quantity="other">%d imagens importadas! </item>
+    </plurals>
+</resources>

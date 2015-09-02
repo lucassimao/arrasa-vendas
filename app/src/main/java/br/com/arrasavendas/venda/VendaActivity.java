@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import android.widget.*;
 import br.com.arrasavendas.Application;
+import br.com.arrasavendas.model.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
@@ -147,7 +148,7 @@ public class VendaActivity extends Activity {
 
                 CursorLoader cl = new CursorLoader(getApplicationContext(),
                         EstoqueProvider.CONTENT_URI_PRODUTOS, colunas,
-                        "produto_nome like ? ", new String[]{"%"
+                        "produto_nome_ascii like ?1 or produto_nome like ?1 ", new String[]{"%"
                         + arg0.toString() + "%"}, null);
                 return cl.loadInBackground();
             }
@@ -393,6 +394,7 @@ public class VendaActivity extends Activity {
                     } else if (statusCode == HttpStatus.SC_CREATED) {
                         atualizarEstoque();
                         Toast.makeText(getBaseContext(), "Venda salva com sucesso!", Toast.LENGTH_LONG).show();
+                        finish();
 
                     } else {
                         Toast.makeText(getBaseContext(), "Erro " + statusCode, Toast.LENGTH_SHORT).show();

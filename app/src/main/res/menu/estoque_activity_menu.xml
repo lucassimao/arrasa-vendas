@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:arrasavendas="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/share_with_whatsapp"
+        android:icon="@drawable/whatsapp"
+        android:title="Compartilhar"
+        arrasavendas:showAsAction="always|withText"
+        android:showAsAction="always|withText"
+        />
+</menu>

@@ -36,4 +36,11 @@
             android:layout_margin="10dp"
             android:text="Frete"/>
 
+    <Button
+            android:onClick="onClickBtnImagesManager"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Gerenciar Imagens"/>
+
 </LinearLayout>

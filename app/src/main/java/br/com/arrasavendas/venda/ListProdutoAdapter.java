@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
-import br.com.arrasavendas.estoque.EstoqueExpandableListAdapter;
+import br.com.arrasavendas.model.ItemVenda;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

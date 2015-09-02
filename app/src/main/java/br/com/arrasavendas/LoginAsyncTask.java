@@ -85,9 +85,7 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha,Void, Ht
             InputStream content = null;
             try {
                 content = entity.getContent();
-
-                BufferedReader reader;
-                reader = new BufferedReader(new InputStreamReader(content));
+                BufferedReader reader= new BufferedReader(new InputStreamReader(content));
                 String line;
 
                 while ((line = reader.readLine()) != null) {

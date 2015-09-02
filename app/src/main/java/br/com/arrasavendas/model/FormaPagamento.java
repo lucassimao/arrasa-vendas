@@ -1,4 +1,4 @@
-package br.com.arrasavendas.venda;
+package br.com.arrasavendas.model;
 
 public enum FormaPagamento {
 

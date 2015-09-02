@@ -5,7 +5,7 @@ import java.util.*;
 
 import android.os.Bundle;
 import android.widget.*;
-import br.com.arrasavendas.venda.*;
+import br.com.arrasavendas.model.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 

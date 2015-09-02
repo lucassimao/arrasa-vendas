@@ -16,9 +16,9 @@ import java.io.UnsupportedEncodingException;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
-import br.com.arrasavendas.venda.Cliente;
-import br.com.arrasavendas.venda.StatusVenda;
-import br.com.arrasavendas.venda.TurnoEntrega;
+import br.com.arrasavendas.model.Cliente;
+import br.com.arrasavendas.model.StatusVenda;
+import br.com.arrasavendas.model.TurnoEntrega;
 
 public class UpdateClienteVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 

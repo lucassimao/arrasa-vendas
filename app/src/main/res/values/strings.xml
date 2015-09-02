@@ -8,4 +8,5 @@
     <color name="amareloMClara">#F2F0A0</color>
 
     <string name="title_activity_login">Login</string>
+    <string name="images_manager_label"> Gerenciador de Imagens </string>
 </resources>
