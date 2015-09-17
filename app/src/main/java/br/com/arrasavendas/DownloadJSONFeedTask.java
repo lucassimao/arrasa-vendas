@@ -3,7 +3,6 @@ package br.com.arrasavendas;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
@@ -58,7 +57,7 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
     private void salvarJSON(String jsonString) throws IOException, JSONException {
 
         switch (this.feed) {
-            case EstoqueList:
+            case EstoquePath:
                 this.ctx.getContentResolver().delete(EstoqueProvider.CONTENT_URI, null, null);
                 break;
             case VendaPath:
@@ -73,7 +72,7 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
             ContentValues values;
 
             switch (this.feed) {
-                case EstoqueList:
+                case EstoquePath:
 
                     JSONObject estoque = itens.getJSONObject(i);
 
@@ -83,6 +82,7 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
                             .replaceAll("[^\\p{ASCII}]", "");
 
                     values = new ContentValues();
+                    values.put(EstoqueProvider._ID, estoque.getLong("estoque_id"));
                     values.put(EstoqueProvider.PRODUTO, produtoNome);
                     values.put(EstoqueProvider.PRODUTO_ASCII, produtoNomeASCII);
                     values.put(EstoqueProvider.PRODUTO_ID, estoque.getInt("produto_id"));
@@ -91,18 +91,18 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
                     values.put(EstoqueProvider.UNIDADE, estoque.getString("unidade"));
                     values.put(EstoqueProvider.QUANTIDADE, estoque.getInt("quantidade"));
 
-                    JSONArray produtoFotos= estoque.getJSONArray("produto_fotos");
+                    JSONArray produtoFotos = estoque.getJSONArray("produto_fotos");
 
                     for (int j = 0; j < produtoFotos.length(); j++) {
                         ContentValues cv = new ContentValues();
-                        cv.put(DownloadedImagesProvider.IMAGE_NAME,produtoFotos.getString(j));
-                        cv.put(DownloadedImagesProvider.PRODUTO_ID,estoque.getInt("produto_id"));
+                        cv.put(DownloadedImagesProvider.IMAGE_NAME, produtoFotos.getString(j));
+                        cv.put(DownloadedImagesProvider.PRODUTO_ID, estoque.getInt("produto_id"));
                         cv.put(DownloadedImagesProvider.PRODUTO_NOME, produtoNome);
                         cv.put(DownloadedImagesProvider.PRODUTO_ASCII, produtoNomeASCII);
-                        cv.put(DownloadedImagesProvider.UNIDADE,estoque.getString("unidade"));
-                        cv.put(DownloadedImagesProvider.IS_IGNORED,0);
+                        cv.put(DownloadedImagesProvider.UNIDADE, estoque.getString("unidade"));
+                        cv.put(DownloadedImagesProvider.IS_IGNORED, 0);
 
-                        this.ctx.getContentResolver().insert(DownloadedImagesProvider.CONTENT_URI,cv);
+                        this.ctx.getContentResolver().insert(DownloadedImagesProvider.CONTENT_URI, cv);
                     }
                     this.ctx.getContentResolver().insert(EstoqueProvider.CONTENT_URI, values);
 

@@ -46,7 +46,7 @@ public class UpdateDataEntregaVendaAsyncTask extends AsyncTask<Void,Void,HttpRes
         String accessToken = app.getAccessToken();
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPut httPut = new HttpPut(RemotePath.getVendaEntityPath(this.vendaId));
+		HttpPut httPut = new HttpPut(RemotePath.getEntityPath(RemotePath.VendaPath, this.vendaId));
 
 		StringEntity se = null;
 

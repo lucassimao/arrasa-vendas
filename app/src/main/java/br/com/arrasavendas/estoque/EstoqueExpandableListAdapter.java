@@ -1,35 +1,36 @@
 package br.com.arrasavendas.estoque;
 
+import android.app.*;
+import android.content.ContentValues;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.CheckBox;
-import android.widget.CheckedTextView;
-import android.widget.CompoundButton;
-import android.widget.ExpandableListView;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.util.*;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.model.ItemEstoque;
+import br.com.arrasavendas.model.Produto;
+import br.com.arrasavendas.providers.EstoqueProvider;
 
 public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private List<ItemEstoque> produtos;
+    private final FragmentManager fragmentManager;
+    private final Activity ctx;
+    private List<Produto> produtos;
     private Map<Integer, Boolean[]> unidadesSelecionadas;
     private LayoutInflater inflater;
 
-    public EstoqueExpandableListAdapter(Context ctx, List<ItemEstoque> produtos) {
+    public EstoqueExpandableListAdapter(Activity ctx, List<Produto> produtos) {
+        this.ctx = ctx;
+        this.fragmentManager = ctx.getFragmentManager();
         this.inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.produtos = produtos;
         this.unidadesSelecionadas = new HashMap<>();
 
         for (int i = 0; i < produtos.size(); ++i) {
-            ItemEstoque itemEstoque = produtos.get(i);
+            Produto itemEstoque = produtos.get(i);
             int qtdeDeUnidades = itemEstoque.getUnidades().size();
 
             Boolean[] flags = new Boolean[qtdeDeUnidades];
@@ -55,17 +56,27 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, final ViewGroup parent) {
 
         final String unidade = (String) getChild(groupPosition, childPosition);
+        final Produto produto = this.produtos.get(groupPosition);
+        final Integer quantidade = produto.getQuantidades().get(unidade);
+
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.estoque_list_row_details, null);
         }
 
+        Button btnEditQuantidadeEmEstoque = (Button) convertView.findViewById(R.id.btn_edit_quantidade_em_estoque);
+        btnEditQuantidadeEmEstoque.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                atualizarQuantidadeEmEstoque(produto,unidade);
+            }
+        });
+
         TextView txtUnidade = (TextView) convertView.findViewById(R.id.txtUnidade);
         txtUnidade.setText(unidade);
 
         TextView txtQtde = (TextView) convertView.findViewById(R.id.txtQuantidade);
-        ItemEstoque produto = this.produtos.get(groupPosition);
-        txtQtde.setText(produto.getQuantidades().get(unidade).toString());
+        txtQtde.setText(quantidade.toString());
 
         CheckBox checkBoxShareUnidade = (CheckBox) convertView.findViewById(R.id.checkBoxShareUnidade);
         checkBoxShareUnidade.setChecked(unidadesSelecionadas.get(groupPosition)[childPosition]);
@@ -79,6 +90,34 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
         });
 
         return convertView;
+    }
+
+    private void atualizarQuantidadeEmEstoque(final Produto produto, final String unidade) {
+        final int quantidadeAtual = produto.getQuantidades().get(unidade);
+        final long estoqueId = produto.getEstoqueId(unidade);
+
+        AtualizarQuantidadeEstoqueDialogFragment dialogFragment = AtualizarQuantidadeEstoqueDialogFragment.newInstance(estoqueId, unidade, quantidadeAtual);
+
+
+        dialogFragment.setUpdateListener(new AtualizarQuantidadeEstoqueDialogFragment.UpdateListener() {
+            @Override
+            public void onSuccess(int novaQuantidade) {
+                Toast.makeText(ctx, "Estoque atualizado", Toast.LENGTH_SHORT).show();
+
+                ContentValues cv = new ContentValues();
+                cv.put(EstoqueProvider.QUANTIDADE, novaQuantidade);
+                ctx.getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, EstoqueProvider._ID + "=?", new String[]{"" + estoqueId});
+
+                produto.updateQuantidade(unidade,novaQuantidade);
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFail(String error) {
+                Toast.makeText(ctx,error , Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialogFragment.show(this.fragmentManager,"updateQtde");
     }
 
     @Override
@@ -108,7 +147,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.estoque_list_row_group, null);
         }
-        ItemEstoque produto = (ItemEstoque) getGroup(groupPosition);
+        Produto produto = (Produto) getGroup(groupPosition);
         TextView textViewProduto = (TextView) convertView.findViewById(R.id.textViewNomeProduto);
         //textViewProduto.setTag();
         textViewProduto.setText(produto.getNome());
@@ -169,7 +208,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
         Map<Long, String[]> selecionados = new HashMap<>();
 
         for (int i = 0; i < produtos.size(); ++i) {
-            ItemEstoque item = produtos.get(i);
+            Produto item = produtos.get(i);
             int qtdeUnidades = item.getUnidades().size();
             Set<String> set = new HashSet<>();
 
@@ -184,7 +223,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
             if (set.size() > 0) {
                 String[] unidades = new String[set.size()];
                 set.toArray(unidades);
-                selecionados.put(item.getIdProduto(), unidades);
+                selecionados.put(item.getId(), unidades);
             }
         }
 

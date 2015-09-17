@@ -34,7 +34,7 @@ public class ExcluirVendaAsyncTask extends AsyncTask<Void, Void, HttpResponse> {
     @Override
     protected HttpResponse doInBackground(Void... params) {
         DefaultHttpClient httpclient = new DefaultHttpClient();
-        HttpDelete httpdelete = new HttpDelete(RemotePath.getVendaEntityPath(this.vendaId));
+        HttpDelete httpdelete = new HttpDelete(RemotePath.getEntityPath(RemotePath.VendaPath, this.vendaId));
 
         Application app = (Application) ctx.getApplicationContext();
         String accessToken = app.getAccessToken();

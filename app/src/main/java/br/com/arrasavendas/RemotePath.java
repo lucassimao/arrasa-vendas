@@ -4,8 +4,8 @@ package br.com.arrasavendas;
 import android.net.Uri;
 
 public enum RemotePath {
-	EstoqueList(Constants.host + "/api/estoque?format=json"),
-	VendaPath(Constants.host + "/api/vendas?format=json"),
+	EstoquePath(Constants.host + "/api/estoque"),
+	VendaPath(Constants.host + "/api/vendas"),
     LoginPath(Constants.host +  "/api/login");
 
     private String url;
@@ -14,8 +14,8 @@ public enum RemotePath {
 		this.url = url;
 	}
 
-    public static String getVendaEntityPath(Long vendaId){
-        return Constants.host + "/api/vendas/"+vendaId;
+    public static String getEntityPath(RemotePath remotePath, Long id){
+        return String.format("%s/%d", remotePath.getUrl(), id);
     }
 
     public static String getFullImagePath(String imageName){

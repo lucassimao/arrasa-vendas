@@ -12,7 +12,7 @@ import static br.com.arrasavendas.providers.DownloadedImagesProvider.UNIDADE;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 35;
+	private static final int DATABASE_VERSION = 37;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String DATABASE_CREATE_TABLE_VENDAS = "create table "
@@ -23,9 +23,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String TABLE_ESTOQUE = "ESTOQUE";
 	private static final String DATABASE_CREATE_TABLE_ESTOQUE = "create table "
 			+ TABLE_ESTOQUE
-			+ "(_id integer primary key AUTOINCREMENT, produto_nome text not null, produto_nome_ascii text not null," +
+			+ "(_id integer primary key, produto_nome text not null, produto_nome_ascii text not null," +
 			"produto_id integer not null,prevoAVista REAL,prevoAPrazo REAL, " +
 			"unidade text not null, quantidade integer not null);";
+
+	private static final String CREATE_INDEX_PRODUTO_ID = "CREATE INDEX produto_idx on ESTOQUE(produto_id);";
 
     public static final String TABLE_DOWNLOADED_IMAGES = "DOWNLOADED_IMAGES";
 	private static final String DATABASE_CREATE_TABLE_DOWNLOADED_IMAGES = "create table "
@@ -42,6 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(DATABASE_CREATE_TABLE_VENDAS);
 		db.execSQL(DATABASE_CREATE_TABLE_ESTOQUE);
+		db.execSQL(CREATE_INDEX_PRODUTO_ID);
 		db.execSQL(DATABASE_CREATE_TABLE_DOWNLOADED_IMAGES);
 	}
 

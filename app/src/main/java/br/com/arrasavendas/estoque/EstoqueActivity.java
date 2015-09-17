@@ -4,14 +4,15 @@ import java.io.File;
 import java.util.*;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,7 +24,7 @@ import br.com.arrasavendas.DownloadJSONFeedTask;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.Utilities;
 import br.com.arrasavendas.imagesManager.DownloadImagesTask;
-import br.com.arrasavendas.model.ItemEstoque;
+import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.R;
@@ -41,12 +42,16 @@ public class EstoqueActivity extends Activity {
         list = (ExpandableListView) findViewById(R.id.listItemsEstoque);
         list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        List<ItemEstoque> produtos = getData();
-        estoqueListAdapter = new EstoqueExpandableListAdapter(this, produtos);
-        list.setAdapter(estoqueListAdapter);
-
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        List<Produto> produtos = getData();
+        estoqueListAdapter = new EstoqueExpandableListAdapter(this, produtos);
+        list.setAdapter(estoqueListAdapter);
     }
 
     @Override
@@ -129,7 +134,7 @@ public class EstoqueActivity extends Activity {
                     startActivity(sendIntent);
 
                     start = end;
-                }while(start < imageUris.size() );
+                } while (start < imageUris.size());
 
 
             }
@@ -138,32 +143,37 @@ public class EstoqueActivity extends Activity {
 
     }
 
-    private List<ItemEstoque> getData() {
+    private List<Produto> getData() {
 
-        CursorLoader loader = new CursorLoader(getApplicationContext(),
-                EstoqueProvider.CONTENT_URI_PRODUTOS, null, null, null, null);
+        // consulta apenas os produtos com quantidade >0
+        CursorLoader loader = new CursorLoader(this, EstoqueProvider.CONTENT_URI_PRODUTOS, new String[]{EstoqueProvider.PRODUTO_ID, EstoqueProvider.PRODUTO}, null, null, null);
 
         Cursor cursor = loader.loadInBackground();
 
-        List<ItemEstoque> estoque = new LinkedList<ItemEstoque>();
+        List<Produto> estoque = new LinkedList<Produto>();
 
         if (cursor.moveToFirst()) {
 
             do {
 
                 String nomeProduto = cursor.getString(cursor.getColumnIndex(EstoqueProvider.PRODUTO));
-                long idProduto = cursor.getLong(cursor.getColumnIndex(EstoqueProvider.PRODUTO_ID));
-                ItemEstoque itemEstoque = new ItemEstoque(nomeProduto, idProduto);
+                Long produtoId = cursor.getLong(cursor.getColumnIndex(EstoqueProvider.PRODUTO_ID));
+
+                Produto itemEstoque = new Produto(produtoId, nomeProduto);
+
+                // consultando as unidades do produto
                 CursorLoader unidadesLoader = new CursorLoader(getApplicationContext(),
-                        EstoqueProvider.CONTENT_URI, new String[]{EstoqueProvider.UNIDADE, EstoqueProvider.QUANTIDADE},
-                        EstoqueProvider.PRODUTO + " = ?", new String[]{itemEstoque.getNome()}, EstoqueProvider.UNIDADE);
+                        EstoqueProvider.CONTENT_URI, new String[]{EstoqueProvider.UNIDADE, EstoqueProvider.QUANTIDADE, EstoqueProvider._ID},
+                        EstoqueProvider.PRODUTO_ID + " = ?", new String[]{produtoId.toString()}, EstoqueProvider.UNIDADE);
 
                 Cursor cursor2 = unidadesLoader.loadInBackground();
 
                 while (cursor2.moveToNext()) {
                     String unidade = cursor2.getString(cursor2.getColumnIndex(EstoqueProvider.UNIDADE));
                     int qtde = cursor2.getInt(cursor2.getColumnIndex(EstoqueProvider.QUANTIDADE));
-                    itemEstoque.addUnidade(unidade, qtde);
+                    long estoqueId = cursor2.getLong(cursor2.getColumnIndex(EstoqueProvider._ID));
+
+                    itemEstoque.addUnidade(estoqueId, unidade, qtde);
 
                 }
                 cursor2.close();
@@ -180,14 +190,14 @@ public class EstoqueActivity extends Activity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.EstoqueList, this, new Runnable() {
+        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
 
             @Override
             public void run() {
                 progressDlg.dismiss();
 
-                List<ItemEstoque> produtos = getData();
-                estoqueListAdapter = new EstoqueExpandableListAdapter(getBaseContext(), produtos);
+                List<Produto> produtos = getData();
+                estoqueListAdapter = new EstoqueExpandableListAdapter(EstoqueActivity.this, produtos);
                 list.setAdapter(estoqueListAdapter);
 
             }

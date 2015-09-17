@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
 
-        new DownloadJSONFeedTask(RemotePath.EstoqueList, this, new Runnable() {
+        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
 
             @Override
             public void run() {
@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
 
     public void onClickBtnNovaVenda(View v) {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.EstoqueList, this, new Runnable() {
+        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
 
             @Override
             public void run() {

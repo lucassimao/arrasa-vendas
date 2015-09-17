@@ -56,6 +56,8 @@ public class Application extends android.app.Application {
         return mApp.getApplicationContext();
     }
 
+    public static Application getInstance(){ return mApp; }
+
     public void salvarToken(String username, String roles, String access_token) {
         SharedPreferences sp = context().getSharedPreferences(ARRASAVENDAS_AUTH_PREFS_KEY, Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor =  sp.edit();

@@ -128,6 +128,7 @@ public class EstoqueProvider extends ContentProvider {
         if (uriMatcher.match(uri) == ESTOQUE_ID) {
             sqlBuilder.appendWhere(_ID + " = " + uri.getPathSegments().get(1));
         }
+        else
         if (uriMatcher.match(uri) == ESTOQUE_PRODUTOS) {
             groupBy = PRODUTO_ID;
             having = "AVG(quantidade) > 0";
