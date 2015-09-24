@@ -9,12 +9,23 @@ public class Produto {
 	private Map<String,Long> unidadesIdMapping;
 	private Map<String, Integer> quantidades;
 
+	private Comparator<String> quantityComparator  = new Comparator<String>() {
+
+		public int compare(String a, String b) {
+            if (quantidades.get(a) == quantidades.get(b))
+                return b.compareToIgnoreCase(a);
+            else
+			    return quantidades.get(b).compareTo(quantidades.get(a));
+		}
+	};
+
 	public Produto(long produtoId, String nome) {
 		this.id = produtoId;
 		this.nome = nome;
 		this.unidades = new LinkedList<>();
 		this.quantidades = new HashMap<String, Integer>();
 		this.unidadesIdMapping = new HashMap<String,Long>();
+
 	}
 
 	public String getNome() {
@@ -25,10 +36,13 @@ public class Produto {
 		this.unidadesIdMapping.put(und, estoqueId);
 		this.quantidades.put(und, qtde);
 		this.unidades.add(und);
-	}
+
+        Collections.sort(unidades, quantityComparator);
+    }
 
 	public void updateQuantidade(String un,int qtde){
-		this.quantidades.put(un, qtde);
+        this.quantidades.put(un, qtde);
+        Collections.sort(unidades, quantityComparator);
 	}
 
 	public long getEstoqueId(String unidade) {
