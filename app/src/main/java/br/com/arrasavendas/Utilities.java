@@ -1,5 +1,9 @@
 package br.com.arrasavendas;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+
 public class Utilities {
 
     public static String makePlaceholders(int len) {
@@ -14,5 +18,14 @@ public class Utilities {
             }
             return sb.toString();
         }
+    }
+
+    public static Drawable convertDrawableToGrayScale(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+        Drawable res = drawable.mutate();
+        res.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+        return res;
     }
 }

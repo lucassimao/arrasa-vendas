@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.*;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.Utilities;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 
@@ -328,18 +329,11 @@ public class ImagesManagerActivity extends Activity {
     private void setImageButtonEnabled(boolean enabled, ImageButton imageButton, int iconResId) {
         imageButton.setEnabled(enabled);
         Drawable originalIcon = getResources().getDrawable(iconResId);
-        Drawable icon = enabled ? originalIcon : convertDrawableToGrayScale(originalIcon);
+        Drawable icon = enabled ? originalIcon : Utilities.convertDrawableToGrayScale(originalIcon);
         imageButton.setImageDrawable(icon);
     }
 
-    private Drawable convertDrawableToGrayScale(Drawable drawable) {
-        if (drawable == null) {
-            return null;
-        }
-        Drawable res = drawable.mutate();
-        res.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
-        return res;
-    }
+
 
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {

@@ -3,8 +3,10 @@ package br.com.arrasavendas.entregas;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.*;
+import br.com.arrasavendas.Utilities;
 import br.com.arrasavendas.model.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -151,6 +153,15 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
                     break;
 
             }
+        }
+
+        if (venda.getStatus().equals(StatusVenda.AguardandoPagamento) && venda.getFormaDePagamento().equals(FormaPagamento.PagSeguro)){
+            ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
+
+            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.credit_card_icon);
+            Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
+            img.setBackground(dimmedIcon);
+            img.setVisibility(View.VISIBLE);
         }
 
 
