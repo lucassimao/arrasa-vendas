@@ -42,7 +42,6 @@ public class VendaActivity extends Activity {
 
     private static final int ITEM_GRAVAR = 0;
     private static final int ITEM_LIMPAR = 1;
-    private static final int ITEM_VOLTAR = 2;
 
     private ListView list;
     private AutoCompleteTextView txtViewProduto;
@@ -61,6 +60,8 @@ public class VendaActivity extends Activity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.venda);
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         listProdutosAdapter = new ListProdutoAdapter(this);
         listProdutosAdapter.registerDataSetObserver(listProdutosObserver);
@@ -254,17 +255,12 @@ public class VendaActivity extends Activity {
         menuItem2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS
                 | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-        MenuItem menuItem3 = menu.add(0, ITEM_VOLTAR, 2, "Voltar");
-        menuItem3.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS
-                | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-
         return true;
 
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        super.onOptionsItemSelected(item);
 
         switch (item.getItemId()) {
             case ITEM_GRAVAR:
@@ -273,11 +269,9 @@ public class VendaActivity extends Activity {
             case ITEM_LIMPAR:
                 limparFormulario();
                 break;
-            case ITEM_VOLTAR:
-                finish();
-                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
         return true;
     }
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:arrasavendas="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/edit_address"
+        android:icon="@drawable/address"
+        android:title="Endereço"
+        arrasavendas:showAsAction="always"
+        android:showAsAction="always"
+        />
+
+    <item android:id="@+id/delete"
+        android:icon="@drawable/delete"
+        android:title="Excluir"
+        arrasavendas:showAsAction="always"
+        android:showAsAction="always"
+        />
+
+    <item android:id="@+id/update_data_entrega"
+        android:icon="@drawable/calendar"
+        android:title="Data da Entrega"
+        arrasavendas:showAsAction="always"
+        android:showAsAction="always"
+        />
+
+</menu>

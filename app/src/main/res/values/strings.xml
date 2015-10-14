@@ -9,4 +9,8 @@
 
     <string name="title_activity_login">Login</string>
     <string name="images_manager_label"> Gerenciador de Imagens </string>
+    <string name="title_activity_edit_venda">Editar Venda</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

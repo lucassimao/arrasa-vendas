@@ -13,8 +13,11 @@
         <option name="ASSEMBLE_TASK_NAME" value="assembleDevelopmentDebug" />
         <option name="COMPILE_JAVA_TASK_NAME" value="compileDevelopmentDebugSources" />
         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleDevelopmentDebugAndroidTest" />
-        <option name="SOURCE_GEN_TASK_NAME" value="generateDevelopmentDebugSources" />
-        <option name="TEST_SOURCE_GEN_TASK_NAME" value="generateDevelopmentDebugAndroidTestSources" />
+        <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileDevelopmentDebugAndroidTestSources" />
+        <afterSyncTasks>
+          <task>generateDevelopmentDebugAndroidTestSources</task>
+          <task>generateDevelopmentDebugSources</task>
+        </afterSyncTasks>
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
@@ -23,7 +26,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/build/intermediates/classes/development/debug" />
     <output-test url="file://$MODULE_DIR$/build/intermediates/classes/androidTest/development/debug" />
     <exclude-output />
@@ -104,8 +107,9 @@
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="design-22.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.2.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.0" level="project" />

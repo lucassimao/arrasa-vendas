@@ -1,92 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="br.com.arrasavendas"
-          android:versionCode="2"
-          android:versionName="1.2">
+    package="br.com.arrasavendas"
+    android:versionCode="2"
+    android:versionName="1.2">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-            android:allowBackup="true"
-            android:name=".Application"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name"
-            android:theme="@style/android:Theme.Holo.Light">
-
+        android:name=".Application"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/android:Theme.Holo.Light">
         <activity
-                android:name=".LoginActivity"
-                android:label="@string/app_name">
+            android:name=".LoginActivity"
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".imagesManager.ImagesManagerActivity"
+            android:label="@string/images_manager_label"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".estoque.EstoqueActivity"
+            android:label="Estoque"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".entregas.EntregasActivity"
+            android:label="Entregas"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <activity
-                android:name=".MainActivity"
-                android:label="@string/app_name">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".imagesManager.ImagesManagerActivity" android:parentActivityName=".MainActivity" android:label="@string/images_manager_label">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-
-        <activity
-                android:name=".estoque.EstoqueActivity"
+            android:name=".venda.VendaActivity"
+            android:label="Venda"
             android:parentActivityName=".MainActivity"
-                android:label="Estoque">
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+
         <activity
-                android:name=".entregas.EntregasActivity"
-                android:label="Entregas">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-        <activity
-                android:name=".venda.VendaActivity"
-                android:label="Venda"
-                android:windowSoftInputMode="stateHidden">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-
+            android:name=".entregas.EditVenda"
+            android:label="@string/title_activity_edit_venda"></activity>
 
         <provider
-                android:name=".providers.VendasProvider"
-                android:authorities="br.com.arrasavendas.providers.VendasProvider"
-                android:exported="false"/>
+            android:name=".providers.VendasProvider"
+            android:authorities="br.com.arrasavendas.providers.VendasProvider"
+            android:exported="false" />
         <provider
-                android:name=".providers.EstoqueProvider"
-                android:authorities="br.com.arrasavendas.providers.EstoqueProvider"
-                android:exported="false"/>
-
+            android:name=".providers.EstoqueProvider"
+            android:authorities="br.com.arrasavendas.providers.EstoqueProvider"
+            android:exported="false" />
         <provider
-                android:name=".providers.DownloadedImagesProvider"
-                android:authorities="br.com.arrasavendas.providers.DownloadedImagesProvider"
-                android:exported="false"/>
-
+            android:name=".providers.DownloadedImagesProvider"
+            android:authorities="br.com.arrasavendas.providers.DownloadedImagesProvider"
+            android:exported="false" />
         <provider
-                android:name="android.support.v4.content.FileProvider"
-                android:authorities="br.com.arrasavendas.fileprovider"
-                android:grantUriPermissions="true"
-                android:exported="false">
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="br.com.arrasavendas.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/filepaths" />
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
         </provider>
-
 
     </application>
 

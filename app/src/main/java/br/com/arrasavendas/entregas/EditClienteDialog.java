@@ -1,5 +1,6 @@
 package br.com.arrasavendas.entregas;
 
+import android.support.annotation.NonNull;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
@@ -20,7 +21,7 @@ import br.com.arrasavendas.model.Venda;
 public class EditClienteDialog extends DialogFragment {
 
     public interface ClienteDialogListener {
-        public void onClienteDialogPositiveClick(View view);
+        void onPositiveClick(Cliente cliente, TurnoEntrega turnoEntrega, StatusVenda statusVenda);
     }
 
     private ClienteDialogListener clienteDialogListener;
@@ -40,9 +41,19 @@ public class EditClienteDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        if (clienteDialogListener != null)
-                            clienteDialogListener
-                                    .onClienteDialogPositiveClick(view);
+                        if (clienteDialogListener != null) {
+
+                            final Cliente updatedCliente = getUpdatedCliente(view);
+
+                            Spinner spinnerTurnoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
+                            final TurnoEntrega turnoEntrega = TurnoEntrega.valueOf(spinnerTurnoEntrega.getSelectedItem().toString());
+
+                            CheckBox checkBoxJaPagou = (CheckBox) view.findViewById(R.id.cbJaPagou);
+                            final StatusVenda statusVenda = (checkBoxJaPagou.isChecked()) ? StatusVenda.PagamentoRecebido : StatusVenda.AguardandoPagamento;
+
+
+                            clienteDialogListener.onPositiveClick(updatedCliente,turnoEntrega,statusVenda);
+                        }
                     }
                 })
                 .setNegativeButton("Cancelar",
@@ -88,6 +99,33 @@ public class EditClienteDialog extends DialogFragment {
 
     public void setClienteDialogListener(ClienteDialogListener clienteDialogListener) {
         this.clienteDialogListener = clienteDialogListener;
+    }
+
+    private Cliente getUpdatedCliente(View dialog) {
+        final Cliente updatedCliente = new Cliente();
+
+        EditText editTextNome = (EditText) dialog.findViewById(R.id.editTextNome);
+        updatedCliente.setNome(editTextNome.getText().toString());
+
+        EditText editTextDDDTelefone = (EditText) dialog.findViewById(R.id.editTextDDDTelefone);
+        updatedCliente.setDddTelefone(editTextDDDTelefone.getText().toString());
+
+        EditText editTextTelefone = (EditText) dialog.findViewById(R.id.editTextTelefone);
+        updatedCliente.setTelefone(editTextTelefone.getText().toString());
+
+        EditText editTextDDDCelular = (EditText) dialog.findViewById(R.id.editTextDDDCelular);
+        updatedCliente.setDddCelular(editTextDDDCelular.getText().toString());
+
+        EditText editTextCelular = (EditText) dialog.findViewById(R.id.editTextCelular);
+        updatedCliente.setCelular(editTextCelular.getText().toString());
+
+        EditText editTextEndereco = (EditText) dialog.findViewById(R.id.editTextEndereco);
+        updatedCliente.setEndereco(editTextEndereco.getText().toString());
+
+        EditText editTextBairro = (EditText) dialog.findViewById(R.id.editTextBairro);
+        updatedCliente.setBairro(editTextBairro.getText().toString());
+
+        return updatedCliente;
     }
 
 }
