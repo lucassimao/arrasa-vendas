@@ -1,6 +1,7 @@
 package br.com.arrasavendas.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Venda implements Serializable{
     private FormaPagamento formaDePagamento;
     private StatusVenda status;
     private TurnoEntrega turnoEntrega;
+    private Double taxaEntrega = 2d;
 
     public Date getDataEntrega() {
 		return dataEntrega;
@@ -101,5 +103,25 @@ public class Venda implements Serializable{
 
     public void setTurnoEntrega(TurnoEntrega turnoEntrega) {
         this.turnoEntrega = turnoEntrega;
+    }
+
+    public Double getValorTotal() {
+        BigDecimal valorTotal = BigDecimal.valueOf(taxaEntrega);
+        BigDecimal subTotal = null;
+
+        for(ItemVenda item: itens){
+            switch (formaDePagamento){
+                case AVista:
+                    subTotal = item.getPrecoAVista().multiply(BigDecimal.valueOf(item.getQuantidade()));
+                    valorTotal = valorTotal.add(subTotal);
+                    break;
+                case PagSeguro:
+                    subTotal = item.getPrecoAPrazo().multiply(BigDecimal.valueOf(item.getQuantidade()));
+                    valorTotal = valorTotal.add(subTotal);
+                    break;
+            }
+        }
+
+        return valorTotal.doubleValue();
     }
 }

@@ -10,18 +10,15 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -69,7 +66,7 @@ public class EntregasActivity extends Activity {
 
         @Override
         public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-//            actionMode.setTitle("CheckBox is Checked");
+//            actionMode.setTitle("sction mode title");
             return false;
         }
 
@@ -137,7 +134,7 @@ public class EntregasActivity extends Activity {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (actionMode != null){
+                if (actionMode != null) {
                     actionMode.finish();
                     actionMode = null;
                 }
@@ -147,13 +144,23 @@ public class EntregasActivity extends Activity {
                 EntregasActivity.this.vendaSelecionadaView = view;
 
                 float[] hsv = new float[3];
-                int color = ((ColorDrawable)view.getBackground()).getColor();
+                int color = ((ColorDrawable) view.getBackground()).getColor();
                 Color.colorToHSV(color, hsv);
                 hsv[2] *= 0.8f; // value component
                 view.setBackgroundColor(Color.HSVToColor(hsv));
 
-                actionMode =  startActionMode(callback);
+                actionMode = startActionMode(callback);
                 return true;
+            }
+        });
+
+        list.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+            @Override
+            public void onGroupCollapse(int groupPosition) {
+                if (actionMode != null) {
+                    actionMode.finish();
+                    actionMode = null;
+                }
             }
         });
 
@@ -247,7 +254,6 @@ public class EntregasActivity extends Activity {
                         }
 
 
-
                     }
                 }, EntregasActivity.this).execute();
 
@@ -290,7 +296,7 @@ public class EntregasActivity extends Activity {
                                     default:
                                         Toast.makeText(EntregasActivity.this, "Erro " + statusCode, Toast.LENGTH_SHORT).show();
                                 }
-                                 actionMode.finish();
+                                actionMode.finish();
 
                             }
                         }, EntregasActivity.this).execute();
@@ -300,8 +306,6 @@ public class EntregasActivity extends Activity {
                 })
                 .setNegativeButton(android.R.string.no, null).show();
     }
-
-
 
 
     private List<Venda> getData() {

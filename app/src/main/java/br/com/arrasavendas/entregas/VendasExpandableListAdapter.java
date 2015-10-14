@@ -166,6 +166,9 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtCliente = (TextView) convertView.findViewById(R.id.txtCliente);
         txtCliente.setText(venda.getCliente().getNome());
 
+        TextView txtValor = (TextView) convertView.findViewById(R.id.txtValor);
+        txtValor.setText(String.format("R$ %.2f",venda.getValorTotal()));
+
         TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
         txtTurno.setText(venda.getTurnoEntrega().name());
 
