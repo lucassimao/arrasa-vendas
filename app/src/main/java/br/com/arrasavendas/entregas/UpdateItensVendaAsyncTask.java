@@ -1,10 +1,11 @@
-package br.com.arrasavendas.venda;
+package br.com.arrasavendas.entregas;
 
-import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
@@ -12,18 +13,21 @@ import org.json.JSONObject;
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
 
-public class SalvarVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
+public class UpdateItensVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 
-	interface OnComplete{
+    private final long vendaId;
+
+    interface OnComplete{
 		void run(HttpResponse response);
 	}
-	
+
 	private OnComplete onComplete;
 	private JSONObject venda;
 
-	public SalvarVendaAsyncTask(JSONObject venda,OnComplete onComplete) {
+	public UpdateItensVendaAsyncTask(long vendaId,JSONObject venda, OnComplete onComplete) {
 		this.venda = venda;
 		this.onComplete = onComplete;
+		this.vendaId = vendaId;
 	}
 	
 	@Override
@@ -48,22 +52,23 @@ public class SalvarVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 
 		// url with the post data
-		HttpPost httpost = new HttpPost(RemotePath.VendaPath.getUrl());
+		HttpPut httpust = new HttpPut(RemotePath.VendaPath.getEntityPath(RemotePath.VendaPath, this.vendaId));
 
 		StringEntity se = new StringEntity(obj.toString(),"UTF-8");
-		httpost.setEntity(se);
+		httpust.setEntity(se);
 
-		httpost.setHeader("Authorization","Bearer " + accessToken);
-		httpost.setHeader("Accept", "application/json");
-		httpost.setHeader("Content-type", "application/json");
+		httpust.setHeader("Authorization", "Bearer " + accessToken);
+		httpust.setHeader("Accept", "application/json");
+		httpust.setHeader("Content-type", "application/json");
 
 		// Handles what is returned from the page
-		return httpclient.execute(httpost);
+		return httpclient.execute(httpust);
 	}
 	
 	@Override
 	protected void onPostExecute(HttpResponse result) {
-		if (this.onComplete!=null){
+
+        if (this.onComplete!=null){
 			onComplete.run(result);
 		}
 	}

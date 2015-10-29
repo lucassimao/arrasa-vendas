@@ -3,6 +3,8 @@ package br.com.arrasavendas;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
+
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
@@ -168,6 +170,7 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
 
     protected void onPostExecute(Void result) {
 
+        Log.d("DOWNLOAD","DOWNLOAD OK!");
         if (onCompleteListener != null)
             onCompleteListener.run();
     }

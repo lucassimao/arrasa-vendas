@@ -1,9 +1,11 @@
 package br.com.arrasavendas;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
@@ -58,7 +60,7 @@ public class Application extends android.app.Application {
 
     public static Application getInstance(){ return mApp; }
 
-    public void salvarToken(String username, String roles, String access_token) {
+    public static void salvarToken(String username, String roles, String access_token) {
         SharedPreferences sp = context().getSharedPreferences(ARRASAVENDAS_AUTH_PREFS_KEY, Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor =  sp.edit();
 
@@ -67,5 +69,8 @@ public class Application extends android.app.Application {
         editor.putString("access_token",access_token);
 
         editor.commit();
+
+        Application.mApp.currentUser = username;
+        Application.mApp.accessToken= access_token;
     }
 }

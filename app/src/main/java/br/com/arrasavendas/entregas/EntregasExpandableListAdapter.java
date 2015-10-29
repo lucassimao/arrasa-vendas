@@ -2,10 +2,12 @@ package br.com.arrasavendas.entregas;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +15,13 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -31,25 +37,30 @@ import java.util.TimeZone;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
+import br.com.arrasavendas.providers.VendasProvider;
 
-public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
+public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
     private final int BLUE_LUCAS;
     private final int PINK_ADNA;
     private final int AMARELO_MCLARA;
+
     private Map<Long, List<Venda>> vendasPorDataDeEntrega;
     private List<Long> datasDeEntregas;
+
     private LayoutInflater inflater;
     private Context ctx;
     private List<Venda> vendas;
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - EEEE", Locale.getDefault());
+    private Cursor cursor;
 
-    public VendasExpandableListAdapter(Context ctx, List<Venda> vendas) {
+    public EntregasExpandableListAdapter(Context ctx, Cursor cursor) {
         this.ctx = ctx;
         sdf.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
         this.inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -59,12 +70,17 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
         this.PINK_ADNA = resources.getColor(R.color.pinkAdna);
         this.AMARELO_MCLARA = resources.getColor(R.color.amareloMClara);
 
-        vendasPorDataDeEntrega = new HashMap<Long, List<Venda>>();
-        this.vendas = vendas;
-        atualizarDatasDeEntregas();
+        processarVendas();
 
     }
 
+    private void processarVendas() {
+        vendasPorDataDeEntrega = new HashMap<Long, List<Venda>>();
+        this.vendas = getData();
+        atualizarDatasDeEntregas();
+        notifyDataSetChanged();
+
+    }
 
     public void atualizarDatasDeEntregas() {
 
@@ -94,7 +110,6 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
         Collections.reverse(datasDeEntregas);
 
         ordenarVendas();
-        notifyDataSetChanged();
     }
 
     public void removerVenda(Venda venda) {
@@ -167,7 +182,7 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
         txtCliente.setText(venda.getCliente().getNome());
 
         TextView txtValor = (TextView) convertView.findViewById(R.id.txtValor);
-        txtValor.setText(String.format("R$ %.2f",venda.getValorTotal()));
+        txtValor.setText(String.format("R$ %.2f", venda.getValorTotal()));
 
         TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
         txtTurno.setText(venda.getTurnoEntrega().name());
@@ -258,4 +273,87 @@ public class VendasExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
 
+    public void setCursor(Cursor cursor) {
+        this.cursor = cursor;
+        processarVendas();
+        notifyDataSetChanged();
+    }
+
+    private List<Venda> getData() {
+
+        List<Venda> vendas = new LinkedList<Venda>();
+
+        if (cursor != null) {
+
+            cursor.moveToFirst();
+            while (cursor.moveToNext()) {
+
+                Venda v = new Venda();
+
+                Calendar dataEntrega = Calendar.getInstance();
+                dataEntrega.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(VendasProvider.DATA_ENTREGA)));
+                v.setDataEntrega(dataEntrega.getTime());
+
+                v.setId(cursor.getLong(cursor.getColumnIndex(VendasProvider._ID)));
+                v.setVendedor(cursor.getString(cursor.getColumnIndex(VendasProvider.VENDEDOR)));
+
+                String formaPagamento = cursor.getString(cursor.getColumnIndex(VendasProvider.FORMA_PAGAMENTO));
+                v.setFormaDePagamento(FormaPagamento.valueOf(formaPagamento));
+
+                String status = cursor.getString(cursor.getColumnIndex(VendasProvider.STATUS));
+                v.setStatus(StatusVenda.valueOf(status));
+
+                String turnoEntrega = cursor.getString(cursor.getColumnIndex(VendasProvider.TURNO_ENTREGA));
+                v.setTurnoEntrega(TurnoEntrega.valueOf(turnoEntrega));
+
+                try {
+
+                    JSONObject clienteJSONObj = new JSONObject(cursor.getString(cursor.getColumnIndex(VendasProvider.CLIENTE)));
+
+                    Cliente cliente = new Cliente();
+                    cliente.setId(clienteJSONObj.getLong("id"));
+                    cliente.setNome(clienteJSONObj.getString("nome"));
+                    cliente.setCelular(clienteJSONObj.getString("celular"));
+                    cliente.setDddCelular(clienteJSONObj.getString("dddCelular"));
+                    cliente.setDddTelefone(clienteJSONObj.getString("dddTelefone"));
+                    cliente.setTelefone(clienteJSONObj.getString("telefone"));
+
+                    JSONObject enderecoJSONObj = clienteJSONObj.getJSONObject("endereco");
+                    cliente.setEndereco(enderecoJSONObj.getString("complemento"));
+                    cliente.setBairro(enderecoJSONObj.getString("bairro"));
+
+                    v.setCliente(cliente);
+
+                    JSONArray itens = new JSONArray(cursor.getString(cursor.getColumnIndex(VendasProvider.CARRINHO)));
+
+                    for (int i = 0; i < itens.length(); ++i) {
+                        JSONObject jsonObj = itens.getJSONObject(i);
+
+                        long id = jsonObj.getLong("id");
+                        String produto = jsonObj.getString("produto_nome");
+                        Long produtoID = jsonObj.getLong("produto_id");
+                        String unidade = jsonObj.getString("unidade");
+                        Integer quantidade = jsonObj.getInt("quantidade");
+                        BigDecimal precoAVistaEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAVistaEmCentavos")/100d);
+                        BigDecimal precoAPrazoEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAPrazoEmCentavos")/100d);
+
+                        ItemVenda item = new ItemVenda(id,produtoID, produto, unidade, quantidade, precoAVistaEmReais, precoAPrazoEmReais);
+                        v.addToItens(item);
+                    }
+                    if (v.getItens() == null){
+                        int i=0;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+                vendas.add(v);
+
+            }
+        }
+
+        return vendas;
+    }
 }

@@ -42,11 +42,20 @@ public class Venda implements Serializable{
 		this.itens = itens;
 	}
 
-	public void addToItens(ItemVenda item) {
+	public void addToItens(ItemVenda novoItem) {
 		if (this.itens == null)
 			this.itens = new LinkedList<ItemVenda>();
 
-		this.itens.add(item);
+        boolean added = false;
+        for(ItemVenda item: this.itens){
+            if (item.getProdutoID().equals(novoItem.getProdutoID()) && item.getUnidade().equals(novoItem.getUnidade())){
+                item.setQuantidade(item.getQuantidade()+novoItem.getQuantidade());
+                added = true;
+                break;
+            }
+        }
+        if (!added)
+            this.itens.add(novoItem);
 
 	}
 
@@ -123,5 +132,16 @@ public class Venda implements Serializable{
         }
 
         return valorTotal.doubleValue();
+    }
+
+    public boolean contemItem(Long produtoID, String unidade) {
+
+        for(ItemVenda item: this.itens){
+            if (item.getProdutoID().equals(produtoID) && item.getUnidade().equals(unidade)){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 public class ItemVenda implements Serializable {
 
+	private Long id;
     private String nomeProduto;
     private String unidade;
     private Long produtoID;
@@ -16,8 +17,9 @@ public class ItemVenda implements Serializable {
 	private BigDecimal precoAVista, precoAPrazo;
 	
 	
-	public ItemVenda(Long produtoID, String nomeProduto,String unidade, Integer quantidade,BigDecimal precoAVista,BigDecimal precoAPrazo) {
+	public ItemVenda(Long id,Long produtoID, String nomeProduto,String unidade, Integer quantidade,BigDecimal precoAVista,BigDecimal precoAPrazo) {
 		this.produtoID = produtoID;
+        this.id = id;
         this.nomeProduto = nomeProduto;
 		this.unidade = unidade;
 		this.quantidade = quantidade;
@@ -27,6 +29,10 @@ public class ItemVenda implements Serializable {
 
     public Integer getQuantidade() {
         return quantidade;
+    }
+
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
     }
 
     public Long getProdutoID() {
@@ -50,6 +56,8 @@ public class ItemVenda implements Serializable {
 			obj.put("produto", produtoJSONObj);
 
 			obj.put("unidade", this.unidade);
+            if (id != null)
+                obj.put("id",this.id.longValue());
 			obj.put("quantidade", this.quantidade);
 			obj.put("precoAVistaEmCentavos", precoAVista.multiply(BigDecimal.valueOf(100)));
 			obj.put("precoAPrazoEmCentavos", precoAPrazo.multiply(BigDecimal.valueOf(100)));
@@ -70,8 +78,12 @@ public class ItemVenda implements Serializable {
 	public BigDecimal getPrecoAPrazo() {
 		return precoAPrazo;
 	}
-	
-	@Override
+
+    public Long getId() {
+        return id;
+    }
+
+    @Override
 	public String toString() {
 		return String.format(Locale.getDefault(), "%d %s (%s)", this.quantidade,this.nomeProduto,this.unidade);
 	}

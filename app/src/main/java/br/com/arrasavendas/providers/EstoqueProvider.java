@@ -14,15 +14,12 @@ import android.util.Log;
 
 import br.com.arrasavendas.DatabaseHelper;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class EstoqueProvider extends ContentProvider {
 
-    private static final String PROVIDER_NAME = EstoqueProvider.class.getName();
+    public static final String AUTHORITHY = EstoqueProvider.class.getName();
 
-    public static final Uri CONTENT_URI = Uri.parse("content://" + PROVIDER_NAME + "/estoque");
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITHY + "/estoque");
     // representa os produtos que tiver no minimo 1 item em estoque
     public static final Uri CONTENT_URI_PRODUTOS = Uri.parse(CONTENT_URI.toString() + "/produtos");
 
@@ -44,9 +41,9 @@ public class EstoqueProvider extends ContentProvider {
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "estoque", ESTOQUE_ALL);
-        uriMatcher.addURI(PROVIDER_NAME, "estoque/#", ESTOQUE_ID);
-        uriMatcher.addURI(PROVIDER_NAME, "estoque/produtos", ESTOQUE_PRODUTOS);
+        uriMatcher.addURI(AUTHORITHY, "estoque", ESTOQUE_ALL);
+        uriMatcher.addURI(AUTHORITHY, "estoque/#", ESTOQUE_ID);
+        uriMatcher.addURI(AUTHORITHY, "estoque/produtos", ESTOQUE_PRODUTOS);
     }
 
     @Override

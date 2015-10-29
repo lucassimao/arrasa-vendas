@@ -9,6 +9,13 @@
         android:showAsAction="always"
         />
 
+    <item android:id="@+id/shopping_cart"
+        android:icon="@drawable/cart"
+        android:title="Carrinho"
+        arrasavendas:showAsAction="always"
+        android:showAsAction="always"
+        />
+
     <item android:id="@+id/delete"
         android:icon="@drawable/delete"
         android:title="Excluir"

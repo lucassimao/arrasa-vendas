@@ -90,7 +90,7 @@ public class VendasProvider extends ContentProvider {
 
             return _uri;
         } else {
-            Log.e("VendasProvider", "Failed to insert row into " + uri);
+            Log.e(PROVIDER_NAME, "Failed to insert row into " + uri);
         }
         return null;
     }

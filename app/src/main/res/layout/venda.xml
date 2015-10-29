@@ -1,184 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
-            android:layout_marginTop="5dip">
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:layout_marginTop="5dip"
+    android:orientation="vertical">
 
     <LinearLayout
-            android:layout_width="fill_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/radioGroupVendedor"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        <LinearLayout android:layout_width="fill_parent" android:orientation="horizontal"
-                      android:layout_height="wrap_content">
+            android:orientation="horizontal">
 
             <TextView
-                    android:layout_width="70sp"
-                    android:layout_height="wrap_content"
-                    android:text="Vendedor: "
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-            <RadioGroup
-                    android:id="@+id/radioGroupVendedor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                <RadioButton
-                        android:id="@+id/radioVendedorAdna"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Adna"
-                        android:textSize="12sp"/>
-
-                <RadioButton
-                        android:id="@+id/radioVendedorLucas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lucas"
-                        android:textSize="12sp"/>
-
-                <RadioButton
-                        android:id="@+id/radioVendedorMariaClara"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Maria Clara"
-                        android:textSize="12sp"/>
-            </RadioGroup>
-        </LinearLayout>
-
-        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal">
-            <TextView
-                    android:layout_width="70sp"
-                    android:layout_height="wrap_content"
-                    android:text="Entrega: "
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-            <TextView
-                    android:id="@+id/txtViewDataEntrega"
-                    style="@android:style/Widget.DeviceDefault.Light.Spinner"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onClickSelecionarDataEntrega"
-                    android:text="Selecionar data ..."
-                    android:textSize="12sp"/>
-
-
-
-
-        </LinearLayout>
-
-        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal">
-            <TextView
-                    android:layout_width="70sp"
-                    android:layout_height="wrap_content"
-                    android:text="Pagamento:  "
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-
-            <RadioGroup
-                    android:id="@+id/radioGroupFormaPagamento"
-                    android:layout_width="wrap_content"
-                    android:onClick="onClickFormaPagamento"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                <RadioButton
-                        android:id="@+id/radioFormaPagamentoAVista"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="A Vista"
-                        android:textSize="12sp"/>
-
-
-                <RadioButton
-                        android:id="@+id/radioFormaPagamentoParcelado"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Parcelado"
-                        android:textSize="12sp"/>
-            </RadioGroup>
-
-
-            <CheckBox
-                    android:layout_marginLeft="10dp"
-                    android:id="@+id/checkBoxJaPagou"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Já Pagou"
-                    android:textSize="12sp"/>
-        </LinearLayout>
-
-        <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal">
-
-            <TextView
-                    android:layout_width="70sp"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:text="Cliente:"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-            <EditText
-                    android:id="@+id/editTextCliente"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"/>
-        </LinearLayout>
-
-
-        <TextView
-                android:layout_width="fill_parent"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dip"
-                android:text="Itens do Pedido:"
-                android:textColor="#0000ff"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
+                android:text="Vendedor: "
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
-        <ListView
-                android:id="@+id/listItensVenda"
-                android:layout_width="fill_parent"
-                android:layout_height="200dip"
-                android:layout_marginBottom="15dip"/>
-
-        <LinearLayout
-                android:id="@+id/linearLayout2"
-                android:layout_width="fill_parent"
+            <RadioButton
+                android:id="@+id/radioVendedorAdna"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:text="Adna"
+                android:textSize="12sp" />
 
-            <AutoCompleteTextView
-                    android:id="@+id/autoCompleteTextViewProduto"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"/>
-
-            <Button
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onClickAddProduto"
-                    android:text="Add"/>
-        </LinearLayout>
-
-        <TextView
-                android:layout_width="fill_parent"
+            <RadioButton
+                android:id="@+id/radioVendedorLucas"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtValorTotal"
-                android:layout_marginTop="10dip"
-                android:text="R$ 0,00"
-                android:textColor="#0000ff"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
+                android:text="Lucas"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/radioVendedorMariaClara"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Maria Clara"
+                android:textSize="12sp" />
+        </RadioGroup>
     </LinearLayout>
 
-</ScrollView>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="Entrega: "
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtViewDataEntrega"
+            style="@android:style/Widget.DeviceDefault.Light.Spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onClickSelecionarDataEntrega"
+            android:text="Selecionar data ..."
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="Pagamento:  "
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupFormaPagamento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickFormaPagamento"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoAVista"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A Vista"
+                android:textSize="12sp" />
+
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoParcelado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Parcelado"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/checkBoxJaPagou"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="Já Pagou"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="Cliente:"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/editTextCliente"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="Itens do Pedido:"
+        android:textColor="#0000ff"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <ListView
+        android:id="@+id/listItensVenda"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:padding="5dp"
+        android:background="@drawable/listview_shape"
+        android:gravity="top"
+        android:layout_marginBottom="15dip"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextViewProduto"
+            android:layout_width="0dip"
+            android:drawableRight="@android:drawable/ic_menu_search"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickAddProduto"
+            android:text="Add" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtValorTotal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="R$ 0,00"
+        android:textColor="#0000ff"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</LinearLayout>
+

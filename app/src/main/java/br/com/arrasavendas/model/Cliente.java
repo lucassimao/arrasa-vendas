@@ -82,6 +82,7 @@ public class Cliente implements Serializable {
 	public JSONObject toJson() {
 		JSONObject objCliente = new JSONObject();
 		try {
+
 			objCliente.put("nome", this.nome);
 			objCliente.put("dddTelefone", this.dddTelefone);
 			objCliente.put("telefone", this.telefone);
@@ -105,5 +106,17 @@ public class Cliente implements Serializable {
 
 	}
 
-
+	@Override
+	public String toString() {
+		return "Cliente{" +
+				"nome='" + nome + '\'' +
+				", celular='" + celular + '\'' +
+				", dddCelular='" + dddCelular + '\'' +
+				", telefone='" + telefone + '\'' +
+				", dddTelefone='" + dddTelefone + '\'' +
+				", endereco='" + endereco + '\'' +
+				", bairro='" + bairro + '\'' +
+				", id=" + id +
+				'}';
+	}
 }

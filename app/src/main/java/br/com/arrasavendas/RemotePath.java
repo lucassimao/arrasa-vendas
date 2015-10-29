@@ -6,7 +6,8 @@ import android.net.Uri;
 public enum RemotePath {
 	EstoquePath(Constants.host + "/api/estoque"),
 	VendaPath(Constants.host + "/api/vendas"),
-    LoginPath(Constants.host +  "/api/login");
+    LoginPath(Constants.host +  "/api/login"),
+    EnderecosPath(Constants.host +  "/api/enderecos");
 
     private String url;
 	
@@ -14,7 +15,7 @@ public enum RemotePath {
 		this.url = url;
 	}
 
-    public static String getEntityPath(RemotePath remotePath, Long id){
+    public static String getEntityPath(RemotePath remotePath, long id){
         return String.format("%s/%d", remotePath.getUrl(), id);
     }
 

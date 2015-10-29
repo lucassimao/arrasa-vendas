@@ -108,14 +108,10 @@ public class VendaActivity extends Activity {
     private void configurarAutoCompleteTextViewProduto() {
         txtViewProduto = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextViewProduto);
 
-        final String[] colunas = new String[]{EstoqueProvider.PRODUTO,
-                EstoqueProvider._ID};
-        CursorLoader loader = new CursorLoader(this,
-                EstoqueProvider.CONTENT_URI_PRODUTOS, colunas, null, null, null);
-        Cursor cursor = loader.loadInBackground();
+        final String[] colunas = new String[]{EstoqueProvider.PRODUTO, EstoqueProvider._ID};
 
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_dropdown_item_1line, cursor, colunas,
+                android.R.layout.simple_dropdown_item_1line, null, colunas,
                 new int[]{android.R.id.text1},
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
@@ -173,9 +169,9 @@ public class VendaActivity extends Activity {
             fragment.setOnAdicionarListener(new UnidadeQuantidadeDialogFragment.OnAdicionarListener() {
 
                 @Override
-                public void onClickBtnAdicionar(Integer idProduto, String unidade, Integer quantidade) {
+                public void onClickBtnAdicionar(long idProduto, String unidade, Integer quantidade, BigDecimal precoAVista, BigDecimal precoAPrazo) {
 
-                    listProdutosAdapter.add(idProduto, produto, unidade, quantidade);
+                    listProdutosAdapter.add(idProduto, produto, unidade, quantidade,precoAVista,precoAPrazo);
                     listProdutosAdapter.notifyDataSetChanged();
 
                     txtViewProduto.setText("");
@@ -269,6 +265,8 @@ public class VendaActivity extends Activity {
             case ITEM_LIMPAR:
                 limparFormulario();
                 break;
+            case android.R.id.home: // caso seja o up bottom, da um delete e continua chamando na superclasse
+                listProdutosAdapter.rollback();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -395,7 +393,7 @@ public class VendaActivity extends Activity {
                     }
 
                 }
-            }, VendaActivity.this).execute();
+            }).execute();
 
         } catch (JSONException e) {
             e.printStackTrace();

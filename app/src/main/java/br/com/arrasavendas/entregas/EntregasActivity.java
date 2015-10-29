@@ -3,9 +3,12 @@ package br.com.arrasavendas.entregas;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -23,23 +26,15 @@ import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.TimeZone;
 
 import br.com.arrasavendas.DownloadJSONFeedTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.model.Cliente;
-import br.com.arrasavendas.model.FormaPagamento;
-import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
@@ -47,14 +42,34 @@ import br.com.arrasavendas.providers.VendasProvider;
 
 // http://www.technotalkative.com/contextual-action-bar-cab-android/
 
-public class EntregasActivity extends Activity {
+public class EntregasActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private VendasExpandableListAdapter vendasListAdapter;
+    private static final int ENTREGAS_LOADER = 1;
+    private static final int EDIT_ITENS_VENDA_RESULT = 1;
+    private EntregasExpandableListAdapter vendasListAdapter;
     private ExpandableListView list;
     Venda vendaSelecionada = null;
     View vendaSelecionadaView = null;
     ActionMode actionMode = null;
     ActionBarCallBack callback = new ActionBarCallBack();
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (id == ENTREGAS_LOADER) {
+            return new CursorLoader(getApplicationContext(), VendasProvider.CONTENT_URI, null, null, null, VendasProvider.DATA_ENTREGA);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        vendasListAdapter.setCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        vendasListAdapter.setCursor(null);
+    }
 
     class ActionBarCallBack implements ActionMode.Callback {
 
@@ -82,6 +97,9 @@ public class EntregasActivity extends Activity {
                 case R.id.delete:
                     excluirVenda(vendaSelecionada);
                     break;
+                case R.id.shopping_cart:
+                    editarItensVenda(vendaSelecionada);
+                    break;
             }
             return false;
         }
@@ -97,6 +115,27 @@ public class EntregasActivity extends Activity {
             EntregasActivity.this.vendaSelecionada = null;
             EntregasActivity.this.vendaSelecionadaView = null;
         }
+    }
+
+    private void editarItensVenda(Venda vendaSelecionada) {
+        Intent intent = new Intent(this, EditItensVendaActivity.class);
+        intent.putExtra(EditItensVendaActivity.VENDA, vendaSelecionada);
+        startActivityForResult(intent, EDIT_ITENS_VENDA_RESULT);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EDIT_ITENS_VENDA_RESULT && resultCode == Activity.RESULT_OK){
+            if (actionMode != null) {
+                actionMode.finish();
+                actionMode = null;
+            }
+
+            getLoaderManager().restartLoader(ENTREGAS_LOADER,null,EntregasActivity.this);
+
+        }else
+            super.onActivityResult(requestCode,resultCode,data);
     }
 
     private void restoreViewBackground(View view, Venda venda) {
@@ -124,10 +163,10 @@ public class EntregasActivity extends Activity {
         setContentView(R.layout.entregas);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        list = (ExpandableListView) findViewById(R.id.listItemsEntregas);
+        getLoaderManager().initLoader(ENTREGAS_LOADER, null, this);
 
-        List<Venda> vendas = getData();
-        vendasListAdapter = new VendasExpandableListAdapter(this, vendas);
+        vendasListAdapter = new EntregasExpandableListAdapter(this, null);
+        list = (ExpandableListView) findViewById(R.id.listItemsEntregas);
         list.setAdapter(vendasListAdapter);
 
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -175,7 +214,8 @@ public class EntregasActivity extends Activity {
             @Override
             public void onDateSet(DatePicker arg0, int ano, int mes, int diaDoMes) {
 
-                final Calendar novaDataDeEntrega = GregorianCalendar.getInstance(TimeZone.getTimeZone("Etc/UTC"));
+                TimeZone timeZone = TimeZone.getTimeZone("Etc/UTC");
+                final Calendar novaDataDeEntrega = GregorianCalendar.getInstance(timeZone);
                 novaDataDeEntrega.set(Calendar.YEAR, ano);
                 novaDataDeEntrega.set(Calendar.MONTH, mes);
                 novaDataDeEntrega.set(Calendar.DAY_OF_MONTH, diaDoMes);
@@ -217,7 +257,7 @@ public class EntregasActivity extends Activity {
     private void showEditClienteDialog() {
         EditClienteDialog dlg = new EditClienteDialog();
         Bundle bundle = new Bundle();
-        bundle.putSerializable("venda", this.vendaSelecionada);
+        bundle.putSerializable(EditClienteDialog.VENDA, this.vendaSelecionada);
         dlg.setArguments(bundle);
 
 
@@ -228,7 +268,7 @@ public class EntregasActivity extends Activity {
 
                 final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando venda", "Aguarde ...");
 
-                new UpdateClienteVendaAsyncTask(vendaSelecionada.getId(), updatedCliente, turnoEntrega, statusVenda, new br.com.arrasavendas.entregas.UpdateClienteVendaAsyncTask.OnComplete() {
+                new UpdateClienteVendaAsyncTask(vendaSelecionada.getId(), updatedCliente, turnoEntrega, statusVenda, new UpdateClienteVendaAsyncTask.OnComplete() {
 
                     @Override
                     public void run(HttpResponse response) {
@@ -308,93 +348,16 @@ public class EntregasActivity extends Activity {
     }
 
 
-    private List<Venda> getData() {
-        CursorLoader cLoader = new CursorLoader(getApplicationContext(), VendasProvider.CONTENT_URI, null, null, null, VendasProvider.DATA_ENTREGA);
-
-        Cursor cursor = cLoader.loadInBackground();
-
-        List<Venda> vendas = new LinkedList<Venda>();
-
-        while (cursor.moveToNext()) {
-
-            Venda v = new Venda();
-
-            Calendar dataEntrega = Calendar.getInstance();
-            dataEntrega.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(VendasProvider.DATA_ENTREGA)));
-            v.setDataEntrega(dataEntrega.getTime());
-
-            v.setId(cursor.getLong(cursor.getColumnIndex(VendasProvider._ID)));
-            v.setVendedor(cursor.getString(cursor.getColumnIndex(VendasProvider.VENDEDOR)));
-
-            String formaPagamento = cursor.getString(cursor.getColumnIndex(VendasProvider.FORMA_PAGAMENTO));
-            v.setFormaDePagamento(FormaPagamento.valueOf(formaPagamento));
-
-            String status = cursor.getString(cursor.getColumnIndex(VendasProvider.STATUS));
-            v.setStatus(StatusVenda.valueOf(status));
-
-            String turnoEntrega = cursor.getString(cursor.getColumnIndex(VendasProvider.TURNO_ENTREGA));
-            v.setTurnoEntrega(TurnoEntrega.valueOf(turnoEntrega));
-
-            try {
-
-                JSONObject clienteJSONObj = new JSONObject(cursor.getString(cursor.getColumnIndex(VendasProvider.CLIENTE)));
-
-                Cliente cliente = new Cliente();
-                cliente.setId(clienteJSONObj.getLong("id"));
-                cliente.setNome(clienteJSONObj.getString("nome"));
-                cliente.setCelular(clienteJSONObj.getString("celular"));
-                cliente.setDddCelular(clienteJSONObj.getString("dddCelular"));
-                cliente.setDddTelefone(clienteJSONObj.getString("dddTelefone"));
-                cliente.setTelefone(clienteJSONObj.getString("telefone"));
-
-                JSONObject enderecoJSONObj = clienteJSONObj.getJSONObject("endereco");
-                cliente.setEndereco(enderecoJSONObj.getString("complemento"));
-                cliente.setBairro(enderecoJSONObj.getString("bairro"));
-
-                v.setCliente(cliente);
-
-                JSONArray itens = new JSONArray(cursor.getString(cursor.getColumnIndex(VendasProvider.CARRINHO)));
-
-                for (int i = 0; i < itens.length(); ++i) {
-                    JSONObject jsonObj = itens.getJSONObject(i);
-
-                    String produto = jsonObj.getString("produto_nome");
-                    Long produtoID = jsonObj.getLong("produto_id");
-                    String unidade = jsonObj.getString("unidade");
-                    Integer quantidade = jsonObj.getInt("quantidade");
-                    BigDecimal precoAVistaEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAVistaEmCentavos")).divide(BigDecimal.valueOf(100));
-                    BigDecimal precoAPrazoEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAPrazoEmCentavos")).divide(BigDecimal.valueOf(100));
-
-                    ItemVenda item = new ItemVenda(produtoID, produto, unidade, quantidade, precoAVistaEmReais, precoAPrazoEmReais);
-                    v.addToItens(item);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-            vendas.add(v);
-
-        }
-
-        cursor.close();
-
-        return vendas;
-    }
-
     public void sincronizar() {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
+        vendasListAdapter.setCursor(null);
         new DownloadJSONFeedTask(RemotePath.VendaPath, this, new Runnable() {
 
             @Override
             public void run() {
                 progressDlg.dismiss();
-
-                List<Venda> vendas = getData();
-                vendasListAdapter = new VendasExpandableListAdapter(EntregasActivity.this, vendas);
-                list.setAdapter(vendasListAdapter);
+                getLoaderManager().restartLoader(ENTREGAS_LOADER,null,EntregasActivity.this);
 
             }
         }).execute();

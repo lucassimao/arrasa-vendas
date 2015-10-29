@@ -3,10 +3,11 @@
     android:layout_width="fill_parent"
     android:baselineAligned="false"
     android:layout_height="fill_parent"
+    android:padding="3dp"
     android:orientation="horizontal" >
 
     <LinearLayout
-        android:layout_weight="3"
+        android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -25,8 +26,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_weight="1"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
@@ -37,12 +37,12 @@
             android:layout_marginRight="10dp"
             android:textSize="12sp" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnExcluirProduto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Excluir"
-            android:textSize="12sp" />
+            android:background="@android:drawable/ic_menu_delete"
+            />
     </LinearLayout>
 
 </LinearLayout>
