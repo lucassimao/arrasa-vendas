@@ -138,7 +138,7 @@ public class UnidadeQuantidadeDialogFragment extends DialogFragment implements L
                     BigDecimal precoAPrazo = BigDecimal.valueOf(c.getLong(c.getColumnIndex(EstoqueProvider.PRECO_A_PRAZO))/100d);
                     BigDecimal precoAVista = BigDecimal.valueOf(c.getLong(c.getColumnIndex(EstoqueProvider.PRECO_A_VISTA))/100d);
                     c.close();
-                    onAdicionarListener.onClickBtnAdicionar(idProduto, unidade, quantidade, precoAPrazo, precoAVista);
+                    onAdicionarListener.onClickBtnAdicionar(idProduto, unidade, quantidade, precoAVista,precoAPrazo);
 
                 }
 
