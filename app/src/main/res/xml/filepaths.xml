@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path path="produtos/" name="produtos" />
+    <files-path path="anexos/" name="anexos" />
 </paths>

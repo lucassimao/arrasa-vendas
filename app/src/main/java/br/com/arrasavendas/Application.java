@@ -1,18 +1,13 @@
 package br.com.arrasavendas;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
 
 import java.io.File;
-import java.util.logging.FileHandler;
+
+import static br.com.arrasavendas.Utilities.ImageFolder.ANEXOS;
+import static br.com.arrasavendas.Utilities.ImageFolder.PRODUTOS;
 
 /**
  * Created by lsimaocosta on 13/01/15.
@@ -34,7 +29,13 @@ public class Application extends android.app.Application {
     }
 
     private void criarImagesProdutosDir() {
-        File f = new File(getFilesDir()+"/produtos/");
+
+        File f = new File(PRODUTOS.getPath(this));
+        if (!f.exists()){
+            f.mkdirs();
+        }
+
+        f = new File(ANEXOS.getPath(this));
         if (!f.exists()){
             f.mkdirs();
         }

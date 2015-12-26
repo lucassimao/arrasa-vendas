@@ -17,6 +17,7 @@ public class Venda implements Serializable{
     private StatusVenda status;
     private TurnoEntrega turnoEntrega;
     private Double taxaEntrega = 2d;
+    private String[] anexos;
 
     public Date getDataEntrega() {
 		return dataEntrega;
@@ -143,5 +144,13 @@ public class Venda implements Serializable{
         }
 
         return false;
+    }
+
+    public String[] getAnexos() {
+        return anexos;
+    }
+
+    public void setAnexos(String[] anexos) {
+        this.anexos = anexos;
     }
 }

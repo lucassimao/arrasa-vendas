@@ -1,18 +1,23 @@
 package br.com.arrasavendas.imagesManager;
 
-import android.content.*;
+import android.content.ClipData;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.widget.Toast;
-import br.com.arrasavendas.R;
-import br.com.arrasavendas.providers.DownloadedImagesProvider;
 
-import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import br.com.arrasavendas.R;
+import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.providers.DownloadedImagesProvider;
 
 public class ImportarImagensTask extends AsyncTask<Intent, Void, Integer> {
 
@@ -54,30 +59,13 @@ public class ImportarImagensTask extends AsyncTask<Intent, Void, Integer> {
             uris.add(intent.getData());
         }
 
-        try {
-            for (Uri uri : uris) {
+        for (Uri uri : uris) {
 
-                InputStream inputStream = contentResolver.openInputStream(uri);
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                byte[] buffer = new byte[4 * 1024];
-                int read = 0;
+            String imageFileName = getImageFileName(uri);
+            String localPath = Utilities.salvarImagem(this.ctx, Utilities.ImageFolder.PRODUTOS, imageFileName, uri);
 
-                while ((read = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, read);
-                }
-                byte[] byteArray = outputStream.toByteArray();
+            saveNewImage(imageFileName, localPath);
 
-                String imageFileName = getImageFileName(uri);
-                String localPath = salvarImagem(imageFileName, byteArray);
-
-                saveNewImage(imageFileName, localPath);
-                inputStream.close();
-
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return uris.size();
     }
@@ -115,21 +103,6 @@ public class ImportarImagensTask extends AsyncTask<Intent, Void, Integer> {
         return displayName;
     }
 
-    private String salvarImagem(String imageName, byte[] imageBytes) {
-        File file = new File(ctx.getFilesDir() + "/produtos/", imageName);
-        try {
-            FileOutputStream output = new FileOutputStream(file);
-            output.write(imageBytes);
-            output.close();
-            return file.getAbsolutePath();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     private Uri saveNewImage(String imageName, String localPath) {
         ContentValues cv = new ContentValues();

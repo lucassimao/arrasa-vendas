@@ -15,6 +15,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -157,7 +158,8 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
         final Venda venda = (Venda) getChild(groupPosition, childPosition);
 
-        convertView = inflater.inflate(R.layout.vendas_list_row_details, null);
+        if (convertView == null)
+            convertView = inflater.inflate(R.layout.vendas_list_row_details, null);
 
         if (venda.getVendedor() == null)
             convertView.setBackgroundColor(Color.WHITE);
@@ -187,10 +189,15 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
         txtTurno.setText(venda.getTurnoEntrega().name());
 
-        if (venda.getStatus().equals(StatusVenda.PagamentoRecebido)) {
-            ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
+        ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
+        img.setVisibility(View.INVISIBLE);
 
-            switch (venda.getFormaDePagamento()) {
+        StatusVenda statusVenda = venda.getStatus();
+        FormaPagamento formaDePagamento = venda.getFormaDePagamento();
+
+        if (statusVenda.equals(StatusVenda.PagamentoRecebido)) {
+
+            switch (formaDePagamento) {
                 case AVista:
                     img.setBackgroundResource(R.drawable.dollar_currency_sign);
                     img.setVisibility(View.VISIBLE);
@@ -203,17 +210,22 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
             }
         }
 
-        if (venda.getStatus().equals(StatusVenda.AguardandoPagamento) && venda.getFormaDePagamento().equals(FormaPagamento.PagSeguro)) {
-            ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
-
+        if (statusVenda.equals(StatusVenda.AguardandoPagamento) && formaDePagamento.equals(FormaPagamento.PagSeguro)) {
             Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.credit_card_icon);
             Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
             img.setBackground(dimmedIcon);
             img.setVisibility(View.VISIBLE);
         }
 
+        ImageView imgPaperclip = (ImageView) convertView.findViewById(R.id.imgPaperclip);
+        if (venda.getAnexos() == null){
+            imgPaperclip.setVisibility(View.INVISIBLE);
+        }else{
+            imgPaperclip.setVisibility(View.VISIBLE);
+        }
+
         if (venda.getItens() != null) {
-            LinearLayout lLayout = (LinearLayout) convertView.findViewById(R.id.rowLayout);
+            RelativeLayout lLayout = (RelativeLayout) convertView.findViewById(R.id.row_layout);
             TextView txtView = (TextView) convertView.findViewById(R.id.txtItensVenda);
             txtView.setText(Html.fromHtml(TextUtils.join("<br>", venda.getItens())));
         }
@@ -305,6 +317,22 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
                 String turnoEntrega = cursor.getString(cursor.getColumnIndex(VendasProvider.TURNO_ENTREGA));
                 v.setTurnoEntrega(TurnoEntrega.valueOf(turnoEntrega));
+
+                try {
+
+                    String str = cursor.getString(cursor.getColumnIndex(VendasProvider.ANEXOS_JSON_ARRAY));
+                    JSONArray anexosArray = new JSONArray(str);
+                    if (anexosArray.length() > 0) {
+                        String[] anexos = new String[anexosArray.length()];
+                        for (int i = 0; i < anexosArray.length(); ++i)
+                            anexos[i] = anexosArray.getString(i);
+
+                        v.setAnexos(anexos);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
                 try {
 

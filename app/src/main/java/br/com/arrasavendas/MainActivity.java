@@ -7,7 +7,10 @@ import android.content.*;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import br.com.arrasavendas.entregas.EntregasActivity;
+import br.com.arrasavendas.entregas.UploadAnexoAsyncTask;
 import br.com.arrasavendas.estoque.EstoqueActivity;
 import br.com.arrasavendas.imagesManager.ImagesManagerActivity;
 import br.com.arrasavendas.venda.VendaActivity;
@@ -22,6 +25,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
         atualizarEnderecos();
+
+
     }
 
 

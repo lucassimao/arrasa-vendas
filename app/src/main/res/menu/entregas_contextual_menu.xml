@@ -30,4 +30,11 @@
         android:showAsAction="always"
         />
 
+    <item android:id="@+id/add_anexo"
+        android:icon="@drawable/anexo"
+        android:title="Anexar Documento"
+        arrasavendas:showAsAction="always"
+        android:showAsAction="always"
+        />
+
 </menu>

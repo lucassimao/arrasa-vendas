@@ -194,7 +194,7 @@ public class EditItensVendaActivity extends Activity {
         }
 
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new UpdateItensVendaAsyncTask(venda.getId(), obj, new UpdateItensVendaAsyncTask.OnComplete() {
+        new UpdateVendaAsyncTask(venda.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
             @Override
             public void run(HttpResponse response) {
                 String msg = null;

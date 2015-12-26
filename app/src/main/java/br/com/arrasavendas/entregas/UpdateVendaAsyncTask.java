@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
 
-public class UpdateItensVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
+public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 
     private final long vendaId;
 
@@ -24,7 +24,7 @@ public class UpdateItensVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>
 	private OnComplete onComplete;
 	private JSONObject venda;
 
-	public UpdateItensVendaAsyncTask(long vendaId,JSONObject venda, OnComplete onComplete) {
+	public UpdateVendaAsyncTask(long vendaId, JSONObject venda, OnComplete onComplete) {
 		this.venda = venda;
 		this.onComplete = onComplete;
 		this.vendaId = vendaId;

@@ -15,6 +15,9 @@ public enum RemotePath {
 		this.url = url;
 	}
 
+    public static String getAnexosPath(long vendaId){
+        return String.format("%s/%d/anexo", VendaPath.getUrl(), vendaId);
+    }
     public static String getEntityPath(RemotePath remotePath, long id){
         return String.format("%s/%d", remotePath.getUrl(), id);
     }

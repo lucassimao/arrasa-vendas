@@ -6,19 +6,10 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
-
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.widget.RelativeLayout.LayoutParams;
-
 import android.widget.TextView;
 
 import java.util.LinkedList;
@@ -32,11 +23,6 @@ import br.com.arrasavendas.model.Cliente;
 public class SelectClienteDialog extends DialogFragment {
 
     public static final String CLIENTES = "SelectClienteDialog.clientes";
-
-    public interface SelectClienteDialogListener {
-        void onOK(Cliente cliente);
-    }
-
     private SelectClienteDialogListener selectClienteDialogListener;
 
     public void setSelectClienteDialogListener(SelectClienteDialogListener selectClienteDialogListener) {
@@ -88,5 +74,9 @@ public class SelectClienteDialog extends DialogFragment {
                         }).setTitle("Resultado da Pesquisa");
 
         return builder.create();
+    }
+
+    public interface SelectClienteDialogListener {
+        void onOK(Cliente cliente);
     }
 }

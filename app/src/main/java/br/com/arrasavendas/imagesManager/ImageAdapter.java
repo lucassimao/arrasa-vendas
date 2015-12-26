@@ -2,6 +2,7 @@ package br.com.arrasavendas.imagesManager;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -19,16 +20,24 @@ import java.io.File;
  * Created by lsimaocosta on 27/07/15.
  */
 public class ImageAdapter extends BaseAdapter {
-    private ImagesManagerActivity imagesManagerActivity;
+    private final boolean[] thumbnailsSelection;
+    private final int count;
+    private final Bitmap[] thumbnails;
+    private final String[] localPath;
+    private final Context ctx;
     private LayoutInflater mInflater;
 
-    public ImageAdapter(ImagesManagerActivity imagesManagerActivity) {
-        this.imagesManagerActivity = imagesManagerActivity;
-        mInflater = (LayoutInflater) imagesManagerActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public ImageAdapter(int count, boolean[] thumbnailsSelection, Bitmap[] thumbnails, String[] localPath,Context ctx) {
+        this.count = count;
+        this.ctx=ctx;
+        this.localPath =localPath;
+        this.thumbnailsSelection = thumbnailsSelection;
+        this.thumbnails = thumbnails;
+        mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public int getCount() {
-        return imagesManagerActivity.count;
+        return this.count;
     }
 
     public Object getItem(int position) {
@@ -59,12 +68,12 @@ public class ImageAdapter extends BaseAdapter {
             public void onClick(View v) {
                 CheckBox cb = (CheckBox) v;
                 int id = cb.getId();
-                if (imagesManagerActivity.thumbnailsSelection[id]) {
+                if (thumbnailsSelection[id]) {
                     cb.setChecked(false);
-                    imagesManagerActivity.thumbnailsSelection[id] = false;
+                    thumbnailsSelection[id] = false;
                 } else {
                     cb.setChecked(true);
-                    imagesManagerActivity.thumbnailsSelection[id] = true;
+                    thumbnailsSelection[id] = true;
                 }
             }
         });
@@ -73,25 +82,19 @@ public class ImageAdapter extends BaseAdapter {
             public void onClick(View v) {
                 int id = v.getId();
 
-                File file = new File(imagesManagerActivity.localPath[id]);
+                File file = new File(localPath[id]);
 
                 String authority = "br.com.arrasavendas.fileprovider";
-                Uri uriForFile = FileProvider.getUriForFile(imagesManagerActivity,
-                        authority, file);
-
-                Log.d("localpath", "" + file.exists());
-                Log.d("localpath", imagesManagerActivity.localPath[id]);
-                Log.d("localpath", uriForFile.toString());
-
+                Uri uriForFile = FileProvider.getUriForFile(ctx,authority, file);
 
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.setDataAndType(uriForFile, "image/*");
-                imagesManagerActivity.startActivity(intent);
+                ctx.startActivity(intent);
             }
         });
-        holder.imageview.setImageBitmap(imagesManagerActivity.thumbnails[position]);
-        holder.checkbox.setChecked(imagesManagerActivity.thumbnailsSelection[position]);
+        holder.imageview.setImageBitmap(thumbnails[position]);
+        holder.checkbox.setChecked(thumbnailsSelection[position]);
         holder.id = position;
         return convertView;
     }

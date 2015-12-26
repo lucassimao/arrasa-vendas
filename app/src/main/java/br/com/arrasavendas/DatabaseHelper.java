@@ -7,14 +7,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 52;
+	private static final int DATABASE_VERSION = 53;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String DATABASE_CREATE_TABLE_VENDAS = "create table "
 			+ TABLE_VENDAS
 			+ "(_id integer primary key, vendedor_id integer not null, carrinho text not null,"
 			+ " data_entrega integer not null, forma_pagamento text null,status text null," +
-			"turno text null, cliente text not null, remote_id integer);";
+			"turno text null, cliente text not null, anexos_json_array text);";
 
 	public static final String TABLE_ESTOQUE = "ESTOQUE";
 	private static final String DATABASE_CREATE_TABLE_ESTOQUE = "create table "

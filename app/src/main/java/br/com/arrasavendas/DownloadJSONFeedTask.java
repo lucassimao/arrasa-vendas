@@ -124,6 +124,7 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
                         values.put(VendasProvider.TURNO_ENTREGA, venda.getString("turnoEntrega"));
                         values.put(VendasProvider.STATUS, venda.getString("status"));
                         values.put(VendasProvider.CARRINHO, venda.getString("itens"));
+                        values.put(VendasProvider.ANEXOS_JSON_ARRAY, venda.getString("anexos_json_array"));
 
                         this.ctx.getContentResolver().insert(VendasProvider.CONTENT_URI, values);
                     }
@@ -169,8 +170,6 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
     }
 
     protected void onPostExecute(Void result) {
-
-        Log.d("DOWNLOAD","DOWNLOAD OK!");
         if (onCompleteListener != null)
             onCompleteListener.run();
     }

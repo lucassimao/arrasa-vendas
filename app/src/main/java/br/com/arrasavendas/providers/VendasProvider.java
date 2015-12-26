@@ -26,6 +26,7 @@ public class VendasProvider extends ContentProvider {
     public final static String CLIENTE = "cliente";
     public final static String TURNO_ENTREGA = "turno";
     public static final String CARRINHO = "carrinho";
+    public static final String ANEXOS_JSON_ARRAY = "anexos_json_array";
 
     private static final UriMatcher uriMatcher;
     private static final int VENDAS = 1;

@@ -143,7 +143,7 @@ public class ImagesManagerActivity extends Activity {
                 toogleImageButtons(false);
 
                 GridView imagegrid = (GridView) findViewById(R.id.PhoneImageGrid);
-                imageAdapter = new ImageAdapter(ImagesManagerActivity.this);
+                imageAdapter = new ImageAdapter(count,thumbnailsSelection,thumbnails,localPath,ImagesManagerActivity.this);
 
                 count = 0;
                 thumbnails = null;
@@ -258,12 +258,6 @@ public class ImagesManagerActivity extends Activity {
     }
 
 
-
-    public void exit(View v) {
-        finish();
-    }
-
-
     private void exibirImagens() {
         long estoqueId = (long) spinnerUnidade.getTag();
         Long produtoId = getProdutoIdFromEstoqueId(estoqueId);
@@ -295,7 +289,7 @@ public class ImagesManagerActivity extends Activity {
 
             BitmapFactory.decodeFile(imagePath, options);
 
-            options.inSampleSize = calculateInSampleSize(options, 150, 150);
+            options.inSampleSize = Utilities.calculateInSampleSize(options, 150, 150);
             options.inJustDecodeBounds = false;
 
             thumbnails[i] = BitmapFactory.decodeFile(imagePath, options);
@@ -304,7 +298,7 @@ public class ImagesManagerActivity extends Activity {
         }
 
         GridView imagegrid = (GridView) findViewById(R.id.PhoneImageGrid);
-        imageAdapter = new ImageAdapter(this);
+        imageAdapter = new ImageAdapter(count,thumbnailsSelection,thumbnails,localPath,this);
         imagegrid.setAdapter(imageAdapter);
         cursor.close();
     }
@@ -333,29 +327,5 @@ public class ImagesManagerActivity extends Activity {
         imageButton.setImageDrawable(icon);
     }
 
-
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
 
 }
