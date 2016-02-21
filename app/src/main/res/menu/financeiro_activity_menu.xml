@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:arrasavendas="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/contas"
+        android:icon="@drawable/money_exchange"
+        android:title="Contas pagar e receber"
+        arrasavendas:showAsAction="always|withText"
+        android:showAsAction="always|withText"
+        />
+</menu>

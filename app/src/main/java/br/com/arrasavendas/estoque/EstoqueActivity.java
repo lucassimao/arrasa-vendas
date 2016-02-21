@@ -4,11 +4,9 @@ import java.io.File;
 import java.util.*;
 
 import android.app.Activity;
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,7 +35,7 @@ public class EstoqueActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.estoque_expandable);
+        setContentView(R.layout.activity_estoque);
 
         list = (ExpandableListView) findViewById(R.id.listItemsEstoque);
         list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);

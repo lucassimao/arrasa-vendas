@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import br.com.arrasavendas.model.FinanceiroDAO;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
@@ -45,7 +46,15 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
         try {
 
             String jsonString = downloadJSON();
-            salvarJSON(jsonString);
+            switch(this.feed){
+                case EstoquePath:
+                case VendaPath:
+                    salvarJSON(jsonString);
+                    break;
+                case CaixaPath:
+                    exportarInformacoesDoCaixa(jsonString);
+                    break;
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,6 +63,12 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
 
+    }
+
+    private void exportarInformacoesDoCaixa(String jsonString) {
+        FinanceiroDAO dao = new FinanceiroDAO(this.ctx);
+        dao.deleteAll();
+        dao.save(jsonString);
     }
 
     private void salvarJSON(String jsonString) throws IOException, JSONException {

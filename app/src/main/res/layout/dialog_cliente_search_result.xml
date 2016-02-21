@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- utilizado pela consulta de cliente por telefone e celular
+       Os itens do radio group sao preenchdios dinamicamente -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/radio_clientes"
     android:layout_width="wrap_content"

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="10dip">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Descrição:" />
+
+        <EditText
+            android:id="@+id/editTxtDescricao"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pagamento:" />
+
+        <RadioGroup
+            android:id="@+id/radioGrpFormaPagamento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoAVista"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="A Vista" />
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoParcelado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cartão" />
+
+        </RadioGroup>
+
+
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo: " />
+
+        <RadioGroup
+            android:id="@+id/radioGroupTipoMovimento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <RadioButton
+                android:id="@+id/radioTipoMovimentoPositivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Positivo" />
+
+            <RadioButton
+                android:id="@+id/radioTipoMovimentoNegativo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negativo" />
+
+        </RadioGroup>
+    </TableRow>
+
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data:" />
+
+        <TextView
+            android:id="@+id/txtViewData"
+            style="@android:style/Widget.DeviceDefault.Light.Spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Selecionar data ..."
+            android:textSize="12sp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valor (R$):" />
+
+        <EditText
+            android:id="@+id/editTxtValor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:textSize="12sp" />
+
+    </TableRow>
+</TableLayout>
+

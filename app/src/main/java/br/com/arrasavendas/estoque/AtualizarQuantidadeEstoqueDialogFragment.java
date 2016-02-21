@@ -54,7 +54,7 @@ public class AtualizarQuantidadeEstoqueDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 
-        final View dialog = inflater.inflate(R.layout.atualizar_quantidade_em_estoque_dialog, container);
+        final View dialog = inflater.inflate(R.layout.dialog_update_qtde_em_estoque, container);
         final long estoqueId = getArguments().getLong("estoque_id");
         String unidade = getArguments().getString("unidade");
         final Integer quantidadeAtual = getArguments().getInt("quantidade_em_estoque");

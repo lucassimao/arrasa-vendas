@@ -3,6 +3,9 @@ package br.com.arrasavendas;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 
@@ -17,6 +20,7 @@ public class Application extends android.app.Application {
     public static final String ARRASAVENDAS_AUTH_PREFS_KEY = "br.com.arrasavendas.auth";
     private String currentUser = null;
     private String accessToken;
+    private String roles;
     private static Application mApp = null;
 
 
@@ -49,10 +53,19 @@ public class Application extends android.app.Application {
         return currentUser;
     }
 
+    public boolean isAdmin(){
+        String currentRoles = getRoles();
+        return  (!TextUtils.isEmpty(currentRoles) && currentRoles.contains("ROLE_ADMIN"));
+    }
+
+    public String getRoles(){return this.roles; };
+
     private void loadAuthenticationInfo() {
         SharedPreferences sp = getSharedPreferences(ARRASAVENDAS_AUTH_PREFS_KEY, MODE_PRIVATE);
         this.currentUser = sp.getString("username",null);
         this.accessToken = sp.getString("access_token",null);
+        this.roles = sp.getString("roles",null);
+
     }
     public static Context context()
     {
@@ -73,5 +86,6 @@ public class Application extends android.app.Application {
 
         Application.mApp.currentUser = username;
         Application.mApp.accessToken= access_token;
+        Application.mApp.roles = roles;
     }
 }

@@ -103,7 +103,7 @@ public class EditItensVendaBaseAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.edit_itens_venda_list_row, null);
+            convertView = inflater.inflate(R.layout.list_row_edit_itens_venda, null);
         }
 
         final ItemVenda itemVenda = this.itens.get(position);

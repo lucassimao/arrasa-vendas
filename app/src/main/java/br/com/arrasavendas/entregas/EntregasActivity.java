@@ -72,7 +72,7 @@ public class EntregasActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.entregas);
+        setContentView(R.layout.activity_entregas);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         getLoaderManager().initLoader(ENTREGAS_LOADER, null, entregasCursorCallback);
@@ -142,7 +142,7 @@ public class EntregasActivity extends Activity{
                         int statusCode = response.getStatusLine().getStatusCode();
 
                         if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                            String string = "Erro ao atualizar venda, verifique se todos os campos foram preenchidos!";
+                            String string = "Erro ao atualizar activity_venda, verifique se todos os campos foram preenchidos!";
                             Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
 
                         } else if (statusCode == HttpStatus.SC_OK) {
@@ -184,7 +184,7 @@ public class EntregasActivity extends Activity{
             @Override
             public void onPositiveClick(final Cliente updatedCliente, final TurnoEntrega turnoEntrega, final StatusVenda statusVenda) {
 
-                final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando venda", "Aguarde ...");
+                final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando activity_venda", "Aguarde ...");
 
                 new UpdateClienteVendaAsyncTask(vendaSelecionada.getId(), updatedCliente, turnoEntrega, statusVenda, new UpdateClienteVendaAsyncTask.OnComplete() {
 
@@ -195,7 +195,7 @@ public class EntregasActivity extends Activity{
                         int statusCode = response.getStatusLine().getStatusCode();
 
                         if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                            String string = "Erro ao atualizar venda, verifique se todos os campos foram preenchidos!";
+                            String string = "Erro ao atualizar activity_venda, verifique se todos os campos foram preenchidos!";
                             Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
 
                         } else if (statusCode == HttpStatus.SC_OK) {
@@ -251,7 +251,7 @@ public class EntregasActivity extends Activity{
                                         Toast.makeText(EntregasActivity.this, "Venda excluida com sucesso!", Toast.LENGTH_LONG).show();
                                         break;
                                     case HttpStatus.SC_UNPROCESSABLE_ENTITY:
-                                        Toast.makeText(EntregasActivity.this, "Erro ao excluir venda!", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(EntregasActivity.this, "Erro ao excluir activity_venda!", Toast.LENGTH_LONG).show();
                                         break;
                                     default:
                                         Toast.makeText(EntregasActivity.this, "Erro " + statusCode, Toast.LENGTH_SHORT).show();

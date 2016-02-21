@@ -15,14 +15,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.providers.EstoqueProvider;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class UnidadeQuantidadeDialogFragment extends DialogFragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -95,7 +92,7 @@ public class UnidadeQuantidadeDialogFragment extends DialogFragment implements L
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 
-        final View dialog = inflater.inflate(R.layout.unidade_quantidade_dialog, container);
+        final View dialog = inflater.inflate(R.layout.dialog_und_qtde, container);
         this.produto = getArguments().getString(UnidadeQuantidadeDialogFragment.NOME_PRODUTO);
 
         getDialog().setTitle("Unidade / Quantidade");

@@ -322,7 +322,7 @@ public class AnexosManagerActivity extends ListActivity {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null)
-                convertView = getLayoutInflater().inflate(R.layout.anexos_manager_list_item, parent, false);
+                convertView = getLayoutInflater().inflate(R.layout.list_item_anexos_manager, parent, false);
 
             ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
             // se for uma image

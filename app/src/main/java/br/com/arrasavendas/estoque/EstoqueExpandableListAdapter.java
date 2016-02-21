@@ -61,7 +61,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.estoque_list_row_details, null);
+            convertView = inflater.inflate(R.layout.list_row_detail_estoque, null);
         }
 
         Button btnEditQuantidadeEmEstoque = (Button) convertView.findViewById(R.id.btn_edit_quantidade_em_estoque);
@@ -145,7 +145,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
                              View convertView, final ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.estoque_list_row_group, null);
+            convertView = inflater.inflate(R.layout.list_row_group_estoque, null);
         }
         Produto produto = (Produto) getGroup(groupPosition);
         TextView textViewProduto = (TextView) convertView.findViewById(R.id.textViewNomeProduto);

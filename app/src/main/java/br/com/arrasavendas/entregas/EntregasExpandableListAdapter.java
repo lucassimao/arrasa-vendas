@@ -7,14 +7,12 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -159,7 +157,7 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         final Venda venda = (Venda) getChild(groupPosition, childPosition);
 
         if (convertView == null)
-            convertView = inflater.inflate(R.layout.vendas_list_row_details, null);
+            convertView = inflater.inflate(R.layout.list_row_venda_detail, null);
 
         if (venda.getVendedor() == null)
             convertView.setBackgroundColor(Color.WHITE);
@@ -263,7 +261,7 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
         if (convertView == null) {
             convertView = inflater
-                    .inflate(R.layout.vendas_list_row_group, null);
+                    .inflate(R.layout.list_row_group_venda, null);
         }
         String dataEntrega = (String) getGroup(groupPosition);
         ((CheckedTextView) convertView).setText(dataEntrega);

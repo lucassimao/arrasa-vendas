@@ -7,11 +7,10 @@ import android.content.*;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import br.com.arrasavendas.entregas.EntregasActivity;
-import br.com.arrasavendas.entregas.UploadAnexoAsyncTask;
 import br.com.arrasavendas.estoque.EstoqueActivity;
+import br.com.arrasavendas.financeiro.FinanceiroActivity;
 import br.com.arrasavendas.imagesManager.ImagesManagerActivity;
 import br.com.arrasavendas.venda.VendaActivity;
 
@@ -25,8 +24,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
         atualizarEnderecos();
-
-
     }
 
 
@@ -140,6 +137,21 @@ public class MainActivity extends Activity {
             public void run() {
                 progressDlg.dismiss();
                 Intent i = new Intent(getBaseContext(), EntregasActivity.class);
+                startActivity(i);
+
+            }
+        }).execute();
+    }
+
+    public void onClickBtnFinanceiro(View v){
+        final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
+        new DownloadJSONFeedTask(RemotePath.CaixaPath, this, new Runnable() {
+
+            @Override
+            public void run() {
+                progressDlg.dismiss();
+
+                Intent i = new Intent(getBaseContext(), FinanceiroActivity.class);
                 startActivity(i);
 
             }

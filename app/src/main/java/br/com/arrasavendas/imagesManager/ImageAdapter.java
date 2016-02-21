@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +52,7 @@ public class ImageAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mInflater.inflate(
-                    R.layout.galleryitem, null);
+                    R.layout.item_gallery, null);
             holder.imageview = (ImageView) convertView.findViewById(R.id.thumbImage);
             holder.checkbox = (CheckBox) convertView.findViewById(R.id.itemCheckBox);
 

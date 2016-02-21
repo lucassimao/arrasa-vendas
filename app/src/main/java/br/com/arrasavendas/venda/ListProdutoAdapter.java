@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -83,7 +82,7 @@ public class ListProdutoAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) this.ctx
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        final View rowView = inflater.inflate(R.layout.venda_list_row, parent,
+        final View rowView = inflater.inflate(R.layout.list_row_venda, parent,
                 false);
         String produto = itens.get(position).getNomeProduto();
         String unidade = itens.get(position).getUnidade().toString();

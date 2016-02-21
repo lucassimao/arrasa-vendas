@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/descricao"
+        android:textSize="12dip"
+        />
+    <TextView
+        android:id="@+id/tipo"
+        android:textSize="12dip"
+        android:gravity="center"
+        />
+    <TextView
+        android:id="@+id/data"
+        android:textSize="12dip"
+        android:gravity="center"
+        />
+    <TextView
+        android:id="@+id/valor"
+        android:textSize="12dip"
+        android:gravity="right"
+        />
+</TableRow>

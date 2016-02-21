@@ -7,10 +7,12 @@ public enum RemotePath {
 	EstoquePath(Constants.host + "/api/estoque"),
 	VendaPath(Constants.host + "/api/vendas"),
     LoginPath(Constants.host +  "/api/login"),
+    CaixaPath(Constants.host +  "/api/caixa"),
+    MovimentoCaixaPath(Constants.host +  "/api/movimentoCaixa"),
     EnderecosPath(Constants.host +  "/api/enderecos");
 
     private String url;
-	
+
 	RemotePath(String url){
 		this.url = url;
 	}
@@ -18,6 +20,8 @@ public enum RemotePath {
     public static String getAnexosPath(long vendaId){
         return String.format("%s/%d/anexo", VendaPath.getUrl(), vendaId);
     }
+    
+
     public static String getEntityPath(RemotePath remotePath, long id){
         return String.format("%s/%d", remotePath.getUrl(), id);
     }

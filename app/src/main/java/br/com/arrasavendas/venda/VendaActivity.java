@@ -59,7 +59,7 @@ public class VendaActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.venda);
+        setContentView(R.layout.activity_venda);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -368,7 +368,7 @@ public class VendaActivity extends Activity {
             obj.put("carrinho", listProdutosAdapter.getItemsAsJson());
 
 
-            final ProgressDialog dlg = ProgressDialog.show(this, "Salvando venda", "Aguarde ...");
+            final ProgressDialog dlg = ProgressDialog.show(this, "Salvando activity_venda", "Aguarde ...");
 
             new SalvarVendaAsyncTask(obj, new OnComplete() {
 
@@ -380,7 +380,7 @@ public class VendaActivity extends Activity {
 
 
                     if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                        String string = "Erro ao salvar venda, verifique se todos os campos foram preenchidos!";
+                        String string = "Erro ao salvar activity_venda, verifique se todos os campos foram preenchidos!";
                         Toast.makeText(getBaseContext(), string, Toast.LENGTH_LONG).show();
 
                     } else if (statusCode == HttpStatus.SC_CREATED) {
