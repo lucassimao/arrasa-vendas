@@ -71,10 +71,11 @@ public class Utilities {
     }
 
     public static void registrarSyncEnderecoAlarm(Context context) {
+        long INTERVAL_3_HOURS = AlarmManager.INTERVAL_HOUR*3;
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SyncEnderecosService.class);
         PendingIntent alarmIntent = PendingIntent.getService(context, 0, intent, 0);
-        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, AlarmManager.INTERVAL_HALF_DAY, alarmIntent);
+        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, INTERVAL_3_HOURS, alarmIntent);
     }
 
     /**
