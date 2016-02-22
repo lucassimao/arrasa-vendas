@@ -65,6 +65,9 @@ public class EstoqueActivity extends Activity {
             case R.id.share_with_whatsapp:
                 shareWithWhatsApp();
                 return true;
+            case R.id.sync_estoque:
+                sincronizarEstoque();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -184,7 +187,7 @@ public class EstoqueActivity extends Activity {
         return estoque;
     }
 
-    public void onClickBtnSincronizar(View v) {
+    private void sincronizarEstoque() {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
@@ -200,10 +203,6 @@ public class EstoqueActivity extends Activity {
 
             }
         }).execute();
-    }
-
-    public void onClickSair(View v) {
-        finish();
     }
 
 }
