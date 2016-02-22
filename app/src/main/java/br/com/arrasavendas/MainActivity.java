@@ -31,16 +31,18 @@ public class MainActivity extends Activity {
 
     /**
      * Método chamado no onCreate e caso
-     * sea a primeira execuçao do aplicativo, faz o 1º agendamento do sincronizador de endereços
+     * seja a primeira execuçao do aplicativo,
+     * faz o 1º agendamento do sincronizador de endereços e baixa o estoque
      */
     private void atualizarEnderecos() {
         final String ARRASAVENDAS = "br.com.arrasavendas";
         final String KEY_PREFS_FIRST_LAUNCH = "br.com.arrasavendas.first_launch";
 
         SharedPreferences prefs = getSharedPreferences(ARRASAVENDAS,Activity.MODE_PRIVATE);
+
         if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH,true)){
             prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH,false).commit();
-
+            new DownloadJSONFeedTask(RemotePath.EstoquePath, this,null).execute();
             Utilities.registrarSyncEnderecoAlarm(this);
         }
     }
