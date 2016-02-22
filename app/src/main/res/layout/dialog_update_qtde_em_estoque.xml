@@ -19,7 +19,9 @@
         <TableRow>
 
             <TextView android:text="Quantidade:" />
-            <EditText android:id="@+id/edit_quantidade" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+            <EditText android:id="@+id/edit_quantidade"
+                android:inputType="number"
+                android:layout_width="fill_parent" android:layout_height="wrap_content"/>
         </TableRow>
     </TableLayout>
 
