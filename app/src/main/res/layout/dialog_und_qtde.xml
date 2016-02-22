@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Esse layout eh p/ o usuario selecionar a unidade e
+    a quantidade de um produto quando o mesmo estiver sendo adicionado
+    a uma venda-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
