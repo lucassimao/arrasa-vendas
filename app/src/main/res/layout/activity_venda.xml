@@ -133,6 +133,7 @@
         <EditText
             android:id="@+id/editTextCliente"
             android:layout_width="fill_parent"
+            android:inputType="textCapWords"
             android:layout_height="wrap_content"
             android:textSize="12sp" />
     </LinearLayout>
