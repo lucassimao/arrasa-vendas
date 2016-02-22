@@ -5,8 +5,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.*;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import br.com.arrasavendas.entregas.EntregasActivity;
 import br.com.arrasavendas.estoque.EstoqueActivity;
@@ -51,6 +53,7 @@ public class MainActivity extends Activity {
         alert.setMessage("CEP: ");
 
         final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL);
         alert.setView(input);
 
 
