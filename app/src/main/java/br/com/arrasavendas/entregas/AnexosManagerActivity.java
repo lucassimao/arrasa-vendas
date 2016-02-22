@@ -197,6 +197,7 @@ public class AnexosManagerActivity extends ListActivity {
 
             final ProgressDialog progressDlg = ProgressDialog.show(this, "Enviando anexo", "Aguarde ...");
             final Uri uri = data.getData();
+            final AnexosManagerActivity activity = this;
 
             new UploadAnexoAsyncTask(this.vendaId, new UploadAnexoAsyncTask.OnComplete() {
                 @Override
@@ -206,7 +207,7 @@ public class AnexosManagerActivity extends ListActivity {
                     Toast.makeText(AnexosManagerActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
 
                     // salvando copia da imagem na pasta local do app
-                    Utilities.salvarImagem(AnexosManagerActivity.this, ImageFolder.ANEXOS, response.getFileName(), uri);
+                    Utilities.salvarImagem(activity, ImageFolder.ANEXOS, response.getFileName(), uri);
 
                     // adicionando o novo anexo no registro do db local
                     String[] projection = {VendasProvider.ANEXOS_JSON_ARRAY};

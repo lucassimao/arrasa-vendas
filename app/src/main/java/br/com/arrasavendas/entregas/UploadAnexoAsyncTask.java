@@ -85,7 +85,7 @@ public class UploadAnexoAsyncTask extends AsyncTask<Uri, Void, Response> {
             File file = new File(Utilities.getPath(ctx,uri));
             int indexExtension = file.getName().lastIndexOf(".");
             String fileNameWithoutExtension = file.getName().substring(0, indexExtension);
-            String newfileName = fileNameWithoutExtension + System.currentTimeMillis() + "." + Utilities.getExtension(file.getName());
+            String newfileName = fileNameWithoutExtension + System.currentTimeMillis() + Utilities.getExtension(file.getName());
 
             MultipartUtility mu = new MultipartUtility(path, "UTF-8", accessToken);
             mu.addFilePart("anexo", newfileName, inputStream, type);
