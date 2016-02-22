@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import br.com.arrasavendas.util.Response;
+
 /**
  * This utility class provides an abstraction layer for sending multipart HTTP
  * POST requests to a web server.
@@ -117,9 +119,9 @@ public class MultipartUtility {
      * @return HttpURLConnection.HTTP_* code
      * @throws IOException
      */
-    public HttpResponse finish() throws IOException {
+    public Response finish() throws IOException {
         StringBuilder sb = new StringBuilder();
-        HttpResponse response = new HttpResponse();
+        Response response = new Response();
 
         writer.append(LINE_FEED).flush();
         writer.append("--" + boundary + "--").append(LINE_FEED);

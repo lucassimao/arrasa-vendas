@@ -4,12 +4,8 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.graphics.*;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import br.com.arrasavendas.Utilities;
 import org.apache.http.HttpEntity;
@@ -26,9 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Random;
 import java.util.Set;
 
 import br.com.arrasavendas.RemotePath;
@@ -184,7 +177,7 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
 
         HttpClient client = new DefaultHttpClient();
 
-        HttpGet httpGet = new HttpGet(RemotePath.getFullImagePath(imageName));
+        HttpGet httpGet = new HttpGet(RemotePath.getProdutosImageURL(imageName));
         HttpResponse response = client.execute(httpGet);
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();

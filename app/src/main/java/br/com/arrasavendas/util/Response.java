@@ -1,11 +1,19 @@
-package br.com.arrasavendas;
+package br.com.arrasavendas.util;
 
 /**
  * Created by lsimaocosta on 27/12/15.
  */
-public class HttpResponse {
+public class Response {
     private String message;
     private int status;
+
+    public Response() {
+    }
+
+    public Response(String message, int status) {
+        this.message = message;
+        this.status = status;
+    }
 
     public String getMessage() {
         return message;

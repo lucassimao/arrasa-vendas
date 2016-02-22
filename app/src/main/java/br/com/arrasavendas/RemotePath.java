@@ -26,10 +26,13 @@ public enum RemotePath {
         return String.format("%s/%d", remotePath.getUrl(), id);
     }
 
-    public static String getFullImagePath(String imageName){
+    public static String getProdutosImageURL(String imageName){
         return Constants.host + "/images/produtos/"+ Uri.encode(imageName);
     }
 
+    public static String getAnexoImageURL(String imageName){
+        return Constants.host + "/images/anexos/"+ Uri.encode(imageName);
+    }
 
     public String getUrl() {
 		return url;

@@ -27,6 +27,7 @@ import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.MovimentoCaixa;
 import br.com.arrasavendas.model.TipoMovimento;
+import br.com.arrasavendas.util.Response;
 
 /**
  * Created by lsimaocosta on 15/02/16.
@@ -89,7 +90,7 @@ public class MovimentoCaixaDialog extends DialogFragment {
 
                             new SalvarMovimentoDeCaixaAsyncTask(mc, activity, new SalvarMovimentoDeCaixaAsyncTask.OnComplete() {
                                 @Override
-                                public void run(SalvarMovimentoDeCaixaAsyncTask.Response response) {
+                                public void run(Response response) {
                                     String msg = "Movimento salvo!";
 
                                     if (response.getStatus() != HttpURLConnection.HTTP_CREATED) {

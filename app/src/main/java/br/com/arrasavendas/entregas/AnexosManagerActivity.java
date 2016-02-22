@@ -1,6 +1,7 @@
 package br.com.arrasavendas.entregas;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -32,6 +33,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
@@ -85,12 +89,43 @@ public class AnexosManagerActivity extends ListActivity {
 
         String fileName = (String) this.anexosListAdapter.getItem(position);
         String fullPath = ImageFolder.ANEXOS.getPath(AnexosManagerActivity.this) + fileName;
-        File file = new File(fullPath);
+        final File file = new File(fullPath);
+        final AnexosManagerActivity ctx = this;
 
+        if (!file.exists()){
+            final Dialog progressDlg = ProgressDialog.show(this, "Baixando anexo", "Aguarde ...");
+
+            new DownloadAnexoAsyncTask(new DownloadAnexoAsyncTask.OnComplete() {
+                @Override
+                public void run(DownloadAnexoAsyncTask.HttpResponse response) {
+                    progressDlg.dismiss();
+
+                    if (response.getStatus() == HttpURLConnection.HTTP_OK ){
+                        try {
+                            FileOutputStream output = new FileOutputStream(file);
+                            output.write(response.getBytes());
+                            output.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        exibirArquivo(file);
+                    }else
+                        Toast.makeText(ctx,response.getMessage(),Toast.LENGTH_SHORT).show();
+
+                }
+            }).execute(fileName);
+
+        }else
+            exibirArquivo(file);
+
+
+    }
+
+    private void exibirArquivo(File  file) {
         String authority = "br.com.arrasavendas.fileprovider";
         Uri uriForFile = FileProvider.getUriForFile(this, authority, file);
 
-        String extension = MimeTypeMap.getFileExtensionFromUrl(fullPath);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -201,7 +236,7 @@ public class AnexosManagerActivity extends ListActivity {
 
             new UploadAnexoAsyncTask(this.vendaId, new UploadAnexoAsyncTask.OnComplete() {
                 @Override
-                public void run(UploadAnexoAsyncTask.Response response) {
+                public void run(UploadAnexoAsyncTask.ResponseUpload response) {
                     progressDlg.dismiss();
 
                     Toast.makeText(AnexosManagerActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
