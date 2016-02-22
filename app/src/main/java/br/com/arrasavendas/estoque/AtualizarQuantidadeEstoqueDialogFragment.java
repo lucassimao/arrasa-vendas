@@ -78,8 +78,8 @@ public class AtualizarQuantidadeEstoqueDialogFragment extends DialogFragment {
         });
 
 
-        Button btnAdicionar = (Button) dialog.findViewById(R.id.btnAdicionar);
-        btnAdicionar.setOnClickListener(new View.OnClickListener() {
+        Button btnSalvar = (Button) dialog.findViewById(R.id.btnSalvar);
+        btnSalvar.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {

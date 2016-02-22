@@ -30,10 +30,10 @@
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/btnAdicionar"
+            android:id="@+id/btnSalvar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Adicionar" />
+            android:text="Salvar" />
 
         <Button
             android:id="@+id/btnCancelar"
