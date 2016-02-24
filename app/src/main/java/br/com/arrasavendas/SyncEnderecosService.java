@@ -33,57 +33,58 @@ public class SyncEnderecosService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(":: SyncEnderecos :: ", "baixando os enderecos");
 
-        //TODO tratar a inexistencia do TOKEN
         Application app = (Application) getApplicationContext();
-        String accessToken = app.getAccessToken();
 
-        try {
+        if (app.isAuthenticated()) {
 
-            long lastTimestamp = getLastTimestamp();
+            try {
 
-            String serverUrl = RemotePath.EnderecosPath.getUrl();
-            String str = String.format("%s?lastDownloadedTimestamp=%d", serverUrl, lastTimestamp);
+                String accessToken = app.getAccessToken();
+                String login = app.getCurrentUser();
+                long lastTimestamp = getLastTimestamp();
+                String path = RemotePath.EnderecosPath.getUrl();
+                String url = String.format("%s?lastDownloadedTimestamp=%d&login=%s", path, lastTimestamp,login);
 
-            Log.d(":: SyncEnderecos :: ", "Timestamp do ultimo cliente: "+lastTimestamp);
+                Log.d(":: SyncEnderecos :: ", "Timestamp do ultimo cliente: " + lastTimestamp);
 
-            URL url = new URL(str);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-            //connection.setReadTimeout(15000);
-            connection.setConnectTimeout(1500);
-            connection.setDoInput(true);
-            connection.setDoOutput(false);
-            connection.setUseCaches(false);
-            connection.connect();
+                HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+                connection.setReadTimeout(15000);
+                connection.setConnectTimeout(1500);
+                connection.setDoInput(true);
+                connection.setDoOutput(false);
+                connection.setUseCaches(false);
+                connection.connect();
 
-            int responseCode = connection.getResponseCode();
+                int responseCode = connection.getResponseCode();
 
-            if (responseCode == HttpURLConnection.HTTP_OK) {
+                if (responseCode == HttpURLConnection.HTTP_OK) {
 
-                InputStream inputStream = connection.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                    InputStream inputStream = connection.getInputStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
+                    while ((line = rd.readLine()) != null) {
+                        sb.append(line);
+                    }
+
+                    JSONArray jsonArray = new JSONArray(sb.toString());
+                    Log.d(":: SyncEnderecos :: ", String.format("%d novos clientes", jsonArray.length()));
+                    if (jsonArray.length() > 0)
+                        salvarNovosEnderecos(jsonArray);
+
                 }
 
-                JSONArray jsonArray = new JSONArray(sb.toString());
-                Log.d(":: SyncEnderecos :: ", String.format("%d novos clientes",jsonArray.length()));
-                if (jsonArray.length() > 0)
-                    salvarNovosEnderecos(jsonArray);
-
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
