@@ -19,11 +19,9 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //TODO tratar a inexistencia do TOKEN
         Application app = (Application) getApplication();
-        String accessToken = app.getAccessToken();
 
-        if (accessToken != null) {
+        if (app.isAuthenticated()) {
             showMainActivity();
             finish();
         } else {

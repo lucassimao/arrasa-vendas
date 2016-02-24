@@ -3,12 +3,8 @@ package br.com.arrasavendas;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.text.TextUtils;
 
-import br.com.arrasavendas.model.FinanceiroDAO;
-import br.com.arrasavendas.providers.DownloadedImagesProvider;
-import br.com.arrasavendas.providers.EstoqueProvider;
-import br.com.arrasavendas.providers.VendasProvider;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -25,6 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.Normalizer;
+
+import br.com.arrasavendas.model.FinanceiroDAO;
+import br.com.arrasavendas.providers.DownloadedImagesProvider;
+import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.providers.VendasProvider;
 
 public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
 
@@ -46,14 +47,17 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
         try {
 
             String jsonString = downloadJSON();
-            switch(this.feed){
-                case EstoquePath:
-                case VendaPath:
-                    salvarJSON(jsonString);
-                    break;
-                case CaixaPath:
-                    exportarInformacoesDoCaixa(jsonString);
-                    break;
+            if (!TextUtils.isEmpty(jsonString)) {
+
+                switch (this.feed) {
+                    case EstoquePath:
+                    case VendaPath:
+                        salvarJSON(jsonString);
+                        break;
+                    case CaixaPath:
+                        exportarInformacoesDoCaixa(jsonString);
+                        break;
+                }
             }
 
         } catch (IOException e) {
@@ -61,8 +65,8 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return null;
 
+        return null;
     }
 
     private void exportarInformacoesDoCaixa(String jsonString) {
@@ -153,32 +157,33 @@ public class DownloadJSONFeedTask extends AsyncTask<Void, Void, Void> {
 
     private String downloadJSON() throws IOException {
 
-        //TODO tratar a inexistencia do TOKEN
         Application app = (Application) ctx.getApplicationContext();
-        String accessToken = app.getAccessToken();
 
-        HttpClient client = new DefaultHttpClient();
+        if (app.isAuthenticated()) {
+            String accessToken = app.getAccessToken();
 
-        HttpGet httpGet = new HttpGet(this.feed.getUrl());
-        httpGet.setHeader("Accept", "application/json");
-        httpGet.setHeader("Authorization", "Bearer " + accessToken);
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(this.feed.getUrl());
+            httpGet.setHeader("Accept", "application/json");
+            httpGet.setHeader("Authorization", "Bearer " + accessToken);
 
-        HttpResponse response = client.execute(httpGet);
-        StatusLine statusLine = response.getStatusLine();
-        int statusCode = statusLine.getStatusCode();
+            HttpResponse response = client.execute(httpGet);
+            StatusLine statusLine = response.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
 
-        if (statusCode == HttpStatus.SC_OK) {
-            StringBuilder stringBuilder = new StringBuilder();
-            HttpEntity entity = response.getEntity();
-            InputStream content = entity.getContent();
-            BufferedReader reader;
-            reader = new BufferedReader(new InputStreamReader(content));
-            String line;
+            if (statusCode == HttpStatus.SC_OK) {
+                StringBuilder stringBuilder = new StringBuilder();
+                HttpEntity entity = response.getEntity();
+                InputStream content = entity.getContent();
+                BufferedReader reader;
+                reader = new BufferedReader(new InputStreamReader(content));
+                String line;
 
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+                return stringBuilder.toString();
             }
-            return stringBuilder.toString();
         }
         return null;
 

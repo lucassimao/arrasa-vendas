@@ -58,6 +58,10 @@ public class Application extends android.app.Application {
         return  (!TextUtils.isEmpty(currentRoles) && currentRoles.contains("ROLE_ADMIN"));
     }
 
+    public boolean isAuthenticated(){
+        return !TextUtils.isEmpty(this.accessToken);
+    }
+
     public String getRoles(){return this.roles; };
 
     private void loadAuthenticationInfo() {
