@@ -148,6 +148,8 @@ public class EntregasActivity extends Activity{
                         } else if (statusCode == HttpStatus.SC_OK) {
                             vendaSelecionada.setDataEntrega(novaDataDeEntrega.getTime());
                             vendasListAdapter.atualizarDatasDeEntregas();
+                            vendasListAdapter.notifyDataSetChanged();
+                            actionMode.finish();
                             Toast.makeText(EntregasActivity.this, "Data de entrega atualizada com sucesso!", Toast.LENGTH_LONG).show();
 
                         } else {
