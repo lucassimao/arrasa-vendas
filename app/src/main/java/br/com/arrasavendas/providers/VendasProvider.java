@@ -26,6 +26,7 @@ public class VendasProvider extends ContentProvider {
     public final static String CLIENTE = "cliente";
     public final static String TURNO_ENTREGA = "turno";
     public static final String CARRINHO = "carrinho";
+    public static final String LAST_UPDATED_TIMESTAMP = "last_updated_timestamp";
     public static final String ANEXOS_JSON_ARRAY = "anexos_json_array";
 
     private static final UriMatcher uriMatcher;
@@ -49,7 +50,7 @@ public class VendasProvider extends ContentProvider {
         switch (uriMatcher.match(uri)) {
 
             case VENDAS:
-                arrasaVendasDb.delete(DatabaseHelper.TABLE_VENDAS, null, null);
+                count = arrasaVendasDb.delete(DatabaseHelper.TABLE_VENDAS, selection, selectionArgs);
                 break;
             case VENDA_ID:
                 String id = uri.getPathSegments().get(1);
@@ -63,7 +64,9 @@ public class VendasProvider extends ContentProvider {
                 throw new IllegalArgumentException("URI Desconhecida: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        if (count > 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
         return count;
     }
 

@@ -31,6 +31,8 @@ public class EstoqueProvider extends ContentProvider {
     public final static String QUANTIDADE = "quantidade";
     public final static String PRECO_A_VISTA = "prevoAVista";
     public final static String PRECO_A_PRAZO = "prevoAPrazo";
+    public final static String LAST_UPDATED_TIMESTAMP = "last_updated_timestamp";
+
 
     private static final UriMatcher uriMatcher;
     private static final int ESTOQUE_ALL = 1;

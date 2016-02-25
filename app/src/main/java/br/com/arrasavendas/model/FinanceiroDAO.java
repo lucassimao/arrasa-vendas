@@ -28,12 +28,17 @@ import br.com.arrasavendas.DatabaseHelper;
 public class FinanceiroDAO implements Serializable {
 
     private final String COLUMN_JSON = "json";
+
     private transient SQLiteDatabase db;
     private transient JSONObject obj;
-    private String[] vendedores;
 
     public FinanceiroDAO(Context ctx) {
         this.db = new DatabaseHelper(ctx).getWritableDatabase();
+    }
+
+    public void close(){
+        if(this.db != null)
+            this.db.close();
     }
 
     public void deleteAll() {
@@ -48,7 +53,6 @@ public class FinanceiroDAO implements Serializable {
 
     public long getTotalEmDinheiro(String usernameVendedor) {
         try {
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
             return vendedor.getLong("dinheiro");
 
@@ -60,7 +64,6 @@ public class FinanceiroDAO implements Serializable {
 
     public long getTotalNoCartao(String usernameVendedor) {
         try {
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
             return vendedor.getLong("cartao");
 
@@ -72,7 +75,6 @@ public class FinanceiroDAO implements Serializable {
 
     public Integer getBonus(String usernameVendedor) {
         try {
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
             if (vendedor.has("strikes")) {
                 JSONArray strikes = vendedor.getJSONArray("strikes");
@@ -87,7 +89,6 @@ public class FinanceiroDAO implements Serializable {
 
     public long getSalario(String usernameVendedor) {
         try {
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
             return vendedor.getLong("salario");
 
@@ -97,17 +98,20 @@ public class FinanceiroDAO implements Serializable {
         return 0;
     }
 
-    private JSONObject getJSONObject() {
+    private final JSONObject getJSONObject() {
         if (this.obj == null) {
             String[] projections = {COLUMN_JSON};
             Cursor cursor = db.query(DatabaseHelper.TABLE_FINANCEIRO, projections, null, null, null, null, null);
+
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 String json = cursor.getString(cursor.getColumnIndex(COLUMN_JSON));
+
                 try {
                     this.obj = new JSONObject(json);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    return null;
                 }
             }
             cursor.close();
@@ -121,7 +125,6 @@ public class FinanceiroDAO implements Serializable {
         Map<String, HistoricoDetail> map = new LinkedHashMap<>();
 
         try {
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
             JSONObject historico = vendedor.getJSONObject("historico");
             Iterator<String> keys = historico.keys();
@@ -138,15 +141,14 @@ public class FinanceiroDAO implements Serializable {
         return map;
     }
 
-    private JSONObject getVendedor(String usernameVendedor) throws JSONException {
-        JSONObject vendedores = obj.getJSONObject("vendedores");
+    private final JSONObject getVendedor(String usernameVendedor) throws JSONException {
+        JSONObject vendedores = getJSONObject().getJSONObject("vendedores");
         return vendedores.getJSONObject(usernameVendedor);
     }
 
     public List<String> getStrikes(String usernameVendedor) {
         try {
 
-            JSONObject obj = getJSONObject();
             JSONObject vendedor = getVendedor(usernameVendedor);
 
             if (!vendedor.has("strikes"))
@@ -232,6 +234,19 @@ public class FinanceiroDAO implements Serializable {
             e.printStackTrace();
         }
         return movimentos;
+    }
+
+    public Long lastUpdated() {
+        try {
+            JSONObject obj = getJSONObject();
+            if (obj != null)
+                return obj.getLong("last_updated");
+            else
+                return 0L;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return 0L;
     }
 
     public class HistoricoDetail {

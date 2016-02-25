@@ -10,6 +10,7 @@ import android.view.MenuItem;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.model.FinanceiroDAO;
 
 /**
  * Created by lsimaocosta on 08/02/16.
@@ -21,6 +22,7 @@ public class FinanceiroActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
     private FinanceiroPagerAdapter pagerAdapter;
+    private FinanceiroDAO dao;
 
 
     @Override
@@ -29,7 +31,8 @@ public class FinanceiroActivity extends AppCompatActivity {
         setContentView(R.layout.financeiro_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        pagerAdapter = new FinanceiroPagerAdapter(getSupportFragmentManager());
+        this.dao = new FinanceiroDAO(this);
+        pagerAdapter = new FinanceiroPagerAdapter(getSupportFragmentManager(),dao);
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
 
@@ -38,6 +41,12 @@ public class FinanceiroActivity extends AppCompatActivity {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        this.dao.close();
     }
 
     @Override

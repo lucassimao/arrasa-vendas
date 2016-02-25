@@ -203,7 +203,7 @@ public class EditItensVendaActivity extends Activity {
 
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     // atualizando o estoque e a lista de vendas
-                    new DownloadJSONFeedTask(RemotePath.EstoquePath, EditItensVendaActivity.this, null).execute();
+                    new DownloadJSONFeedTask(EditItensVendaActivity.this, null).execute(RemotePath.EstoquePath);
 
                     ContentValues cv = new ContentValues();
                     JSONArray array = new JSONArray();

@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 
         if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH,true)){
             prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH,false).commit();
-            new DownloadJSONFeedTask(RemotePath.EstoquePath, this,null).execute();
+            new DownloadJSONFeedTask(this,null).execute(RemotePath.EstoquePath);
             Utilities.registrarSyncEnderecoAlarm(this);
         }
     }
@@ -107,20 +107,20 @@ public class MainActivity extends Activity {
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
 
-        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
                 progressDlg.dismiss();
                 startEstoqueActivity();
             }
-        }).execute();
+        }).execute(RemotePath.EstoquePath);
 
     }
 
     public void onClickBtnNovaVenda(View v) {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
@@ -129,14 +129,14 @@ public class MainActivity extends Activity {
                 startActivity(i);
 
             }
-        }).execute();
+        }).execute(RemotePath.EstoquePath);
 
 
     }
 
     public void onClickBtnEntregas(View v) {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.VendaPath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
@@ -145,12 +145,12 @@ public class MainActivity extends Activity {
                 startActivity(i);
 
             }
-        }).execute();
+        }).execute(RemotePath.VendaPath);
     }
 
     public void onClickBtnFinanceiro(View v){
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.CaixaPath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
                 startActivity(i);
 
             }
-        }).execute();
+        }).execute(RemotePath.CaixaPath);
 
 
     }

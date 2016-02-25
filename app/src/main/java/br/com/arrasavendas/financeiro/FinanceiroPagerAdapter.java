@@ -12,21 +12,19 @@ class FinanceiroPagerAdapter extends FragmentPagerAdapter {
 
     private String[] tabTitles;
     private FinanceiroDAO dao;
-    private boolean isAdmin = false;
     public static final String FINANCEIRO_DAO = "FINANCEIRO_DAO";
 
 
-    public FinanceiroPagerAdapter(FragmentManager fm) {
+    public FinanceiroPagerAdapter(FragmentManager fm,FinanceiroDAO dao) {
         super(fm);
 
-        dao = new FinanceiroDAO(Application.context());
+        this.dao = dao;
         Application app = Application.getInstance();
-        String username = app.getCurrentUser();
-        this.isAdmin = app.isAdmin();
 
-        if (!isAdmin)
+        if (!app.isAdmin()) {
+            String username = app.getCurrentUser();
             tabTitles = new String[]{username};
-        else{
+        }else{
             String[] vendedores = dao.getVendedores();
             tabTitles = new String[vendedores.length+1];
             int i = 0;

@@ -191,7 +191,7 @@ public class EstoqueActivity extends Activity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(RemotePath.EstoquePath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
@@ -202,7 +202,7 @@ public class EstoqueActivity extends Activity {
                 list.setAdapter(estoqueListAdapter);
 
             }
-        }).execute();
+        }).execute(RemotePath.EstoquePath);
     }
 
 }

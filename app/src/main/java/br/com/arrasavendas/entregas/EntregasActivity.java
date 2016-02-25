@@ -142,7 +142,7 @@ public class EntregasActivity extends Activity{
                         int statusCode = response.getStatusLine().getStatusCode();
 
                         if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                            String string = "Erro ao atualizar activity_venda, verifique se todos os campos foram preenchidos!";
+                            String string = "Erro ao atualizar venda, verifique se todos os campos foram preenchidos!";
                             Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
 
                         } else if (statusCode == HttpStatus.SC_OK) {
@@ -272,7 +272,7 @@ public class EntregasActivity extends Activity{
 
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
         vendasListAdapter.setCursor(null);
-        new DownloadJSONFeedTask(RemotePath.VendaPath, this, new Runnable() {
+        new DownloadJSONFeedTask(this, new Runnable() {
 
             @Override
             public void run() {
@@ -280,7 +280,7 @@ public class EntregasActivity extends Activity{
                 getLoaderManager().restartLoader(ENTREGAS_LOADER, null, entregasCursorCallback);
 
             }
-        }).execute();
+        }).execute(RemotePath.VendaPath);
     }
 
     @Override

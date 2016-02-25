@@ -1,10 +1,12 @@
 package br.com.arrasavendas.entregas;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;

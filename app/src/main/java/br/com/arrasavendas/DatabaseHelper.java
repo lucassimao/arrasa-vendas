@@ -7,21 +7,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 54;
+	private static final int DATABASE_VERSION = 57;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String CREATE_TABLE_VENDAS = "create table "
 			+ TABLE_VENDAS
 			+ "(_id integer primary key, vendedor_id integer not null, carrinho text not null,"
 			+ " data_entrega integer not null, forma_pagamento text null,status text null," +
-			"turno text null, cliente text not null, anexos_json_array text);";
+			"turno text null, cliente text not null, anexos_json_array text," +
+			"last_updated_timestamp integer);";
 
 	public static final String TABLE_ESTOQUE = "ESTOQUE";
 	private static final String CREATE_TABLE_ESTOQUE = "create table "
 			+ TABLE_ESTOQUE
 			+ "(_id integer primary key, produto_nome text not null, produto_nome_ascii text not null," +
 			"produto_id integer not null,prevoAVista REAL,prevoAPrazo REAL, " +
-			"unidade text not null, quantidade integer not null);";
+			"unidade text not null, quantidade integer not null, last_updated_timestamp integer);";
 
 	private static final String CREATE_INDEX_PRODUTO_ID = "CREATE INDEX produto_idx on ESTOQUE(produto_id);";
 
@@ -48,7 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String TABLE_FINANCEIRO = "FINANCEIRO";
 	private static final String CREATE_TABLE_FINANCEIRO = "create table "
 			+ TABLE_FINANCEIRO
-			+ "(_id integer primary key, json text not null, data_created_timestamp integer)";
+			+ "(_id integer primary key, json text not null)";
 
     public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
