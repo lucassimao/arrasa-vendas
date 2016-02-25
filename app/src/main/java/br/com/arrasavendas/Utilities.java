@@ -71,7 +71,7 @@ public class Utilities {
     }
 
     public static void registrarSyncEnderecoAlarm(Context context) {
-        long INTERVAL_3_HOURS = AlarmManager.INTERVAL_HOUR*3;
+        long INTERVAL_3_HOURS = AlarmManager.INTERVAL_HOUR * 3;
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SyncEnderecosService.class);
         PendingIntent alarmIntent = PendingIntent.getService(context, 0, intent, 0);
@@ -87,33 +87,26 @@ public class Utilities {
      * @param uri
      * @return path completo para o arquivo na pasta local
      */
-    public static String salvarImagem(Context ctx, ImageFolder folder, String imageName, Uri uri) {
+    public static String salvarImagem(Context ctx, ImageFolder folder, String imageName, Uri uri) throws IOException {
         File file = new File(folder.getPath(ctx) + File.separator + imageName);
         ContentResolver contentResolver = ctx.getContentResolver();
 
-        try {
-            InputStream inputStream = contentResolver.openInputStream(uri);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[4 * 1024];
-            int read = 0;
+        InputStream inputStream = contentResolver.openInputStream(uri);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4 * 1024];
+        int read = 0;
 
-            while ((read = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, read);
-            }
-
-            FileOutputStream output = new FileOutputStream(file);
-            output.write(outputStream.toByteArray());
-            output.close();
-            inputStream.close();
-
-            return file.getAbsolutePath();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        while ((read = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, read);
         }
-        return null;
+
+        FileOutputStream output = new FileOutputStream(file);
+        output.write(outputStream.toByteArray());
+        output.close();
+        inputStream.close();
+
+        return file.getAbsolutePath();
+
     }
 
     /**

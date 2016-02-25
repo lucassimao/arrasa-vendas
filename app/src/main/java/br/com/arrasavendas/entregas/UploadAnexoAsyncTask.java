@@ -13,6 +13,7 @@ import br.com.arrasavendas.Application;
 import br.com.arrasavendas.MultipartUtility;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.util.Response;
 
 
 public class UploadAnexoAsyncTask extends AsyncTask<Uri, Void, UploadAnexoAsyncTask.ResponseUpload> {
@@ -48,11 +49,12 @@ public class UploadAnexoAsyncTask extends AsyncTask<Uri, Void, UploadAnexoAsyncT
             MultipartUtility mu = new MultipartUtility(path, "UTF-8", accessToken);
             mu.addFilePart("anexo", newfileName, inputStream, type);
 
-            br.com.arrasavendas.util.Response httpResponse = mu.finish();
+            Response httpResponse = mu.finish();
             return new ResponseUpload(httpResponse.getMessage(), httpResponse.getStatus(), newfileName);
+
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return new ResponseUpload(e.getMessage(),-1,null);
         }
 
     }

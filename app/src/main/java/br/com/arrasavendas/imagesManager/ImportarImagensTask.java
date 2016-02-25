@@ -12,6 +12,7 @@ import android.os.Build;
 import android.provider.OpenableColumns;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,9 +63,14 @@ public class ImportarImagensTask extends AsyncTask<Intent, Void, Integer> {
         for (Uri uri : uris) {
 
             String imageFileName = getImageFileName(uri);
-            String localPath = Utilities.salvarImagem(this.ctx, Utilities.ImageFolder.PRODUTOS, imageFileName, uri);
+            String localPath = null;
 
-            saveNewImage(imageFileName, localPath);
+            try {
+                localPath = Utilities.salvarImagem(this.ctx, Utilities.ImageFolder.PRODUTOS, imageFileName, uri);
+                saveNewImage(imageFileName, localPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }
         return uris.size();
