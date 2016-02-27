@@ -3,13 +3,16 @@ package br.com.arrasavendas.financeiro;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -39,11 +42,15 @@ public class MovimentoCaixaDialog extends DialogFragment {
     private RadioGroup radioGrpTipoMovimento, radioGrpFormaPagamento;
     private EditText edtTxtValor;
     private Date data;
+    private FinanceiroDAO dao;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        Bundle args = getArguments();
+        this.dao = (FinanceiroDAO) args.get(FinanceiroActivity.FINANCEIRO_DAO);
 
         final View view = inflater.inflate(R.layout.movimento_caixa_dialog, null);
         edtTxtDescricao = (EditText) view.findViewById(R.id.editTxtDescricao);
@@ -56,62 +63,85 @@ public class MovimentoCaixaDialog extends DialogFragment {
         edtTxtValor = (EditText) view.findViewById(R.id.editTxtValor);
 
 
-        builder.setView(view).setTitle("Lançar Movimentos")
-                .setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (validarCampos()) {
-                            MovimentoCaixa mc = new MovimentoCaixa();
-                            mc.setData(data);
-                            mc.setDescricao(edtTxtDescricao.getText().toString());
-
-                            switch (radioGrpTipoMovimento.getCheckedRadioButtonId()) {
-                                case R.id.radioTipoMovimentoPositivo:
-                                    mc.setTipoMovimento(TipoMovimento.POSITIVO);
-                                    break;
-                                case R.id.radioTipoMovimentoNegativo:
-                                    mc.setTipoMovimento(TipoMovimento.NEGATIVO);
-                                    break;
-                            }
-
-                            switch (radioGrpFormaPagamento.getCheckedRadioButtonId()) {
-                                case R.id.radioFormaPagamentoAVista:
-                                    mc.setFormaPagamento(FormaPagamento.AVista);
-                                    break;
-                                case R.id.radioFormaPagamentoParcelado:
-                                    mc.setFormaPagamento(FormaPagamento.PagSeguro);
-                                    break;
-                            }
-
-                            mc.setValor(new BigDecimal(edtTxtValor.getText().toString()));
-                            mc.setFormaPagamento(FormaPagamento.AVista);
-
-                            final FragmentActivity activity = getActivity();
-
-                            new SalvarMovimentoDeCaixaAsyncTask(mc, activity, new SalvarMovimentoDeCaixaAsyncTask.OnComplete() {
-                                @Override
-                                public void run(Response response) {
-                                    String msg = "Movimento salvo!";
-
-                                    if (response.getStatus() != HttpURLConnection.HTTP_CREATED) {
-                                        msg = String.format("Erro ao salvar movimento: %s (%d)",
-                                                response.getMessage(), response.getStatus());
-                                    }
-                                    Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-
-                                }
-                            }).execute();
-                        }
-                    }
-                })
+        final AlertDialog d = new AlertDialog.Builder(getActivity()).setView(view).setTitle("Lançar Movimentos")
+                .setPositiveButton("Salvar", null)
                 .setNegativeButton("Cancelar",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dismiss();
                             }
-                        });
+                        }).create();
 
-        return builder.create();
+        d.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+
+                Button b = d.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if (validarCampos()) {
+                            final MovimentoCaixa mc = getMovimentoCaixa();
+                            final FragmentActivity activity = getActivity();
+                            final ProgressDialog progressDialog = ProgressDialog.show(activity, "Salvando Movimento", "Aguarde ...");
+
+                            new SalvarMovimentoDeCaixaAsyncTask(mc, activity, new SalvarMovimentoDeCaixaAsyncTask.OnComplete() {
+                                @Override
+                                public void run(Response response) {
+                                    progressDialog.dismiss();
+                                    d.dismiss();
+
+                                    String msg = "Movimento salvo!";
+                                    if (response.getStatus() == HttpURLConnection.HTTP_CREATED) {
+                                        dao.addMovimento(mc, response.getLastModified());
+                                    } else {
+                                        msg = String.format("Erro ao salvar movimento: %s (%d)",
+                                                response.getMessage(), response.getStatus());
+                                    }
+                                    Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+
+
+                                }
+                            }).execute();
+                        }
+                    }
+                });
+
+            }
+        });
+
+
+        return d;
+    }
+
+    @NonNull
+    private MovimentoCaixa getMovimentoCaixa() {
+        final MovimentoCaixa mc = new MovimentoCaixa();
+        mc.setData(data);
+        mc.setDescricao(edtTxtDescricao.getText().toString());
+
+        switch (radioGrpTipoMovimento.getCheckedRadioButtonId()) {
+            case R.id.radioTipoMovimentoPositivo:
+                mc.setTipoMovimento(TipoMovimento.POSITIVO);
+                break;
+            case R.id.radioTipoMovimentoNegativo:
+                mc.setTipoMovimento(TipoMovimento.NEGATIVO);
+                break;
+        }
+
+        switch (radioGrpFormaPagamento.getCheckedRadioButtonId()) {
+            case R.id.radioFormaPagamentoAVista:
+                mc.setFormaPagamento(FormaPagamento.AVista);
+                break;
+            case R.id.radioFormaPagamentoParcelado:
+                mc.setFormaPagamento(FormaPagamento.PagSeguro);
+                break;
+        }
+
+        mc.setValor(new BigDecimal(edtTxtValor.getText().toString()));
+        mc.setFormaPagamento(FormaPagamento.AVista);
+        return mc;
     }
 
     private boolean validarCampos() {
@@ -119,7 +149,7 @@ public class MovimentoCaixaDialog extends DialogFragment {
             Toast.makeText(getActivity(), "Informe a descrição", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (TextUtils.isEmpty(txtViewData.getText())) {
+        if (data == null) {
             Toast.makeText(getActivity(), "Informe a data do movimento", Toast.LENGTH_SHORT).show();
             return false;
         }

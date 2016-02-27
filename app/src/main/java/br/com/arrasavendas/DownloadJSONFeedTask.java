@@ -26,8 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.Normalizer;
 
-import br.com.arrasavendas.model.FinanceiroDAO;
-import br.com.arrasavendas.providers.ClientesProvider;
+import br.com.arrasavendas.financeiro.FinanceiroDAO;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;

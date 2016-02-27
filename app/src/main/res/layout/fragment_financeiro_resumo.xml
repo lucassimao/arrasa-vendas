@@ -91,43 +91,6 @@
             android:layout_width="match_parent"
             android:id="@+id/table"
             android:layout_height="wrap_content">
-
-            <TableRow android:paddingTop="5dp">
-
-                <TextView
-                    android:background="@drawable/cell_shape"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="?android:textColorPrimary"
-                    android:layout_height="wrap_content"
-                    android:text="Movimento" />
-
-                <TextView
-                    android:background="@drawable/cell_shape"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="?android:textColorPrimary"
-                    android:layout_height="wrap_content"
-                    android:text="Tipo" />
-
-                <TextView
-                    android:background="@drawable/cell_shape"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="?android:textColorPrimary"
-                    android:layout_height="wrap_content"
-                    android:text="Data" />
-
-                <TextView
-                    android:background="@drawable/cell_shape"
-                    android:paddingRight="5dp"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="?android:textColorPrimary"
-                    android:layout_height="wrap_content"
-                    android:text="Valor" />
-            </TableRow>
-
         </TableLayout>
     </ScrollView>
 

@@ -13,6 +13,7 @@ import java.util.Locale;
  * Created by lsimaocosta on 19/02/16.
  */
 public class MovimentoCaixa {
+
     private String descricao;
     private TipoMovimento tipoMovimento;
     private Date data;
@@ -20,7 +21,7 @@ public class MovimentoCaixa {
     private BigDecimal valor;
 
     public MovimentoCaixa(JSONObject jsonObject) {
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat df = new SimpleDateFormat("MMddyyyy");
 
         try {
             descricao = jsonObject.getString("descricao");
@@ -83,7 +84,7 @@ public class MovimentoCaixa {
     }
 
     public JSONObject toJSONObject() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("MMddyyyy", Locale.getDefault());
 
         JSONObject obj = new JSONObject();
         try {

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.model.FinanceiroDAO;
 
 /**
  * Created by lsimaocosta on 11/02/16.

@@ -1,9 +1,10 @@
-package br.com.arrasavendas.model;
+package br.com.arrasavendas.financeiro;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,13 +20,15 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
 import br.com.arrasavendas.DatabaseHelper;
+import br.com.arrasavendas.model.MovimentoCaixa;
 
 /**
  * Created by lsimaocosta on 09/02/16.
  */
-public class FinanceiroDAO implements Serializable {
+public class FinanceiroDAO extends Observable implements Serializable {
 
     private final String COLUMN_JSON = "json";
 
@@ -234,6 +237,29 @@ public class FinanceiroDAO implements Serializable {
             e.printStackTrace();
         }
         return movimentos;
+    }
+
+    public boolean addMovimento(MovimentoCaixa mc,long lastUpdatedTimestamp){
+        try {
+            JSONObject obj = getJSONObject();
+            JSONArray movs = obj.getJSONArray("movimentos");
+            movs.put(mc.toJSONObject());
+
+            // atualizando o last_updated das informações financeiras
+            obj.put("last_updated",lastUpdatedTimestamp);
+
+            deleteAll();
+            save(obj.toString());
+            setChanged();
+            notifyObservers();
+
+            return true;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+
     }
 
     public Long lastUpdated() {

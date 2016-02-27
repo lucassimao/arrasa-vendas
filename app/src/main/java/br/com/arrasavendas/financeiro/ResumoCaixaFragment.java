@@ -14,7 +14,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.model.FinanceiroDAO;
 import br.com.arrasavendas.model.MovimentoCaixa;
 
 /**
@@ -42,23 +41,9 @@ public class ResumoCaixaFragment extends Fragment {
         textViewTotalNoCartao = (TextView) rootView.findViewById(R.id.textViewTotalNoCartao);
         textViewTotal = (TextView) rootView.findViewById(R.id.textViewTotal);
         textViewMovimentos = (TextView) rootView.findViewById(R.id.textViewMovimentos);
-
         table = (TableLayout) rootView.findViewById(R.id.table);
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        NumberFormat nf = NumberFormat.getCurrencyInstance();
 
-        BigDecimal totalVencimentos = BigDecimal.ZERO;
-        for(MovimentoCaixa b : dao.getMovimentos())
-        {
-            totalVencimentos = totalVencimentos.add(b.getValor());
-            TableRow row = (TableRow) inflater.inflate(R.layout.table_row_movimentos, null);
-            ((TextView)row.findViewById(R.id.descricao)).setText(b.getDescricao());
-            ((TextView)row.findViewById(R.id.tipo)).setText(b.getTipoMovimento().toString());
-            ((TextView)row.findViewById(R.id.data)).setText(df.format(b.getData()));
-            ((TextView)row.findViewById(R.id.valor)).setText(nf.format(b.getValor()));
-
-            table.addView(row);
-        }
+        atualizarMovimentos(dao);
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
@@ -71,9 +56,37 @@ public class ResumoCaixaFragment extends Fragment {
         long total = totalEmDinheiro + totalNoCartao;
         textViewTotal.setText(formatter.format(total / 100.0));
 
+        return rootView;
+    }
+
+    void atualizarMovimentos(FinanceiroDAO dao) {
+
+        table.removeAllViews();
+
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
+        TableRow header = (TableRow) inflater.inflate(R.layout.table_header_movimentos, null);
+        table.addView(header);
+
+
+        BigDecimal totalVencimentos = BigDecimal.ZERO;
+
+        for (MovimentoCaixa b : dao.getMovimentos()) {
+            totalVencimentos = totalVencimentos.add(b.getValor());
+            TableRow row = (TableRow) inflater.inflate(R.layout.table_row_movimentos, null);
+            ((TextView) row.findViewById(R.id.descricao)).setText(b.getDescricao());
+            ((TextView) row.findViewById(R.id.tipo)).setText(b.getTipoMovimento().toString());
+            ((TextView) row.findViewById(R.id.data)).setText(df.format(b.getData()));
+            ((TextView) row.findViewById(R.id.valor)).setText(nf.format(b.getValor()));
+
+            table.addView(row);
+        }
+
         textViewMovimentos.setText(formatter.format(totalVencimentos));
 
-        return rootView;
     }
 }
 

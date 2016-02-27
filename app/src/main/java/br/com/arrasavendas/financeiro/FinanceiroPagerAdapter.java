@@ -6,11 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import br.com.arrasavendas.Application;
-import br.com.arrasavendas.model.FinanceiroDAO;
 
 class FinanceiroPagerAdapter extends FragmentPagerAdapter {
 
+    private final static String RESUMO_TAB = "Resumo";
     private String[] tabTitles;
+    private Fragment[] fragments;
     private FinanceiroDAO dao;
     public static final String FINANCEIRO_DAO = "FINANCEIRO_DAO";
 
@@ -31,28 +32,35 @@ class FinanceiroPagerAdapter extends FragmentPagerAdapter {
             for(String v : vendedores)
                 tabTitles[i++] = v;
 
-            tabTitles[i] = "Resumo";
+            tabTitles[i] = RESUMO_TAB;
         }
+
+        fragments = new Fragment[tabTitles.length];
 
     }
 
     @Override
     public Fragment getItem(int position) {
-        Fragment fragment = null;
-        Bundle args = new Bundle();
-        args.putSerializable(FINANCEIRO_DAO, dao);
 
-        if (!tabTitles[position].equals("Resumo")){
-            fragment = new VendedorFragment();
-            args.putString(VendedorFragment.USERNAME, tabTitles[position]);
+        if (fragments[position] == null){
+
+            Fragment fragment = null;
+            Bundle args = new Bundle();
+            args.putSerializable(FINANCEIRO_DAO, dao);
+
+            if (!tabTitles[position].equals(RESUMO_TAB)){
+                fragment = new VendedorFragment();
+                args.putString(VendedorFragment.USERNAME, tabTitles[position]);
+            }else{
+                fragment = new ResumoCaixaFragment();
+            }
+
             fragment.setArguments(args);
-        }else{
-            fragment = new ResumoCaixaFragment();
-            fragment.setArguments(args);
+
+            fragments[position] = fragment;
         }
 
-
-        return fragment;
+        return fragments[position];
     }
 
     @Override
@@ -64,13 +72,13 @@ class FinanceiroPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        String username = tabTitles[position];
-        int idx = username.indexOf('@');
+        String pageTitle = tabTitles[position];
+        int idx = pageTitle.indexOf('@');
 
         if (idx != -1)
-            return username.substring(0, idx);
+            return pageTitle.substring(0, idx);
         else
-            return username;
+            return pageTitle;
     }
 
 }

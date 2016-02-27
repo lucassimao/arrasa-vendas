@@ -2,6 +2,8 @@ package br.com.arrasavendas.financeiro;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -64,8 +66,17 @@ public class SalvarMovimentoDeCaixaAsyncTask extends AsyncTask<Void, Void, Respo
             dos.flush();
             dos.close();
 
-            Response response = new Response(httpConnection.getResponseMessage(),
-                    httpConnection.getResponseCode());
+            for(String s :httpConnection.getHeaderFields().keySet())
+                Log.d("HEADERS",s + ": " + httpConnection.getHeaderField(s));
+
+            String headerField = httpConnection.getHeaderField("Last-Modified");
+            long lastModifiedTimestamp = 0;
+            if (!TextUtils.isEmpty(headerField))
+                lastModifiedTimestamp = Long.valueOf(headerField);
+
+            String message = httpConnection.getResponseMessage();
+            int responseCode = httpConnection.getResponseCode();
+            Response response = new Response(message,responseCode,lastModifiedTimestamp);
 
             httpConnection.disconnect();
 

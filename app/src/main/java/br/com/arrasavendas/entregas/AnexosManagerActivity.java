@@ -114,10 +114,10 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
                             FileOutputStream output = new FileOutputStream(file);
                             output.write(response.getBytes());
                             output.close();
+                            exibirAnexo(file);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        exibirAnexo(file);
                     } else
                         Toast.makeText(ctx, response.getMessage(), Toast.LENGTH_SHORT).show();
 
@@ -176,7 +176,6 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
                     new UpdateVendaAsyncTask(vendaId, venda, new UpdateVendaAsyncTask.OnComplete() {
                         @Override
                         public void run(HttpResponse response) {
-
                             dao.delete(position);
                             anexosListAdapter.setAnexos(dao.list());
                             Toast.makeText(AnexosManagerActivity.this, "Imagem excluida", Toast.LENGTH_SHORT).show();
@@ -185,6 +184,8 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Toast.makeText(AnexosManagerActivity.this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
                 }
 
             }

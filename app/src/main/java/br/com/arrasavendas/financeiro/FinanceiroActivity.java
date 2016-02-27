@@ -1,25 +1,31 @@
 package br.com.arrasavendas.financeiro;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.model.FinanceiroDAO;
 
 /**
  * Created by lsimaocosta on 08/02/16.
  * <p/>
  * http://alexzh.com/tutorials/tablayout-android-design-support-library/
  */
-public class FinanceiroActivity extends AppCompatActivity {
+public class FinanceiroActivity extends AppCompatActivity implements Observer {
 
 
+    static final String FINANCEIRO_DAO = "FINANCEIRO_DAO";
     private ViewPager mViewPager;
     private FinanceiroPagerAdapter pagerAdapter;
     private FinanceiroDAO dao;
@@ -32,7 +38,8 @@ public class FinanceiroActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         this.dao = new FinanceiroDAO(this);
-        pagerAdapter = new FinanceiroPagerAdapter(getSupportFragmentManager(),dao);
+        this.dao.addObserver(this);
+        pagerAdapter = new FinanceiroPagerAdapter(getSupportFragmentManager(), dao);
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
 
@@ -64,9 +71,9 @@ public class FinanceiroActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.contas:
                 MovimentoCaixaDialog dlg = new MovimentoCaixaDialog();
-                //Bundle bundle = new Bundle();
-                //bundle.putSerializable(EditClienteDialog.VENDA, this.vendaSelecionada);
-                //dlg.setArguments(bundle);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(FINANCEIRO_DAO, this.dao);
+                dlg.setArguments(bundle);
                 dlg.show(getSupportFragmentManager(), "MovimentoCaixaDialog");
                 return true;
             default:
@@ -76,4 +83,15 @@ public class FinanceiroActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void update(Observable observable, Object data) {
+        if (observable == this.dao) {
+            int currentItem = mViewPager.getCurrentItem();
+            Fragment fragment = pagerAdapter.getItem(currentItem);
+
+            if (fragment instanceof ResumoCaixaFragment) {
+                ((ResumoCaixaFragment) fragment).atualizarMovimentos(dao);
+            }
+        }
+    }
 }
