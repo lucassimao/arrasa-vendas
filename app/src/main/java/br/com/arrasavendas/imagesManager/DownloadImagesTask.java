@@ -4,17 +4,15 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
-
-import br.com.arrasavendas.Utilities;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,9 +20,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Set;
 
 import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.Utilities;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 
 public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
@@ -82,14 +83,17 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
 
                     try {
                         byte[] imageBytes = downloadImage(imageName);
-                        String localPath = salvarImagem(imageName.toLowerCase(), imageBytes); // evitando bug dos caractreres especiais
 
-                        if (getQuantidadeDeUnidadesDoProduto(produtoId) > 1)
-                            desenharLegenda(localPath, produtoNome, unidade);
+                        if (imageBytes !=null) {
+                            String localPath = salvarImagem(imageName.toLowerCase(), imageBytes); // evitando bug dos caractreres especiais
 
-                        updateLocalPath(downloadedImageId, localPath);
+                            if (getQuantidadeDeUnidadesDoProduto(produtoId) > 1)
+                                desenharLegenda(localPath, produtoNome, unidade);
 
-                        publishProgress(++count);
+                            updateLocalPath(downloadedImageId, localPath);
+
+                            publishProgress(++count);
+                        }
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -175,26 +179,29 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
 
     private byte[] downloadImage(String imageName) throws IOException {
 
-        HttpClient client = new DefaultHttpClient();
+        URL url = new URL(RemotePath.getProdutosImageURL(imageName));
+        HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 
-        HttpGet httpGet = new HttpGet(RemotePath.getProdutosImageURL(imageName));
-        HttpResponse response = client.execute(httpGet);
-        StatusLine statusLine = response.getStatusLine();
-        int statusCode = statusLine.getStatusCode();
+        httpConnection.setDoInput(true);
+        httpConnection.setDoOutput(false);
+        httpConnection.setRequestMethod("GET");
+        httpConnection.setUseCaches(false);
 
-        if (statusCode == HttpStatus.SC_OK) {
-            HttpEntity entity = response.getEntity();
+        httpConnection.connect();
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            InputStream inputStream = entity.getContent();
+        int responseCode = httpConnection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK){
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            InputStream inputStream = httpConnection.getInputStream();
             byte[] buffer = new byte[4 * 1024];
             int read = 0;
 
             while ((read = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, read);
+                baos.write(buffer, 0, read);
             }
-            return outputStream.toByteArray();
+            return baos.toByteArray();
         }
+
         return null;
 
     }
