@@ -1,21 +1,15 @@
 package br.com.arrasavendas;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,11 +18,6 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
 
     private final Context ctx;
     private String cep;
-
-    public interface OnComplete {
-        void run(Map<String, String> response);
-    }
-
     private OnComplete onComplete;
 
     public ConsultarFreteAsyncTask(Context ctx, OnComplete onComplete) {
@@ -50,7 +39,7 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
 
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            map.put("Erro",e.getMessage());
+            map.put("Erro", e.getMessage());
             return map;
         }
     }
@@ -74,7 +63,7 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
         }
     }
 
-    private String calcularValorSEDEX(String cep) throws IllegalArgumentException{
+    private String calcularValorSEDEX(String cep) throws IllegalArgumentException {
         String xml = makeRequest(cep, "40010");
 
         Pattern pattern = Pattern.compile("<Valor>(.*?)</Valor>.*<Erro>(.*?)</Erro>.*<MsgErro>(.*?)</MsgErro>");
@@ -93,37 +82,37 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
         }
     }
 
-
     private String makeRequest(String sCepDestino, String codigoServico) {
 
-        // instantiates httpclient to make request
         try {
-            DefaultHttpClient httpclient = new DefaultHttpClient();
 
-            List<NameValuePair> params = new LinkedList<NameValuePair>();
-            params.add(new BasicNameValuePair("nCdServico", codigoServico));
-            params.add(new BasicNameValuePair("sCepOrigem", "64023620"));
-            params.add(new BasicNameValuePair("sCepDestino", sCepDestino.replace("-", "")));
-            params.add(new BasicNameValuePair("nVlPeso", "1"));
-            params.add(new BasicNameValuePair("nCdFormato", "1"));
-            params.add(new BasicNameValuePair("nVlComprimento", "30"));
-            params.add(new BasicNameValuePair("nVlAltura", "30"));
-            params.add(new BasicNameValuePair("nVlLargura", "30"));
-            params.add(new BasicNameValuePair("sCdMaoPropria", "N"));
-            params.add(new BasicNameValuePair("nVlValorDeclarado", "0"));
-            params.add(new BasicNameValuePair("sCdAvisoRecebimento", "N"));
-            params.add(new BasicNameValuePair("StrRetorno", "xml"));
+            Uri uri = Uri.parse("http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx").
+                    buildUpon().appendQueryParameter("nCdServico", codigoServico).
+                    appendQueryParameter("sCepOrigem", "64023620").
+                    appendQueryParameter("sCepDestino", sCepDestino.replace("-", "")).
+                    appendQueryParameter("nVlPeso", "1").
+                    appendQueryParameter("nCdFormato", "1").
+                    appendQueryParameter("nVlComprimento", "30").
+                    appendQueryParameter("nVlAltura", "30").
+                    appendQueryParameter("nVlLargura", "30").
+                    appendQueryParameter("sCdMaoPropria", "N").
+                    appendQueryParameter("nVlValorDeclarado", "0").
+                    appendQueryParameter("sCdAvisoRecebimento", "N").
+                    appendQueryParameter("StrRetorno", "xml").build();
 
-            String paramString = URLEncodedUtils.format(params, "utf-8");
+            URL url = new URL(uri.toString());
+            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+            httpConnection.setDoInput(true);
+            httpConnection.setDoOutput(true);
+            httpConnection.setRequestMethod("GET");
+            httpConnection.setUseCaches(false);
+            httpConnection.connect();
 
-            HttpGet httget = new HttpGet("http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?" + paramString);
-            HttpResponse response = httpclient.execute(httget);
+
             StringBuilder stringBuilder = new StringBuilder();
 
-            HttpEntity entity = response.getEntity();
-            InputStream content = entity.getContent();
-            BufferedReader reader;
-            reader = new BufferedReader(new InputStreamReader(content));
+            InputStream content = httpConnection.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -142,6 +131,10 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
         if (this.onComplete != null) {
             onComplete.run(fretes);
         }
+    }
+
+    public interface OnComplete {
+        void run(Map<String, String> response);
     }
 
 

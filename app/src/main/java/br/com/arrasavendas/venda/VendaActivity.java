@@ -299,7 +299,7 @@ public class VendaActivity extends Activity {
         FormaPagamento formaPagamento;
         StatusVenda status;
         Cliente cliente = new Cliente();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("MMddyyyy", Locale.getDefault());
 
         RadioGroup radiogroupVendedor = (RadioGroup) findViewById(R.id.radioGroupVendedor);
 
