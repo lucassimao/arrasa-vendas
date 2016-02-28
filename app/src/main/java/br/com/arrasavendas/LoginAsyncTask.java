@@ -1,71 +1,78 @@
 package br.com.arrasavendas;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import br.com.arrasavendas.util.Response;
 
 /**
  * Created by lsimaocosta on 04/01/15.
  */
-public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha,Void, HttpResponse> {
+public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha, Void, Response> {
 
 
-    private final Runnable onSuccessfullLoginListener,onUnSuccessfullLoginListener;
+    private final Runnable onSuccessfullLoginListener, onUnSuccessfullLoginListener;
     private final Context context;
 
-    public LoginAsyncTask(Runnable onSuccessfullLoginListener,Runnable onUnSuccessfullLoginListener,Context ctx) {
+    public LoginAsyncTask(Runnable onSuccessfullLoginListener, Runnable onUnSuccessfullLoginListener, Context ctx) {
         super();
         this.onSuccessfullLoginListener = onSuccessfullLoginListener;
-        this.onUnSuccessfullLoginListener=onUnSuccessfullLoginListener;
+        this.onUnSuccessfullLoginListener = onUnSuccessfullLoginListener;
         this.context = ctx;
     }
 
-    static class LoginSenha{
-        String login, senha;
-
-        public LoginSenha(String login, String senha) {
-            this.login = login;
-            this.senha = senha;
-        }
-    }
-
     @Override
-    protected HttpResponse doInBackground(LoginSenha... loginSenha) {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(RemotePath.LoginPath.getUrl());
+    protected Response doInBackground(LoginSenha... loginSenha) {
 
-        StringEntity se = null;
 
         try {
+            URL url = new URL(RemotePath.LoginPath.getUrl());
+            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+
+            httpConnection.setDoInput(true);
+            httpConnection.setDoOutput(true);
+            httpConnection.setRequestMethod("POST");
+            httpConnection.setUseCaches(false);
+            httpConnection.setRequestProperty("Content-Type", "application/json");
+            httpConnection.setRequestProperty("Accept", "application/json");
+            httpConnection.connect();
+
             JSONObject obj = new JSONObject();
-            obj.put("username",loginSenha[0].login );
-            obj.put("password",loginSenha[0].senha );
+            obj.put("username", loginSenha[0].login);
+            obj.put("password", loginSenha[0].senha);
 
-            se = new StringEntity(obj.toString(),"UTF-8");
-            httpPost.setEntity(se);
+            DataOutputStream dos = new DataOutputStream(httpConnection.getOutputStream());
+            byte[] bytes = obj.toString().getBytes("UTF-8");
+            dos.write(bytes);
+            dos.flush();
+            dos.close();
 
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-Type", "application/json");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
 
-            return  httpclient.execute(httpPost);
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            String message = stringBuilder.toString();
+            int responseCode = httpConnection.getResponseCode();
+            Response response = new Response(message, responseCode);
+
+            httpConnection.disconnect();
+            return response;
 
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,32 +80,12 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha,Void, Ht
         return null;
     }
 
-
     @Override
-    protected void onPostExecute(HttpResponse response) {
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
+    protected void onPostExecute(Response response) {
+        if (response.getStatus() == HttpURLConnection.HTTP_OK) {
             this.onSuccessfullLoginListener.run();
-
-            StringBuilder stringBuilder = new StringBuilder();
-            HttpEntity entity = response.getEntity();
-            InputStream content = null;
-            try {
-                content = entity.getContent();
-                BufferedReader reader= new BufferedReader(new InputStreamReader(content));
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                salvarAutenticacao(stringBuilder.toString());
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        }else {
+            salvarAutenticacao(response.getMessage());
+        } else {
             this.onUnSuccessfullLoginListener.run();
         }
 
@@ -116,6 +103,15 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha,Void, Ht
             e.printStackTrace();
         }
 
+    }
+
+    static class LoginSenha {
+        String login, senha;
+
+        public LoginSenha(String login, String senha) {
+            this.login = login;
+            this.senha = senha;
+        }
     }
 
 
