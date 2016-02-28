@@ -1,6 +1,7 @@
 package br.com.arrasavendas.venda;
 
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.SalvarVendaAsyncTask.OnComplete;
 
 public class VendaActivity extends Activity {
@@ -370,30 +372,25 @@ public class VendaActivity extends Activity {
 
             final ProgressDialog dlg = ProgressDialog.show(this, "Salvando activity_venda", "Aguarde ...");
 
-            new SalvarVendaAsyncTask(obj, new OnComplete() {
+            new SalvarVendaAsyncTask(new OnComplete() {
+
 
                 @Override
-                public void run(HttpResponse response) {
+                public void run(Response response) {
                     dlg.dismiss();
 
-                    int statusCode = response.getStatusLine().getStatusCode();
+                    int statusCode = response.getStatus();
 
-
-                    if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                        String string = "Erro ao salvar activity_venda, verifique se todos os campos foram preenchidos!";
-                        Toast.makeText(getBaseContext(), string, Toast.LENGTH_LONG).show();
-
-                    } else if (statusCode == HttpStatus.SC_CREATED) {
+                    if (statusCode == HttpURLConnection.HTTP_CREATED){
                         atualizarEstoque();
-                        Toast.makeText(getBaseContext(), "Venda salva com sucesso!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getBaseContext(), "Venda salva!", Toast.LENGTH_LONG).show();
                         finish();
-
-                    } else {
-                        Toast.makeText(getBaseContext(), "Erro " + statusCode, Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getBaseContext(), "Erro " + statusCode + ": " + response.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
                 }
-            }).execute();
+            }).execute(obj);
 
         } catch (JSONException e) {
             e.printStackTrace();
