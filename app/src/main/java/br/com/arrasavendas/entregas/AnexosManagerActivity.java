@@ -4,12 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,21 +14,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
-import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,7 +29,7 @@ import java.net.HttpURLConnection;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
-import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.util.Response;
 
 import static br.com.arrasavendas.Utilities.ImageFolder;
 
@@ -175,10 +163,16 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
 
                     new UpdateVendaAsyncTask(vendaId, venda, new UpdateVendaAsyncTask.OnComplete() {
                         @Override
-                        public void run(HttpResponse response) {
-                            dao.delete(position);
-                            anexosListAdapter.setAnexos(dao.list());
-                            Toast.makeText(AnexosManagerActivity.this, "Imagem excluida", Toast.LENGTH_SHORT).show();
+                        public void run(Response response) {
+                            if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                                dao.delete(position);
+                                anexosListAdapter.setAnexos(dao.list());
+                                Toast.makeText(AnexosManagerActivity.this, "Imagem excluida", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(AnexosManagerActivity.this, "Erro " +
+                                        response.getStatus() + " " + response.getMessage(), Toast.LENGTH_LONG).show();
+
+                            }
                         }
                     }).execute();
 

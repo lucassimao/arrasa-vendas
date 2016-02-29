@@ -19,13 +19,12 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 
 import br.com.arrasavendas.DownloadJSONFeedTask;
 import br.com.arrasavendas.R;
@@ -34,6 +33,7 @@ import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.UnidadeQuantidadeDialogFragment;
 
 public class EditItensVendaActivity extends Activity {
@@ -64,7 +64,6 @@ public class EditItensVendaActivity extends Activity {
         configurarAutoCompleteTextViewProduto();
 
     }
-
 
 
     public void onClickAddProduto(View v) {
@@ -196,14 +195,15 @@ public class EditItensVendaActivity extends Activity {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
         new UpdateVendaAsyncTask(venda.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
             @Override
-            public void run(HttpResponse response) {
+            public void run(Response response) {
                 String msg = null;
 
                 progressDlg.dismiss();
 
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                     // atualizando o estoque e a lista de vendas
-                    new DownloadJSONFeedTask(EditItensVendaActivity.this, null).execute(RemotePath.EstoquePath);
+                    new DownloadJSONFeedTask(EditItensVendaActivity.this, null).
+                            execute(RemotePath.EstoquePath);
 
                     ContentValues cv = new ContentValues();
                     JSONArray array = new JSONArray();
@@ -235,7 +235,9 @@ public class EditItensVendaActivity extends Activity {
                     finish();
 
                 } else {
-                    Toast.makeText(EditItensVendaActivity.this, response.getStatusLine().getReasonPhrase(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditItensVendaActivity.this,
+                            "Erro "+response.getStatus() +": " + response.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
 
 

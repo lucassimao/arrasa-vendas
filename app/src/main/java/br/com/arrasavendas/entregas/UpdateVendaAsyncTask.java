@@ -10,15 +10,22 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.util.Response;
 
-public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
+public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,Response>{
 
     private final long vendaId;
 
     interface OnComplete{
-		void run(HttpResponse response);
+		void run(Response response);
 	}
 
 	private OnComplete onComplete;
@@ -31,7 +38,7 @@ public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 	}
 	
 	@Override
-	protected HttpResponse doInBackground(Void... params) {
+	protected Response doInBackground(Void... params) {
 		try {
 			
 			return makeRequest(venda);
@@ -43,30 +50,55 @@ public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,HttpResponse>{
 	}
 
 	
-	private HttpResponse makeRequest(JSONObject obj) throws Exception {
+	private Response makeRequest(JSONObject obj) throws Exception {
 
         Application app = Application.getInstance();
         String accessToken = app.getAccessToken();
+		String entityPath = RemotePath.VendaPath.getEntityPath(RemotePath.VendaPath, this.vendaId);
 
-		// instantiates httpclient to make request
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		URL url = new URL(entityPath);
+		HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+		httpConnection.setDoInput(true);
+		httpConnection.setDoOutput(true);
+		httpConnection.setRequestMethod("PUT");
+		httpConnection.setUseCaches(false);
+		httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+		httpConnection.setRequestProperty("Accept", "application/json");
+		httpConnection.setRequestProperty("Content-Type", "application/json");
+		httpConnection.connect();
 
-		// url with the post data
-		HttpPut httpust = new HttpPut(RemotePath.VendaPath.getEntityPath(RemotePath.VendaPath, this.vendaId));
 
-		StringEntity se = new StringEntity(obj.toString(),"UTF-8");
-		httpust.setEntity(se);
+		DataOutputStream dos = new DataOutputStream(httpConnection.getOutputStream());
+		byte[] bytes = obj.toString().getBytes("UTF-8");
+		dos.write(bytes);
+		dos.flush();
+		dos.close();
 
-		httpust.setHeader("Authorization", "Bearer " + accessToken);
-		httpust.setHeader("Accept", "application/json");
-		httpust.setHeader("Content-type", "application/json");
+		String line = null;
+		BufferedReader reader = null;
+		int responseCode = httpConnection.getResponseCode();
 
-		// Handles what is returned from the page
-		return httpclient.execute(httpust);
+		if (responseCode == HttpURLConnection.HTTP_OK)
+			reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+		else
+			reader = new BufferedReader(new InputStreamReader(httpConnection.getErrorStream()));
+
+		StringBuilder stringBuilder = new StringBuilder();
+
+		while ((line = reader.readLine()) != null) {
+			stringBuilder.append(line);
+		}
+
+		String message = stringBuilder.toString();
+		Response response = new Response(message, responseCode);
+		httpConnection.disconnect();
+
+		return response;
+
 	}
 	
 	@Override
-	protected void onPostExecute(HttpResponse result) {
+	protected void onPostExecute(Response result) {
 
         if (this.onComplete!=null){
 			onComplete.run(result);
