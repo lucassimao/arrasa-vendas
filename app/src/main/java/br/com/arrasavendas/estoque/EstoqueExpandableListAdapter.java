@@ -8,11 +8,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.*;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.service.EstoqueService;
+import br.com.arrasavendas.util.Response;
 
 public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -101,15 +106,24 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
         dialogFragment.setUpdateListener(new AtualizarQuantidadeEstoqueDialogFragment.UpdateListener() {
             @Override
-            public void onSuccess(int novaQuantidade) {
-                Toast.makeText(ctx, "Estoque atualizado", Toast.LENGTH_SHORT).show();
+            public void onSuccess(Response response) {
 
-                ContentValues cv = new ContentValues();
-                cv.put(EstoqueProvider.QUANTIDADE, novaQuantidade);
-                ctx.getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, EstoqueProvider._ID + "=?", new String[]{"" + estoqueId});
+                try {
 
-                produto.updateQuantidade(unidade,novaQuantidade);
-                notifyDataSetChanged();
+                    JSONObject obj =new JSONObject(response.getMessage());
+                    int novaQuantidade = obj.getInt("quantidade");
+                    EstoqueService service = new EstoqueService(ctx);
+
+                    service.update(estoqueId,obj);
+                    produto.updateQuantidade(unidade,novaQuantidade);
+                    notifyDataSetChanged();
+                    Toast.makeText(ctx, "Estoque atualizado", Toast.LENGTH_SHORT).show();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(ctx, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
             }
 
             @Override

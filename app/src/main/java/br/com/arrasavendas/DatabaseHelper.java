@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 57;
+	private static final int DATABASE_VERSION = 58;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String CREATE_TABLE_VENDAS = "create table "
@@ -31,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			+ TABLE_DOWNLOADED_IMAGES
 			+ "(_id integer primary key AUTOINCREMENT, produto_id integer not null, " +
 			"produto text,produto_ascii text,image_name text not null,local_path text, " +
-			"unidade text not null,is_ignored integer, UNIQUE (image_name,unidade,produto_id) " +
+			"unidade text not null,is_ignored integer,estoque_id integer, UNIQUE (image_name,unidade,produto_id) " +
 			"ON CONFLICT IGNORE)";
 
 	public static final String TABLE_CLIENTES = "CLIENTES";

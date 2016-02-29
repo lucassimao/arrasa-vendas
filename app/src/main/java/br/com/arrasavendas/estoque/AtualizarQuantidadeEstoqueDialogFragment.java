@@ -11,10 +11,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.util.Response;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +33,7 @@ public class AtualizarQuantidadeEstoqueDialogFragment extends DialogFragment {
 
 
     interface UpdateListener{
-        void onSuccess(int novaQuantidade);
+        void onSuccess(Response response);
         void onFail(String error);
     }
 
@@ -92,14 +95,14 @@ public class AtualizarQuantidadeEstoqueDialogFragment extends DialogFragment {
 
                     new UpdateEstoqueAsyncTask(estoqueId, novaQuantidade, new UpdateEstoqueAsyncTask.OnComplete() {
                         @Override
-                        public void run(HttpResponse response) {
+                        public void run(Response response) {
                             if (response != null) {
-                                StatusLine statusLine = response.getStatusLine();
 
-                                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                                    updateListener.onSuccess(novaQuantidade);
+                                if (response.getStatus() == HttpURLConnection.HTTP_OK) {
+                                    updateListener.onSuccess(response);
                                 } else {
-                                    updateListener.onFail("Erro " + statusLine.getStatusCode() + ": " + statusLine.getReasonPhrase());
+                                    updateListener.onFail("Erro " + response.getStatus() +
+                                            ": " + response.getMessage());
 
                                 }
 

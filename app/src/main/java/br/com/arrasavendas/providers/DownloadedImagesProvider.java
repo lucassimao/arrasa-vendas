@@ -20,6 +20,7 @@ public class DownloadedImagesProvider extends ContentProvider {
 
     public final static String _ID = "_id";
     public final static String PRODUTO_ID = "produto_id";
+    public final static String ESTOQUE_ID = "estoque_id";
     public final static String PRODUTO_NOME = "produto";
     public static final String PRODUTO_ASCII = "produto_ascii" ;
     public final static String UNIDADE = "unidade";

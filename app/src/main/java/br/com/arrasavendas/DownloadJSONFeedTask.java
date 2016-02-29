@@ -30,6 +30,7 @@ import br.com.arrasavendas.financeiro.FinanceiroDAO;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.service.EstoqueService;
 
 public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
 
@@ -87,44 +88,15 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
     private void salvarJSONEstoque(String jsonString) throws IOException, JSONException {
 
         this.ctx.getContentResolver().delete(EstoqueProvider.CONTENT_URI, null, null);
+        this.ctx.getContentResolver().delete(DownloadedImagesProvider.CONTENT_URI, null, null);
 
         JSONArray itens = new JSONArray(jsonString);
+        EstoqueService service = new EstoqueService(ctx);
 
         for (int i = 0; i < itens.length(); ++i) {
 
             JSONObject estoque = itens.getJSONObject(i);
-            String produtoNome = estoque.getString("produto_nome");
-            // excluindo acentos
-            String produtoNomeASCII = Normalizer.normalize(produtoNome, Normalizer.Form.NFD)
-                    .replaceAll("[^\\p{ASCII}]", "");
-
-            ContentValues values = new ContentValues();
-            values.put(EstoqueProvider._ID, estoque.getLong("estoque_id"));
-            values.put(EstoqueProvider.PRODUTO, produtoNome);
-            values.put(EstoqueProvider.PRODUTO_ASCII, produtoNomeASCII);
-            values.put(EstoqueProvider.PRODUTO_ID, estoque.getInt("produto_id"));
-            values.put(EstoqueProvider.LAST_UPDATED_TIMESTAMP, estoque.getLong("last_updated"));
-            values.put(EstoqueProvider.PRECO_A_VISTA, estoque.getLong("produto_precoAVistaEmCentavos"));
-            values.put(EstoqueProvider.PRECO_A_PRAZO, estoque.getLong("produto_precoAPrazoEmCentavos"));
-            values.put(EstoqueProvider.UNIDADE, estoque.getString("unidade"));
-            values.put(EstoqueProvider.QUANTIDADE, estoque.getInt("quantidade"));
-
-            JSONArray produtoFotos = estoque.getJSONArray("produto_fotos");
-
-            for (int j = 0; j < produtoFotos.length(); j++) {
-                ContentValues cv = new ContentValues();
-                cv.put(DownloadedImagesProvider.IMAGE_NAME, produtoFotos.getString(j));
-                cv.put(DownloadedImagesProvider.PRODUTO_ID, estoque.getInt("produto_id"));
-                cv.put(DownloadedImagesProvider.PRODUTO_NOME, produtoNome);
-                cv.put(DownloadedImagesProvider.PRODUTO_ASCII, produtoNomeASCII);
-                cv.put(DownloadedImagesProvider.UNIDADE, estoque.getString("unidade"));
-                cv.put(DownloadedImagesProvider.IS_IGNORED, 0);
-
-                this.ctx.getContentResolver().insert(DownloadedImagesProvider.CONTENT_URI, cv);
-            }
-
-            this.ctx.getContentResolver().insert(EstoqueProvider.CONTENT_URI, values);
-
+            service.save(estoque);
         }
 
     }
