@@ -31,6 +31,7 @@ import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
 import br.com.arrasavendas.service.EstoqueService;
+import br.com.arrasavendas.service.VendaService;
 
 public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
 
@@ -106,25 +107,13 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
         this.ctx.getContentResolver().delete(VendasProvider.CONTENT_URI, null, null);
 
         JSONArray itens = new JSONArray(jsonString);
+        VendaService service = new VendaService(ctx);
 
         for (int i = 0; i < itens.length(); ++i) {
             JSONObject venda = itens.getJSONObject(i);
 
             if (!venda.isNull("dataEntrega")) {
-
-                ContentValues values = new ContentValues();
-                values.put(VendasProvider._ID, venda.getInt("id"));
-                values.put(VendasProvider.VENDEDOR, venda.getString("vendedor"));
-                values.put(VendasProvider.CLIENTE, venda.getString("cliente"));
-                values.put(VendasProvider.LAST_UPDATED_TIMESTAMP, venda.getLong("last_updated"));
-                values.put(VendasProvider.DATA_ENTREGA, venda.getLong("dataEntrega"));
-                values.put(VendasProvider.FORMA_PAGAMENTO, venda.getString("formaPagamento"));
-                values.put(VendasProvider.TURNO_ENTREGA, venda.getString("turnoEntrega"));
-                values.put(VendasProvider.STATUS, venda.getString("status"));
-                values.put(VendasProvider.CARRINHO, venda.getString("itens"));
-                values.put(VendasProvider.ANEXOS_JSON_ARRAY, venda.getString("anexos_json_array"));
-
-                this.ctx.getContentResolver().insert(VendasProvider.CONTENT_URI, values);
+                service.save(venda);
             }
 
         }

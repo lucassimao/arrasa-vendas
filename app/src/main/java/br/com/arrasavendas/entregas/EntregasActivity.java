@@ -29,8 +29,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import br.com.arrasavendas.DownloadJSONFeedTask;
@@ -41,6 +43,7 @@ import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
 
 // http://www.technotalkative.com/contextual-action-bar-cab-android/
@@ -138,35 +141,57 @@ public class EntregasActivity extends Activity {
 
                 final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando data de entrega", "Aguarde ...");
 
-                new UpdateDataEntregaVendaAsyncTask(vendaSelecionada.getId(), novaDataDeEntrega.getTime(), new br.com.arrasavendas.entregas.UpdateDataEntregaVendaAsyncTask.OnComplete() {
+                SimpleDateFormat sdf = new SimpleDateFormat("MMddyyyy", Locale.getDefault());
+                sdf.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
 
-                    @Override
-                    public void run(HttpResponse response) {
-                        dlg.dismiss();
-                        int statusCode = response.getStatusLine().getStatusCode();
+                try {
+                    JSONObject obj = new JSONObject();
+                    obj.put("dataEntrega",sdf.format(novaDataDeEntrega.getTime()));
 
-                        if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                            String string = "Erro ao atualizar venda, verifique se todos os campos foram preenchidos!";
-                            Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+                    new UpdateVendaAsyncTask(vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
 
-                        } else if (statusCode == HttpStatus.SC_OK) {
-                            vendaSelecionada.setDataEntrega(novaDataDeEntrega.getTime());
-                            vendasListAdapter.atualizarDatasDeEntregas();
-                            vendasListAdapter.notifyDataSetChanged();
-                            actionMode.finish();
-                            Toast.makeText(EntregasActivity.this, "Data de entrega atualizada com sucesso!", Toast.LENGTH_LONG).show();
+                        @Override
+                        public void run(Response response) {
+                            dlg.dismiss();
+                            int statusCode = response.getStatus();
 
-                        } else {
-                            Toast.makeText(EntregasActivity.this, "Erro " + statusCode, Toast.LENGTH_SHORT).show();
+                            if (statusCode == HttpURLConnection.HTTP_OK){
+                                try {
+                                    VendaService service = new VendaService(getApplicationContext());
+                                    JSONObject venda = new JSONObject(response.getMessage());
+
+                                    service.update(vendaSelecionada.getId(), venda);
+                                    vendaSelecionada.setDataEntrega(novaDataDeEntrega.getTime());
+                                    vendasListAdapter.atualizarDatasDeEntregas();
+                                    vendasListAdapter.notifyDataSetChanged();
+                                    actionMode.finish();
+
+                                    Toast.makeText(EntregasActivity.this, "Data de entrega atualizada!", Toast.LENGTH_LONG).show();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    String string = "Erro :" + response.getMessage();
+                                    Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+                                }
+                            }else{
+                                String string = "Erro " + statusCode + ": " + response.getMessage();
+                                Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+                            }
+
                         }
+                    }).execute();
 
-                    }
-                }, EntregasActivity.this).execute();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String string = "Erro : " + e.getMessage();
+                    Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+
+                }
 
             }
 
-
-        }, dataEntrega.get(Calendar.YEAR), dataEntrega.get(Calendar.MONTH), dataEntrega.get(Calendar.DAY_OF_MONTH));
+        }, dataEntrega.get(Calendar.YEAR),
+                dataEntrega.get(Calendar.MONTH),
+                dataEntrega.get(Calendar.DAY_OF_MONTH));
 
         dlg.setTitle("Atualize a data da entrega");
         dlg.show();
