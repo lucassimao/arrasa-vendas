@@ -25,7 +25,10 @@ import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -38,10 +41,11 @@ import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.util.Response;
 
 // http://www.technotalkative.com/contextual-action-bar-cab-android/
 
-public class EntregasActivity extends Activity{
+public class EntregasActivity extends Activity {
 
     private static final int ENTREGAS_LOADER = 1;
     private static final int EDIT_ITENS_VENDA_RESULT = 1;
@@ -54,7 +58,7 @@ public class EntregasActivity extends Activity{
     private EntregasCursorCallback entregasCursorCallback = new EntregasCursorCallback();
 
 
-   @Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -187,36 +191,45 @@ public class EntregasActivity extends Activity{
             public void onPositiveClick(final Cliente updatedCliente, final TurnoEntrega turnoEntrega, final StatusVenda statusVenda) {
 
                 final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando activity_venda", "Aguarde ...");
+                JSONObject obj = new JSONObject();
 
-                new UpdateClienteVendaAsyncTask(vendaSelecionada.getId(), updatedCliente, turnoEntrega, statusVenda, new UpdateClienteVendaAsyncTask.OnComplete() {
+                try {
+                    obj.put("cliente", updatedCliente.toJson());
+                    obj.put("turnoEntrega", turnoEntrega.name());
+                    obj.put("status", statusVenda.name());
 
-                    @Override
-                    public void run(HttpResponse response) {
-                        dlg.dismiss();
+                    new UpdateVendaAsyncTask(vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
 
-                        int statusCode = response.getStatusLine().getStatusCode();
+                        @Override
+                        public void run(Response response) {
+                            dlg.dismiss();
 
-                        if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-                            String string = "Erro ao atualizar activity_venda, verifique se todos os campos foram preenchidos!";
-                            Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+                            int statusCode = response.getStatus();
 
-                        } else if (statusCode == HttpStatus.SC_OK) {
-                            vendaSelecionada.setCliente(updatedCliente);
-                            vendaSelecionada.setTurnoEntrega(turnoEntrega);
-                            vendaSelecionada.setStatus(statusVenda);
-                            vendasListAdapter.refreshView();
+                            if (statusCode == HttpURLConnection.HTTP_OK) {
 
-                            Toast.makeText(EntregasActivity.this, "Venda atualizada com sucesso!", Toast.LENGTH_LONG).show();
-                            actionMode.finish();
+                                vendaSelecionada.setCliente(updatedCliente);
+                                vendaSelecionada.setTurnoEntrega(turnoEntrega);
+                                vendaSelecionada.setStatus(statusVenda);
+                                vendasListAdapter.refreshView();
 
-                        } else {
-                            Toast.makeText(EntregasActivity.this, "Erro " + statusCode, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(EntregasActivity.this, "Venda atualizada com sucesso!", Toast.LENGTH_LONG).show();
+                                actionMode.finish();
+                            } else {
+                                String string = "Erro " + statusCode + ": " + response.getMessage();
+                                Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
+                            }
+
+
                         }
+                    }).execute();
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    String string = "Erro: " + e.getMessage();
+                    Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
 
-                    }
-                }, EntregasActivity.this).execute();
-
+                }
 
             }
 
@@ -310,7 +323,7 @@ public class EntregasActivity extends Activity{
         startActivity(intent);
     }
 
-    private class EntregasCursorCallback implements LoaderManager.LoaderCallbacks<Cursor>{
+    private class EntregasCursorCallback implements LoaderManager.LoaderCallbacks<Cursor> {
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             if (id == ENTREGAS_LOADER) {
                 return new CursorLoader(getApplicationContext(), VendasProvider.CONTENT_URI, null, null, null, VendasProvider.DATA_ENTREGA);
