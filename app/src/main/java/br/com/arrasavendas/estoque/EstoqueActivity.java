@@ -1,6 +1,7 @@
 package br.com.arrasavendas.estoque;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 import java.util.*;
 
 import android.app.Activity;
@@ -14,11 +15,11 @@ import android.support.v4.content.FileProvider;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import br.com.arrasavendas.DownloadJSONFeedTask;
+import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.Utilities;
 import br.com.arrasavendas.imagesManager.DownloadImagesTask;
@@ -26,6 +27,7 @@ import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.util.Response;
 
 public class EstoqueActivity extends Activity {
 
@@ -191,15 +193,26 @@ public class EstoqueActivity extends Activity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(this, new Runnable() {
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
+
                 progressDlg.dismiss();
 
-                List<Produto> produtos = getData();
-                estoqueListAdapter = new EstoqueExpandableListAdapter(EstoqueActivity.this, produtos);
-                list.setAdapter(estoqueListAdapter);
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NOT_MODIFIED:
+                        List<Produto> produtos = getData();
+                        estoqueListAdapter = new EstoqueExpandableListAdapter(EstoqueActivity.this, produtos);
+                        list.setAdapter(estoqueListAdapter);
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
+
 
             }
         }).execute(RemotePath.EstoquePath);

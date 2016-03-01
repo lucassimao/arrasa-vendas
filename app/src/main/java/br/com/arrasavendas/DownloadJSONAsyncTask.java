@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,7 +17,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import br.com.arrasavendas.financeiro.FinanceiroDAO;
@@ -25,27 +28,33 @@ import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.providers.VendasProvider;
 import br.com.arrasavendas.service.EstoqueService;
 import br.com.arrasavendas.service.VendaService;
+import br.com.arrasavendas.util.Response;
 
-public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
+public class DownloadJSONAsyncTask extends AsyncTask<RemotePath, Void, Response> {
 
     private Context ctx;
-    private Runnable onCompleteListener;
+    private OnCompleteListener listener;
 
 
-    public DownloadJSONFeedTask(Context ctx, Runnable onCompleteListener) {
+    public DownloadJSONAsyncTask(Context ctx, OnCompleteListener onCompleteListener) {
         super();
         this.ctx = ctx;
-        this.onCompleteListener = onCompleteListener;
+        this.listener = onCompleteListener;
     }
 
     @Override
-    protected Void doInBackground(RemotePath... params) {
+    protected Response doInBackground(RemotePath... params) {
 
-        for (RemotePath remotePath : params) {
+        RemotePath remotePath = params[0];
+        Response response = null;
 
-            try {
+        try {
 
-                String jsonString = downloadJSON(remotePath);
+            response = downloadJSON(remotePath);
+
+            if (response != null) {
+
+                String jsonString = response.getMessage();
 
                 if (!TextUtils.isEmpty(jsonString)) {
 
@@ -60,16 +69,22 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
                             salvarJSONCaixa(jsonString);
                             break;
                     }
-                }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
+                }
             }
+
+        }catch(SocketTimeoutException | ConnectException e) {
+            e.printStackTrace();
+            String message = ctx.getString(R.string.connection_error_msg);
+            return new Response(message,-1);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return new Response(e.getMessage(),-1);
         }
 
-        return null;
+        return response;
     }
 
     private void salvarJSONCaixa(String jsonString) {
@@ -113,11 +128,13 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
 
     }
 
-    private String downloadJSON(RemotePath feed) throws IOException {
+    private Response downloadJSON(RemotePath feed) throws IOException {
 
         Application app = (Application) ctx.getApplicationContext();
+        Response response = null;
 
         if (app.isAuthenticated()) {
+
             String accessToken = app.getAccessToken();
             Long lastUpdated = getLastUpdated(feed);
 
@@ -131,6 +148,7 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
             URL url = new URL(uri.toString());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
             connection.setDoInput(true);
             connection.setDoOutput(false);
             connection.setUseCaches(false);
@@ -139,35 +157,44 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
             connection.connect();
 
             int statusCode = connection.getResponseCode();
+            String payload = null;
 
             switch (statusCode) {
                 case HttpURLConnection.HTTP_OK:
-                    StringBuilder stringBuilder = new StringBuilder();
 
-                    InputStream content = connection.getInputStream();
-                    BufferedReader reader;
-                    reader = new BufferedReader(new InputStreamReader(content));
-                    String line = null;
-
-                    while ((line = reader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-
-                    String json = stringBuilder.toString();
+                    payload = readStream(connection.getInputStream());
 
                     Log.d("DownloadJSONFeedTask",
-                            "Download concluido: " + json.getBytes().length +
+                            "Download concluido: " + payload.getBytes().length +
                                     " bytes de " + uri.toString());
-
-                    return json;
-
+                    break;
                 case HttpURLConnection.HTTP_NO_CONTENT:
+                    payload = null;
                     Log.d("DownloadJSONFeedTask", feed + " não precisa ser atualizado");
-                    return null;
+                    break;
+                default:
+                    payload = readStream(connection.getErrorStream());
+                    Log.d("DownloadJSONFeedTask", "Erro em " + feed +": " + payload);
             }
 
+            response = new Response(payload, statusCode);
         }
-        return null;
+
+        return response;
+    }
+
+    @NonNull
+    private String readStream(InputStream content) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader;
+        reader = new BufferedReader(new InputStreamReader(content));
+        String line = null;
+
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+
+        return sb.toString();
     }
 
     private Long getLastUpdated(RemotePath feed) {
@@ -206,9 +233,13 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
             return 0L;
     }
 
-    protected void onPostExecute(Void result) {
-        if (onCompleteListener != null)
-            onCompleteListener.run();
+    protected void onPostExecute(Response result) {
+        if (listener != null)
+            listener.run(result);
+    }
+
+    public interface OnCompleteListener {
+        void run(Response response);
     }
 
 }

@@ -30,13 +30,16 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import br.com.arrasavendas.DownloadJSONFeedTask;
+import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.estoque.EstoqueExpandableListAdapter;
 import br.com.arrasavendas.model.Cliente;
+import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
@@ -313,12 +316,23 @@ public class EntregasActivity extends Activity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
         vendasListAdapter.setCursor(null);
-        new DownloadJSONFeedTask(this, new Runnable() {
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
                 progressDlg.dismiss();
-                getLoaderManager().restartLoader(ENTREGAS_LOADER, null, entregasCursorCallback);
+
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
+                        getLoaderManager().restartLoader(ENTREGAS_LOADER, null,
+                                entregasCursorCallback);
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
 
             }
         }).execute(RemotePath.VendaPath);

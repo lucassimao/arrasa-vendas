@@ -8,14 +8,16 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import br.com.arrasavendas.entregas.EntregasActivity;
 import br.com.arrasavendas.estoque.EstoqueActivity;
 import br.com.arrasavendas.financeiro.FinanceiroActivity;
 import br.com.arrasavendas.imagesManager.ImagesManagerActivity;
+import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.VendaActivity;
 
+import java.net.HttpURLConnection;
 import java.util.Map;
 
 public class MainActivity extends Activity {
@@ -42,7 +44,7 @@ public class MainActivity extends Activity {
 
         if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH,true)){
             prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH,false).commit();
-            new DownloadJSONFeedTask(this,null).execute(RemotePath.EstoquePath);
+            new DownloadJSONAsyncTask(this,null).execute(RemotePath.EstoquePath);
             Utilities.registrarSyncEnderecoAlarm(this);
         }
     }
@@ -107,12 +109,24 @@ public class MainActivity extends Activity {
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
 
-        new DownloadJSONFeedTask(this, new Runnable() {
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
                 progressDlg.dismiss();
-                startEstoqueActivity();
+
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
+
+                        startEstoqueActivity();
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
+
             }
         }).execute(RemotePath.EstoquePath);
 
@@ -120,44 +134,81 @@ public class MainActivity extends Activity {
 
     public void onClickBtnNovaVenda(View v) {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(this, new Runnable() {
+
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
                 progressDlg.dismiss();
-                Intent i = new Intent(getBaseContext(), VendaActivity.class);
-                startActivity(i);
+
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
+
+                        Intent i = new Intent(getBaseContext(), VendaActivity.class);
+                        startActivity(i);
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
 
             }
         }).execute(RemotePath.EstoquePath);
+
 
 
     }
 
     public void onClickBtnEntregas(View v) {
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(this, new Runnable() {
+
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
                 progressDlg.dismiss();
-                Intent i = new Intent(getBaseContext(), EntregasActivity.class);
-                startActivity(i);
+
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
+
+                        Intent i = new Intent(getBaseContext(), EntregasActivity.class);
+                        startActivity(i);
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
 
             }
         }).execute(RemotePath.VendaPath);
+
     }
 
     public void onClickBtnFinanceiro(View v){
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
-        new DownloadJSONFeedTask(this, new Runnable() {
+
+        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
 
             @Override
-            public void run() {
+            public void run(Response response) {
                 progressDlg.dismiss();
 
-                Intent i = new Intent(getBaseContext(), FinanceiroActivity.class);
-                startActivity(i);
+                switch(response.getStatus()){
+                    case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
+
+                        Intent i = new Intent(getBaseContext(), FinanceiroActivity.class);
+                        startActivity(i);
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(),
+                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                }
 
             }
         }).execute(RemotePath.CaixaPath);

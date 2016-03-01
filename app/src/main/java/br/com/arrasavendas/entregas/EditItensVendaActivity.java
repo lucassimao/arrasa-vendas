@@ -26,7 +26,7 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 
-import br.com.arrasavendas.DownloadJSONFeedTask;
+import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.model.ItemVenda;
@@ -202,7 +202,7 @@ public class EditItensVendaActivity extends Activity {
 
                 if (response.getStatus() == HttpURLConnection.HTTP_OK) {
                     // atualizando o estoque e a lista de vendas
-                    new DownloadJSONFeedTask(EditItensVendaActivity.this, null).
+                    new DownloadJSONAsyncTask(EditItensVendaActivity.this, null).
                             execute(RemotePath.EstoquePath);
 
                     ContentValues cv = new ContentValues();

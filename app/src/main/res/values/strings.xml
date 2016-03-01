@@ -14,4 +14,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_edit_itens_venda">EditItensVendaActivity</string>
+
+    <string name="connection_error_msg">
+        Erro ao conectar ao servidor, verifique sua conexão com a internet
+    </string>
+
 </resources>

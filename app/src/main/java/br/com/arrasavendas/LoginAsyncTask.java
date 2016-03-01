@@ -3,14 +3,14 @@ package br.com.arrasavendas;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import br.com.arrasavendas.util.Response;
@@ -21,14 +21,13 @@ import br.com.arrasavendas.util.Response;
 public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha, Void, Response> {
 
 
-    private final Runnable onSuccessfullLoginListener, onUnSuccessfullLoginListener;
-    private final Context context;
+    private final OnLogin listener;
+    private final Context ctx;
 
-    public LoginAsyncTask(Runnable onSuccessfullLoginListener, Runnable onUnSuccessfullLoginListener, Context ctx) {
+    public LoginAsyncTask(OnLogin listener, Context ctx) {
         super();
-        this.onSuccessfullLoginListener = onSuccessfullLoginListener;
-        this.onUnSuccessfullLoginListener = onUnSuccessfullLoginListener;
-        this.context = ctx;
+        this.listener = listener;
+        this.ctx = ctx;
     }
 
     @Override
@@ -41,6 +40,7 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha, Void, R
 
             httpConnection.setDoInput(true);
             httpConnection.setDoOutput(true);
+            httpConnection.setConnectTimeout(5000);
             httpConnection.setRequestMethod("POST");
             httpConnection.setUseCaches(false);
             httpConnection.setRequestProperty("Content-Type", "application/json");
@@ -57,52 +57,51 @@ public class LoginAsyncTask extends AsyncTask<LoginAsyncTask.LoginSenha, Void, R
             dos.flush();
             dos.close();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+            int responseCode = httpConnection.getResponseCode();
+            Response response = null;
+            BufferedReader reader = null;
+            InputStreamReader in = null;
             StringBuilder stringBuilder = new StringBuilder();
-            String line = null;
 
+
+            if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                in = new InputStreamReader(httpConnection.getInputStream());
+            } else {
+                in = new InputStreamReader(httpConnection.getErrorStream());
+            }
+
+            reader = new BufferedReader(in);
+            String line = null;
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
             }
 
             String message = stringBuilder.toString();
-            int responseCode = httpConnection.getResponseCode();
-            Response response = new Response(message, responseCode);
-
+            response = new Response(message, responseCode);
             httpConnection.disconnect();
+
             return response;
 
-        } catch (JSONException e) {
+        } catch (ConnectException | SocketTimeoutException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+            String message = ctx.getString(R.string.connection_error_msg);
+            return new Response(message,-1);
+
+        } catch (Exception e) {
             e.printStackTrace();
+            return new Response(e.getMessage(),-1);
         }
-        return null;
     }
 
     @Override
     protected void onPostExecute(Response response) {
-        if (response.getStatus() == HttpURLConnection.HTTP_OK) {
-            this.onSuccessfullLoginListener.run();
-            salvarAutenticacao(response.getMessage());
-        } else {
-            this.onUnSuccessfullLoginListener.run();
-        }
+        if (listener != null)
+            listener.run(response);
 
     }
 
-    private void salvarAutenticacao(String json) {
-
-        Application app = (Application) context.getApplicationContext();
-
-        try {
-            JSONObject obj = new JSONObject(json);
-            app.salvarToken(obj.getString("username"), obj.getString("roles"), obj.getString("access_token"));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+    public interface OnLogin {
+        void run(Response response);
     }
 
     static class LoginSenha {

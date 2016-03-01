@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.SalvarVendaAsyncTask.OnComplete;
 
@@ -383,6 +384,15 @@ public class VendaActivity extends Activity {
 
                     if (statusCode == HttpURLConnection.HTTP_CREATED){
                         atualizarEstoque();
+
+                        VendaService service = new VendaService(VendaActivity.this);
+                        try {
+                            service.save(new JSONObject(response.getMessage()));
+                        } catch (JSONException e) {
+                            // fail silently
+                            e.printStackTrace();
+                        }
+
                         Toast.makeText(getBaseContext(), "Venda salva!", Toast.LENGTH_LONG).show();
                         finish();
                     }else{

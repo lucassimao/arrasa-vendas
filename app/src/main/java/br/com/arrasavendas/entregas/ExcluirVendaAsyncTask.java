@@ -44,7 +44,7 @@ public class ExcluirVendaAsyncTask extends AsyncTask<Void, Void, Response> {
 
         Application app = Application.getInstance();
         String accessToken = app.getAccessToken();
-        String entityPath = RemotePath.VendaPath.getEntityPath(RemotePath.VendaPath, -1*vendaId);
+        String entityPath = RemotePath.VendaPath.getEntityPath(RemotePath.VendaPath, vendaId);
 
         try {
             URL url = new URL(entityPath);
