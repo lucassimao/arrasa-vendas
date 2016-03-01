@@ -36,8 +36,12 @@ public class VendaService {
     }
 
     public void update(Long id,JSONObject venda) throws JSONException {
+        delete(id);
+        save(venda);
+    }
+
+    public void delete(Long id) {
         Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
         ctx.getContentResolver().delete(uri, null,null);
-        save(venda);
     }
 }

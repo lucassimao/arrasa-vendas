@@ -280,22 +280,25 @@ public class EntregasActivity extends Activity {
                         new ExcluirVendaAsyncTask(venda.getId(), new ExcluirVendaAsyncTask.OnComplete() {
 
                             @Override
-                            public void run(HttpResponse response) {
+                            public void run(Response response) {
                                 dlg.dismiss();
 
-                                int statusCode = response.getStatusLine().getStatusCode();
+                                int statusCode = response.getStatus();
 
-                                switch (statusCode) {
-                                    case HttpStatus.SC_NO_CONTENT:
-                                        vendasListAdapter.removerVenda(venda);
-                                        Toast.makeText(EntregasActivity.this, "Venda excluida com sucesso!", Toast.LENGTH_LONG).show();
-                                        break;
-                                    case HttpStatus.SC_UNPROCESSABLE_ENTITY:
-                                        Toast.makeText(EntregasActivity.this, "Erro ao excluir activity_venda!", Toast.LENGTH_LONG).show();
-                                        break;
-                                    default:
-                                        Toast.makeText(EntregasActivity.this, "Erro " + statusCode, Toast.LENGTH_SHORT).show();
+                                if (statusCode == HttpURLConnection.HTTP_NO_CONTENT) {
+
+                                    VendaService service = new VendaService(EntregasActivity.this);
+                                    service.delete(venda.getId());
+                                    vendasListAdapter.removerVenda(venda);
+
+                                    Toast.makeText(EntregasActivity.this, "Venda excluida!",
+                                            Toast.LENGTH_LONG).show();
+                                }  else {
+                                    Toast.makeText(EntregasActivity.this,
+                                            "Erro " + statusCode +": " + response.getMessage(),
+                                            Toast.LENGTH_LONG).show();
                                 }
+
                                 actionMode.finish();
 
                             }
