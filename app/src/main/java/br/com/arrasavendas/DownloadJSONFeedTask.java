@@ -1,7 +1,6 @@
 package br.com.arrasavendas;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -9,13 +8,6 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +16,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.Normalizer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import br.com.arrasavendas.financeiro.FinanceiroDAO;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
@@ -48,7 +41,7 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
     @Override
     protected Void doInBackground(RemotePath... params) {
 
-        for(RemotePath remotePath : params) {
+        for (RemotePath remotePath : params) {
 
             try {
 
@@ -128,31 +121,33 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
             String accessToken = app.getAccessToken();
             Long lastUpdated = getLastUpdated(feed);
 
-            Log.d("DownloadJSONFeedTask",feed + " lastUpdated for " + feed + ": " +lastUpdated);
+            Log.d("DownloadJSONFeedTask", feed + " lastUpdated for " + feed + ": " + lastUpdated);
 
             Uri uri = Uri.parse(feed.getUrl()).
-                                buildUpon().
-                                appendQueryParameter("lastUpdated",lastUpdated.toString()).
-                                build();
+                    buildUpon().
+                    appendQueryParameter("lastUpdated", lastUpdated.toString()).
+                    build();
 
-            HttpClient client = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(uri.toString());
-            httpGet.setHeader("Accept", "application/json");
-            httpGet.setHeader("Authorization", "Bearer " + accessToken);
+            URL url = new URL(uri.toString());
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoInput(true);
+            connection.setDoOutput(false);
+            connection.setUseCaches(false);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+            connection.connect();
 
-            HttpResponse response = client.execute(httpGet);
-            StatusLine statusLine = response.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
+            int statusCode = connection.getResponseCode();
 
             switch (statusCode) {
-                case HttpStatus.SC_OK:
+                case HttpURLConnection.HTTP_OK:
                     StringBuilder stringBuilder = new StringBuilder();
-                    HttpEntity entity = response.getEntity();
 
-                    InputStream content = entity.getContent();
+                    InputStream content = connection.getInputStream();
                     BufferedReader reader;
                     reader = new BufferedReader(new InputStreamReader(content));
-                    String line;
+                    String line = null;
 
                     while ((line = reader.readLine()) != null) {
                         stringBuilder.append(line);
@@ -161,13 +156,13 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
                     String json = stringBuilder.toString();
 
                     Log.d("DownloadJSONFeedTask",
-                            "Download concluido: " + json.getBytes().length + " bytes de " + uri.toString() );
+                            "Download concluido: " + json.getBytes().length +
+                                    " bytes de " + uri.toString());
 
                     return json;
 
-                case HttpStatus.SC_NO_CONTENT:
-                    Log.d("DownloadJSONFeedTask",feed + " não precisa ser atualizado");
-
+                case HttpURLConnection.HTTP_NO_CONTENT:
+                    Log.d("DownloadJSONFeedTask", feed + " não precisa ser atualizado");
                     return null;
             }
 
@@ -177,10 +172,10 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
 
     private Long getLastUpdated(RemotePath feed) {
 
-        String coluna=null;
+        String coluna = null;
         Uri contentUri = null;
 
-        switch(feed){
+        switch (feed) {
             case EstoquePath:
                 coluna = EstoqueProvider.LAST_UPDATED_TIMESTAMP;
                 contentUri = EstoqueProvider.CONTENT_URI;
@@ -198,16 +193,16 @@ public class DownloadJSONFeedTask extends AsyncTask<RemotePath, Void, Void> {
                 return 0L;
         }
 
-        String[] projection = {String.format("MAX(%s)",coluna)};
+        String[] projection = {String.format("MAX(%s)", coluna)};
         ContentResolver contentResolver = this.ctx.getContentResolver();
-        Cursor cursor = contentResolver.query(contentUri,projection,null,null,null);
+        Cursor cursor = contentResolver.query(contentUri, projection, null, null, null);
         cursor.moveToFirst();
 
-        if (cursor.getCount() > 0){
+        if (cursor.getCount() > 0) {
             long timestamp = cursor.getLong(0);
             cursor.close();
             return timestamp;
-        }else
+        } else
             return 0L;
     }
 

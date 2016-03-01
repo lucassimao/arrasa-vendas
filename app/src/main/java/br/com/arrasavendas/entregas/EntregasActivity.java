@@ -23,8 +23,6 @@ import android.widget.DatePicker;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -146,7 +144,7 @@ public class EntregasActivity extends Activity {
 
                 try {
                     JSONObject obj = new JSONObject();
-                    obj.put("dataEntrega",sdf.format(novaDataDeEntrega.getTime()));
+                    obj.put("dataEntrega", sdf.format(novaDataDeEntrega.getTime()));
 
                     new UpdateVendaAsyncTask(vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
 
@@ -155,7 +153,7 @@ public class EntregasActivity extends Activity {
                             dlg.dismiss();
                             int statusCode = response.getStatus();
 
-                            if (statusCode == HttpURLConnection.HTTP_OK){
+                            if (statusCode == HttpURLConnection.HTTP_OK) {
                                 try {
                                     VendaService service = new VendaService(getApplicationContext());
                                     JSONObject venda = new JSONObject(response.getMessage());
@@ -172,7 +170,7 @@ public class EntregasActivity extends Activity {
                                     String string = "Erro :" + response.getMessage();
                                     Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
                                 }
-                            }else{
+                            } else {
                                 String string = "Erro " + statusCode + ": " + response.getMessage();
                                 Toast.makeText(EntregasActivity.this, string, Toast.LENGTH_LONG).show();
                             }
@@ -293,9 +291,9 @@ public class EntregasActivity extends Activity {
 
                                     Toast.makeText(EntregasActivity.this, "Venda excluida!",
                                             Toast.LENGTH_LONG).show();
-                                }  else {
+                                } else {
                                     Toast.makeText(EntregasActivity.this,
-                                            "Erro " + statusCode +": " + response.getMessage(),
+                                            "Erro " + statusCode + ": " + response.getMessage(),
                                             Toast.LENGTH_LONG).show();
                                 }
 
