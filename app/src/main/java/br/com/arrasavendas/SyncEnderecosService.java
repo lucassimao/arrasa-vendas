@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -41,18 +42,19 @@ public class SyncEnderecosService extends IntentService {
 
                 String accessToken = app.getAccessToken();
                 String login = app.getCurrentUser();
-                long lastTimestamp = getLastTimestamp();
+                Long lastTimestamp = getLastTimestamp();
                 String path = RemotePath.EnderecosPath.getUrl();
-                String url = String.format("%s?lastDownloadedTimestamp=%d&login=%s", path, lastTimestamp,login);
+                Uri uri = Uri.parse(path).buildUpon().
+                        appendQueryParameter("lastDownloadedTimestamp",lastTimestamp.toString()).
+                        appendQueryParameter("login",login).build();
 
                 Log.d(":: SyncEnderecos :: ", "Timestamp do ultimo cliente: " + lastTimestamp);
 
-                HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                HttpURLConnection connection = (HttpURLConnection) new URL(uri.toString()).openConnection();
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-                connection.setReadTimeout(15000);
-                connection.setConnectTimeout(1500);
+                connection.setConnectTimeout(5000);
                 connection.setDoInput(true);
                 connection.setDoOutput(false);
                 connection.setUseCaches(false);
