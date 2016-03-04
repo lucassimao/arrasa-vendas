@@ -7,8 +7,11 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -66,18 +69,24 @@ public class SalvarMovimentoDeCaixaAsyncTask extends AsyncTask<Void, Void, Respo
             dos.flush();
             dos.close();
 
-            for(String s :httpConnection.getHeaderFields().keySet())
-                Log.d("HEADERS",s + ": " + httpConnection.getHeaderField(s));
-
-            String headerField = httpConnection.getHeaderField("Last-Modified");
-            long lastModifiedTimestamp = 0;
-            if (!TextUtils.isEmpty(headerField))
-                lastModifiedTimestamp = Long.valueOf(headerField);
-
-            String message = httpConnection.getResponseMessage();
+            InputStreamReader isr = null;
+            BufferedReader br = null;
+            String line = null;
+            StringBuilder sb = new StringBuilder();
             int responseCode = httpConnection.getResponseCode();
-            Response response = new Response(message,responseCode,lastModifiedTimestamp);
 
+
+            if (responseCode == HttpURLConnection.HTTP_CREATED)
+                isr = new InputStreamReader(httpConnection.getInputStream());
+            else
+                isr = new InputStreamReader(httpConnection.getErrorStream());
+
+            br = new BufferedReader(isr);
+            while( (line=br.readLine())!=null)
+                sb.append(line);
+
+
+            Response response = new Response(sb.toString(),responseCode);
             httpConnection.disconnect();
 
             return response;

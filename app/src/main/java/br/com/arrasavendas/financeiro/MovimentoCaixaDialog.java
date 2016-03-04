@@ -19,6 +19,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
@@ -94,10 +97,14 @@ public class MovimentoCaixaDialog extends DialogFragment {
 
                                     String msg = "Movimento salvo!";
                                     if (response.getStatus() == HttpURLConnection.HTTP_CREATED) {
-                                        dao.addMovimento(mc, response.getLastModified());
+                                        try {
+                                            dao.addMovimento(new JSONObject(response.getMessage()));
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
                                     } else {
-                                        msg = String.format("Erro ao salvar movimento: %s (%d)",
-                                                response.getMessage(), response.getStatus());
+                                        msg = String.format("Erro %d: (%s)",
+                                                response.getStatus(),response.getMessage());
                                     }
                                     Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
 

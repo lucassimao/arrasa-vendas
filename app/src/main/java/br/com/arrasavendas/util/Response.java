@@ -8,21 +8,15 @@ import java.net.HttpURLConnection;
 public class Response {
     private String message;
     private int status;
-    private long lastModified;
 
     public Response() {
-        this("",-1,0);
     }
 
     public Response(String message, int status) {
-        this(message,status,0);
-    }
-
-    public Response(String message, int status, long lastModified) {
         this.message = message;
         this.status = status;
-        this.lastModified = lastModified;
     }
+
 
     public String getMessage() {
         return message;
@@ -40,20 +34,12 @@ public class Response {
         this.status = status;
     }
 
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
-    }
 
     @Override
     public String toString() {
         return "Response{" +
                 "message='" + message + '\'' +
                 ", status=" + status +
-                ", lastModified=" + lastModified +
                 '}';
     }
 }

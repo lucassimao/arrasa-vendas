@@ -239,14 +239,14 @@ public class FinanceiroDAO extends Observable implements Serializable {
         return movimentos;
     }
 
-    public boolean addMovimento(MovimentoCaixa mc,long lastUpdatedTimestamp){
+    public boolean addMovimento(JSONObject mc){
         try {
             JSONObject obj = getJSONObject();
             JSONArray movs = obj.getJSONArray("movimentos");
-            movs.put(mc.toJSONObject());
+            movs.put(mc);
 
             // atualizando o last_updated das informações financeiras
-            obj.put("last_updated",lastUpdatedTimestamp);
+            obj.put("last_updated",mc.getLong("lastUpdated"));
 
             deleteAll();
             save(obj.toString());
