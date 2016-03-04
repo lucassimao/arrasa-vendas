@@ -5,9 +5,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,13 +19,11 @@ import java.util.regex.Pattern;
 
 public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String, String>> {
 
-    private final Context ctx;
-    private String cep;
+    private static final String XML_PATTERN = "<Valor>(.*?)</Valor>.*<Erro>(.*?)</Erro>.*<MsgErro>(.*?)</MsgErro>";
     private OnComplete onComplete;
 
-    public ConsultarFreteAsyncTask(Context ctx, OnComplete onComplete) {
+    public ConsultarFreteAsyncTask(OnComplete onComplete) {
         this.onComplete = onComplete;
-        this.ctx = ctx;
     }
 
     @Override
@@ -37,17 +38,17 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
 
             return map;
 
-        } catch (IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
             map.put("Erro", e.getMessage());
             return map;
         }
     }
 
-    private String calcularValorPAC(String cep) throws IllegalArgumentException {
+    private String calcularValorPAC(String cep) throws IllegalArgumentException, IOException {
         String xml = makeRequest(cep, "41106");
 
-        Pattern pattern = Pattern.compile("<Valor>(.*?)</Valor>.*<Erro>(.*?)</Erro>.*<MsgErro>(.*?)</MsgErro>");
+        Pattern pattern = Pattern.compile(XML_PATTERN);
         Matcher matcher = pattern.matcher(xml);
         if (matcher.find()) {
             String valor = matcher.group(1);
@@ -63,10 +64,10 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
         }
     }
 
-    private String calcularValorSEDEX(String cep) throws IllegalArgumentException {
+    private String calcularValorSEDEX(String cep) throws IllegalArgumentException, IOException {
         String xml = makeRequest(cep, "40010");
 
-        Pattern pattern = Pattern.compile("<Valor>(.*?)</Valor>.*<Erro>(.*?)</Erro>.*<MsgErro>(.*?)</MsgErro>");
+        Pattern pattern = Pattern.compile(XML_PATTERN);
         Matcher matcher = pattern.matcher(xml);
         if (matcher.find()) {
             String valor = matcher.group(1);
@@ -82,48 +83,47 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
         }
     }
 
-    private String makeRequest(String sCepDestino, String codigoServico) {
-
-        try {
-
-            Uri uri = Uri.parse("http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx").
-                    buildUpon().appendQueryParameter("nCdServico", codigoServico).
-                    appendQueryParameter("sCepOrigem", "64023620").
-                    appendQueryParameter("sCepDestino", sCepDestino.replace("-", "")).
-                    appendQueryParameter("nVlPeso", "1").
-                    appendQueryParameter("nCdFormato", "1").
-                    appendQueryParameter("nVlComprimento", "30").
-                    appendQueryParameter("nVlAltura", "30").
-                    appendQueryParameter("nVlLargura", "30").
-                    appendQueryParameter("sCdMaoPropria", "N").
-                    appendQueryParameter("nVlValorDeclarado", "0").
-                    appendQueryParameter("sCdAvisoRecebimento", "N").
-                    appendQueryParameter("StrRetorno", "xml").build();
-
-            URL url = new URL(uri.toString());
-            HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-            httpConnection.setDoInput(true);
-            httpConnection.setDoOutput(true);
-            httpConnection.setRequestMethod("GET");
-            httpConnection.setUseCaches(false);
-            httpConnection.connect();
+    private String makeRequest(String sCepDestino, String codigoServico) throws IOException {
 
 
-            StringBuilder stringBuilder = new StringBuilder();
+        Uri uri = Uri.parse("http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx").
+                buildUpon().appendQueryParameter("nCdServico", codigoServico).
+                appendQueryParameter("sCepOrigem", "64023620").
+                appendQueryParameter("sCepDestino", sCepDestino.replace("-", "")).
+                appendQueryParameter("nVlPeso", "1").
+                appendQueryParameter("nCdFormato", "1").
+                appendQueryParameter("nVlComprimento", "30").
+                appendQueryParameter("nVlAltura", "30").
+                appendQueryParameter("nVlLargura", "30").
+                appendQueryParameter("sCdMaoPropria", "N").
+                appendQueryParameter("nVlValorDeclarado", "0").
+                appendQueryParameter("sCdAvisoRecebimento", "N").
+                appendQueryParameter("StrRetorno", "xml").build();
 
-            InputStream content = httpConnection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-            String line;
+        URL url = new URL(uri.toString());
+        HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+        httpConnection.setDoInput(true);
+        httpConnection.setDoOutput(false);
+        httpConnection.setConnectTimeout(4000);
+        httpConnection.setRequestMethod("GET");
+        httpConnection.setUseCaches(false);
+        httpConnection.connect();
 
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStream inputStream = null;
+        String line;
 
-            return stringBuilder.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+        if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK)
+            inputStream = httpConnection.getInputStream();
+        else
+            inputStream = httpConnection.getErrorStream();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line);
         }
+
+        return stringBuilder.toString();
     }
 
     @Override

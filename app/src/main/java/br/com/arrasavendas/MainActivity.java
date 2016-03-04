@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
                 final String cep = input.getText().toString();
 
                 final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "Consultando Frete", "Aguarde ...");
-                new ConsultarFreteAsyncTask(getApplicationContext(), new ConsultarFreteAsyncTask.OnComplete() {
+                new ConsultarFreteAsyncTask(new ConsultarFreteAsyncTask.OnComplete() {
 
                     @Override
                     public void run(Map<String, String> fretesMap) {
