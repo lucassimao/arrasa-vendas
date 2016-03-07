@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,19 +31,17 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
-import br.com.arrasavendas.estoque.EstoqueExpandableListAdapter;
 import br.com.arrasavendas.model.Cliente;
-import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
+import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.VendasProvider;
 import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
@@ -204,17 +203,19 @@ public class EntregasActivity extends Activity {
         startActivityForResult(intent, EDIT_ITENS_VENDA_RESULT);
     }
 
-    void showEditClienteDialog() {
-        EditClienteDialog dlg = new EditClienteDialog();
+    void showEditVendaDialog() {
+        EditVendaDialog dlg = new EditVendaDialog();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(EditClienteDialog.VENDA, this.vendaSelecionada);
+        bundle.putSerializable(EditVendaDialog.VENDA, this.vendaSelecionada);
         dlg.setArguments(bundle);
 
 
-        dlg.setClienteDialogListener(new EditClienteDialog.ClienteDialogListener() {
+        dlg.setClienteDialogListener(new EditVendaDialog.EditVendaDialogListener() {
 
             @Override
-            public void onPositiveClick(final Cliente updatedCliente, final TurnoEntrega turnoEntrega, final StatusVenda statusVenda) {
+            public void onPositiveClick(final Cliente updatedCliente,
+                                        final TurnoEntrega turnoEntrega,
+                                        final StatusVenda statusVenda, final Vendedor vendedor) {
 
                 final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando activity_venda", "Aguarde ...");
                 JSONObject obj = new JSONObject();
@@ -223,6 +224,13 @@ public class EntregasActivity extends Activity {
                     obj.put("cliente", updatedCliente.toJson());
                     obj.put("turnoEntrega", turnoEntrega.name());
                     obj.put("status", statusVenda.name());
+
+                    if (vendedor != null){
+                        JSONObject vendedorJSONObj = new JSONObject();
+                        vendedorJSONObj.put("id", vendedor.getId());
+                        obj.put("vendedor", vendedorJSONObj);
+                    }else
+                        obj.put("vendedor","null");
 
                     new UpdateVendaAsyncTask(vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
 
@@ -237,7 +245,17 @@ public class EntregasActivity extends Activity {
                                 vendaSelecionada.setCliente(updatedCliente);
                                 vendaSelecionada.setTurnoEntrega(turnoEntrega);
                                 vendaSelecionada.setStatus(statusVenda);
+                                vendaSelecionada.setVendedor(vendedor);
                                 vendasListAdapter.refreshView();
+
+                                VendaService service = new VendaService(getApplication());
+                                try {
+                                    JSONObject object = new JSONObject(response.getMessage());
+                                    service.update(vendaSelecionada.getId(), object);
+                                } catch (JSONException e) {
+                                    // se der pau, no prox acesso o sistema baixa novamente
+                                    e.printStackTrace();
+                                }
 
                                 Toast.makeText(EntregasActivity.this, "Venda atualizada com sucesso!", Toast.LENGTH_LONG).show();
                                 actionMode.finish();

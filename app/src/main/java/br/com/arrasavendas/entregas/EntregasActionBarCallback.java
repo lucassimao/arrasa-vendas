@@ -37,7 +37,7 @@ class EntregasActionBarCallback implements ActionMode.Callback {
     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.edit_address:
-                entregasActivity.showEditClienteDialog();
+                entregasActivity.showEditVendaDialog();
                 break;
             case R.id.update_data_entrega:
                 entregasActivity.updateDataEntrega();

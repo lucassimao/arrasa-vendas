@@ -15,40 +15,30 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.LinkedList;
 
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
+import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.ClientesProvider;
 
-public class EditClienteDialog extends DialogFragment {
+public class EditVendaDialog extends DialogFragment implements DialogInterface.OnClickListener {
 
     public static final String VENDA = "EditClienteDialog.activity_venda";
-
-    public interface ClienteDialogListener {
-        void onPositiveClick(Cliente cliente, TurnoEntrega turnoEntrega, StatusVenda statusVenda);
-    }
-
-    private enum TipoBusca{
-        Celular, Telefone;
-    }
-
-    private ClienteDialogListener clienteDialogListener;
-    private Venda venda;
-    private Spinner spinnerTurnoEntrega;
-
+    private EditVendaDialogListener clienteDialogListener;
     private SelectClienteDialog.SelectClienteDialogListener listener = new SelectClienteDialog.SelectClienteDialogListener() {
         @Override
         public void onOK(Cliente cliente) {
             carregarCliente(cliente);
         }
     };
-
     View.OnTouchListener onTouchListener = new View.OnTouchListener() {
         final int DRAWABLE_LEFT = 0;
         final int DRAWABLE_TOP = 1;
@@ -65,7 +55,7 @@ public class EditClienteDialog extends DialogFragment {
 
                 if (event.getRawX() >= leftEdgeOfRightDrawable) {
                     String text = editText.getText().toString();
-                    TipoBusca tipoBusca = (editText.getId() == R.id.editTextTelefone)?TipoBusca.Telefone:TipoBusca.Celular;
+                    TipoBusca tipoBusca = (editText.getId() == R.id.editTextTelefone) ? TipoBusca.Telefone : TipoBusca.Celular;
                     LinkedList<Cliente> list = procurarCliente(text, tipoBusca);
 
                     if (list != null) {
@@ -76,9 +66,8 @@ public class EditClienteDialog extends DialogFragment {
                         dlg.setArguments(bundle);
 
                         dlg.show(getFragmentManager(), "selectClienteDialog");
-                    }else
+                    } else
                         Toast.makeText(getActivity(), "Nenhum cliente encontrado", Toast.LENGTH_SHORT).show();
-
 
 
                     return true;
@@ -88,6 +77,40 @@ public class EditClienteDialog extends DialogFragment {
         }
     };
 
+    /**
+     * CLICK do botao OK da janela
+     * @param dialog
+     * @param which
+     */
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        if (clienteDialogListener != null) {
+
+            Cliente updatedCliente = getUpdatedCliente();
+            Dialog view = getDialog();
+
+            Spinner spinnerTurnoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
+            TurnoEntrega turnoEntrega = TurnoEntrega.valueOf(spinnerTurnoEntrega.getSelectedItem().toString());
+
+            CheckBox checkBoxJaPagou = (CheckBox) view.findViewById(R.id.cbJaPagou);
+            StatusVenda statusVenda = (checkBoxJaPagou.isChecked()) ? StatusVenda.PagamentoRecebido : StatusVenda.AguardandoPagamento;
+
+            Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
+            Vendedor vendedor = getVenda().getVendedor();
+
+            if (Application.getInstance().isAdmin()){
+                try {
+                    vendedor = Vendedor.valueOf(spVendedor.getSelectedItem().toString());
+                } catch (IllegalArgumentException e) {
+                    // se arremessar exceção significa que o item selecionado foi "Site"
+                    e.printStackTrace();
+                    vendedor = null;
+                }
+            }
+
+            clienteDialogListener.onPositiveClick(updatedCliente, turnoEntrega, statusVenda,vendedor);
+        }
+    }
 
     private void carregarCliente(Cliente cliente) {
 
@@ -103,39 +126,21 @@ public class EditClienteDialog extends DialogFragment {
 
     }
 
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        final View view = inflater.inflate(R.layout.dialog_edit_cliente,null);
+        final View view = inflater.inflate(R.layout.dialog_edit_venda, null);
 
-        builder.setView(view).setTitle("Editar Cliente")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (clienteDialogListener != null) {
-
-                            final Cliente updatedCliente = getUpdatedCliente();
-
-                            Spinner spinnerTurnoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
-                            TurnoEntrega turnoEntrega = TurnoEntrega.valueOf(spinnerTurnoEntrega.getSelectedItem().toString());
-
-                            CheckBox checkBoxJaPagou = (CheckBox) view.findViewById(R.id.cbJaPagou);
-                            StatusVenda statusVenda = (checkBoxJaPagou.isChecked()) ? StatusVenda.PagamentoRecebido : StatusVenda.AguardandoPagamento;
-
-                            clienteDialogListener.onPositiveClick(updatedCliente, turnoEntrega, statusVenda);
-                        }
-                    }
-                })
+        builder.setView(view).setTitle("Editar Venda")
+                .setPositiveButton("OK", this)
                 .setNegativeButton("Cancelar",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                EditClienteDialog.this.getDialog().cancel();
+                                getDialog().cancel();
                             }
                         });
-
 
 
         EditText editTextTelefone = (EditText) view.findViewById(R.id.editTextTelefone);
@@ -144,11 +149,39 @@ public class EditClienteDialog extends DialogFragment {
         EditText editTextCelular = (EditText) view.findViewById(R.id.editTextCelular);
         editTextCelular.setOnTouchListener(onTouchListener);
 
-        spinnerTurnoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
-        configurarSpinnerTurnoEntrega();
+        configurarSpinnerTurnoEntrega(view);
+        configurarSpinnerVendedor(view);
 
 
         return builder.create();
+    }
+
+    private void configurarSpinnerVendedor(View view) {
+        if (Application.getInstance().isAdmin()) {
+            TextView txtVendedor = (TextView) view.findViewById(R.id.txtVendedor);
+            txtVendedor.setVisibility(View.VISIBLE);
+
+            Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
+            spVendedor.setVisibility(View.VISIBLE);
+
+            String[] vendedores = {Vendedor.Adna.name(), Vendedor.Lucas.name(),
+                    Vendedor.MariaClara.name(), "Site"};
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
+                    android.R.layout.simple_spinner_dropdown_item, vendedores);
+            spVendedor.setAdapter(adapter);
+
+            Vendedor vendedor = getVenda().getVendedor();
+            int position = 0;
+
+            if (vendedor != null)
+                position = adapter.getPosition(vendedor.name().toString());
+            else
+                position = 3; // indice no array do item "Site"
+
+            spVendedor.setSelection(position);
+
+        }
     }
 
     @Override
@@ -162,25 +195,25 @@ public class EditClienteDialog extends DialogFragment {
 
     private LinkedList<Cliente> procurarCliente(String text, TipoBusca tipoBusca) {
 
-        if ( text == null || text.trim().length() == 0)
+        if (text == null || text.trim().length() == 0)
             return null;
 
         LinkedList<Cliente> list = null;
         ContentResolver contentResolver = getActivity().getContentResolver();
         String selection = null;
 
-        if (tipoBusca == TipoBusca.Telefone ) {
+        if (tipoBusca == TipoBusca.Telefone) {
             selection = ClientesProvider.TELEFONE + " LIKE ?";
-        }else{
+        } else {
             selection = ClientesProvider.CELULAR + " LIKE ?";
         }
 
         String[] selectionArgs = {"%" + text + "%"};
-        Cursor cursor = contentResolver.query(ClientesProvider.CONTENT_URI, null,selection, selectionArgs, ClientesProvider.NOME);
+        Cursor cursor = contentResolver.query(ClientesProvider.CONTENT_URI, null, selection, selectionArgs, ClientesProvider.NOME);
         cursor.moveToFirst();
 
-        if(cursor.getCount()>0) {
-            list =  new LinkedList<>();
+        if (cursor.getCount() > 0) {
+            list = new LinkedList<>();
 
             do {
 
@@ -204,21 +237,23 @@ public class EditClienteDialog extends DialogFragment {
         return list;
     }
 
-    private void configurarSpinnerTurnoEntrega() {
+    private void configurarSpinnerTurnoEntrega(View view) {
+        Spinner spTunoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
         String[] turnos = {TurnoEntrega.Manha.name(), TurnoEntrega.Tarde.name()};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_dropdown_item_1line, turnos);
-        spinnerTurnoEntrega.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
+                android.R.layout.simple_dropdown_item_1line, turnos);
 
+        spTunoEntrega.setAdapter(adapter);
         int position = adapter.getPosition(getVenda().getTurnoEntrega().name());
-        spinnerTurnoEntrega.setSelection(position);
+        spTunoEntrega.setSelection(position);
 
     }
 
     private Venda getVenda() {
-        return (Venda) getArguments().get(EditClienteDialog.VENDA);
+        return (Venda) getArguments().get(EditVendaDialog.VENDA);
     }
 
-    public void setClienteDialogListener(ClienteDialogListener clienteDialogListener) {
+    public void setClienteDialogListener(EditVendaDialogListener clienteDialogListener) {
         this.clienteDialogListener = clienteDialogListener;
     }
 
@@ -248,6 +283,15 @@ public class EditClienteDialog extends DialogFragment {
         updatedCliente.setBairro(editTextBairro.getText().toString());
 
         return updatedCliente;
+    }
+
+    private enum TipoBusca {
+        Celular, Telefone;
+    }
+
+    public interface EditVendaDialogListener {
+        void onPositiveClick(Cliente cliente, TurnoEntrega turnoEntrega,
+                             StatusVenda statusVenda,Vendedor vendedor);
     }
 
 }
