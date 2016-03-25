@@ -119,12 +119,7 @@ public class DownloadJSONAsyncTask extends AsyncTask<RemotePath, Void, Response>
 
         for (int i = 0; i < itens.length(); ++i) {
             JSONObject venda = itens.getJSONObject(i);
-
-            // se nao for para outra cidade
-            if (!venda.isNull("dataEntrega")) {
-                service.save(venda);
-            }
-
+            service.save(venda);
         }
 
     }

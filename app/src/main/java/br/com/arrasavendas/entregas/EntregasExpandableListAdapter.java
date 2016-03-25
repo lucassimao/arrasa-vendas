@@ -14,13 +14,11 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -42,25 +40,24 @@ import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.ItemVenda;
-import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.ServicoCorreios;
+import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.VendasProvider;
 
 public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
+    private static final long CORREIOS_KEY = Long.MAX_VALUE;
     private final int BLUE_LUCAS;
     private final int PINK_ADNA;
     private final int AMARELO_MCLARA;
-
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - EEEE", Locale.getDefault());
     private Map<Long, List<Venda>> vendasPorDataDeEntrega;
     private List<Long> datasDeEntregas;
-
     private LayoutInflater inflater;
     private Context ctx;
     private List<Venda> vendas;
-    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - EEEE", Locale.getDefault());
     private Cursor cursor;
 
     public EntregasExpandableListAdapter(Context ctx) {
@@ -75,7 +72,6 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
         datasDeEntregas = new LinkedList<>();
         vendasPorDataDeEntrega = new HashMap<>();
-
     }
 
     private void processarVendas() {
@@ -91,15 +87,26 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
         for (Venda v : vendas) {
             Date dataEntrega = v.getDataEntrega();
+            long time = 0;
 
-            Calendar c = GregorianCalendar.getInstance(TimeZone.getTimeZone("Etc/UTC"));
-            c.setTime(dataEntrega);
-            c.set(Calendar.HOUR_OF_DAY, 0);
-            c.set(Calendar.MINUTE, 0);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
+            if (dataEntrega != null) {
 
-            long time = c.getTimeInMillis();
+                Calendar c = GregorianCalendar.getInstance(TimeZone.getTimeZone("Etc/UTC"));
+                c.setTime(dataEntrega);
+                c.set(Calendar.HOUR_OF_DAY, 0);
+                c.set(Calendar.MINUTE, 0);
+                c.set(Calendar.SECOND, 0);
+                c.set(Calendar.MILLISECOND, 0);
+
+                time = c.getTimeInMillis();
+
+            } else {
+                // se a data de entrega da venda é nula, usa uma chave especial
+                // para indexar vendas p/ outras cidades
+                time = CORREIOS_KEY;
+
+            }
+
 
             if (!datasDeEntregas.contains(time)) {
                 datasDeEntregas.add(time);
@@ -109,9 +116,12 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
             vendasPorDataDeEntrega.get(time).add(v);
         }
 
-        Collections.sort(datasDeEntregas);
-        Collections.reverse(datasDeEntregas);
-
+        Collections.sort(datasDeEntregas, new Comparator<Long>() {
+            @Override
+            public int compare(Long lhs, Long rhs) {
+                return -1 * lhs.compareTo(rhs);  // ordem decrescente
+            }
+        });
         ordenarVendas();
     }
 
@@ -132,14 +142,14 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 @Override
                 public int compare(Venda venda, Venda venda2) {
 
-                    if (!venda.isFlagVaiBuscar() && !venda2.isFlagVaiBuscar()){
+                    if (!venda.isFlagVaiBuscar() && !venda2.isFlagVaiBuscar()) {
 
                         if (venda.getTurnoEntrega() == venda2.getTurnoEntrega())
                             return 0;
                         else
                             return venda.getTurnoEntrega().equals(TurnoEntrega.Tarde) ? 1 : -1;
 
-                    }else {
+                    } else {
                         return Boolean.valueOf(venda.isFlagVaiBuscar()).compareTo(venda2.isFlagVaiBuscar());
                     }
 
@@ -203,16 +213,16 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
             txtTurno.setText(venda.getTurnoEntrega().name());
 
             imgCustomerPickUp.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             txtTurno.setVisibility(View.INVISIBLE);
 
             imgCustomerPickUp.setVisibility(View.VISIBLE);
 
             Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.customer_pick_up);
-            if (!venda.isFlagJaBuscou()){
+            if (!venda.isFlagJaBuscou()) {
                 Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
                 imgCustomerPickUp.setBackground(dimmedIcon);
-            }else
+            } else
                 imgCustomerPickUp.setBackground(originalIcon);
         }
 
@@ -268,9 +278,14 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public Object getGroup(int groupPosition) {
         Long time = datasDeEntregas.get(groupPosition);
-        Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Etc/UTC"));
-        c.setTimeInMillis(time);
-        return sdf.format(c.getTime());
+
+        if (time == CORREIOS_KEY)
+            return "CORREIOS";
+        else {
+            Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Etc/UTC"));
+            c.setTimeInMillis(time);
+            return sdf.format(c.getTime());
+        }
     }
 
     @Override
@@ -288,25 +303,22 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                              View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater
-                    .inflate(R.layout.list_row_group_venda, null);
+            convertView = inflater.inflate(R.layout.list_row_group_venda, null);
         }
-        String dataEntrega = (String) getGroup(groupPosition);
-        ((CheckedTextView) convertView).setText(dataEntrega);
+        String text = (String) getGroup(groupPosition);
+        ((CheckedTextView) convertView).setText(text);
         ((CheckedTextView) convertView).setChecked(isExpanded);
         return convertView;
     }
 
     @Override
     public boolean hasStableIds() {
-        // TODO Auto-generated method stub
         return false;
     }
 
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -323,14 +335,17 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
         List<Venda> vendas = new LinkedList<Venda>();
 
-        if (cursor!=null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
 
                 Venda v = new Venda();
 
                 Calendar dataEntrega = Calendar.getInstance();
-                dataEntrega.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(VendasProvider.DATA_ENTREGA)));
-                v.setDataEntrega(dataEntrega.getTime());
+                long aLong = cursor.getLong(cursor.getColumnIndex(VendasProvider.DATA_ENTREGA));
+                if (aLong > 0) {
+                    dataEntrega.setTimeInMillis(aLong);
+                    v.setDataEntrega(dataEntrega.getTime());
+                } // deixa null a data de entrega das vendas para outras cidades
 
                 v.setId(cursor.getLong(cursor.getColumnIndex(VendasProvider._ID)));
                 v.setVendedor(cursor.getString(cursor.getColumnIndex(VendasProvider.VENDEDOR)));
@@ -338,8 +353,8 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 String formaPagamento = cursor.getString(cursor.getColumnIndex(VendasProvider.FORMA_PAGAMENTO));
                 v.setFormaDePagamento(FormaPagamento.valueOf(formaPagamento));
 
-                int abatimento = cursor.getInt(cursor.getColumnIndex(VendasProvider.ABATIMENTO));
-                v.setAbatimentoEmCentavos(abatimento);
+                int abatimentoEmCentavos = cursor.getInt(cursor.getColumnIndex(VendasProvider.ABATIMENTO));
+                v.setAbatimentoEmCentavos(abatimentoEmCentavos);
 
                 String status = cursor.getString(cursor.getColumnIndex(VendasProvider.STATUS));
                 v.setStatus(StatusVenda.valueOf(status));
@@ -349,16 +364,16 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
                 String tipoFrete = cursor.getString(cursor.getColumnIndex(VendasProvider.SERVICO_CORREIOS));
                 if (!TextUtils.isEmpty(tipoFrete.trim()))
-                 v.setServicoCorreios(ServicoCorreios.valueOf(tipoFrete));
+                    v.setServicoCorreios(ServicoCorreios.valueOf(tipoFrete));
 
                 v.setFreteEmCentavos(cursor.getLong(cursor.getColumnIndex(VendasProvider.FRETE)));
                 v.setCodigoRastreio(cursor.getString(cursor.getColumnIndex(VendasProvider.CODIGO_RASTREIO)));
 
                 int flagVaiBuscar = cursor.getInt(cursor.getColumnIndex(VendasProvider.FLAG_VAI_BUSCAR));
-                v.setFlagVaiBuscar(flagVaiBuscar==1);
+                v.setFlagVaiBuscar(flagVaiBuscar == 1);
 
                 int flagJaBuscou = cursor.getInt(cursor.getColumnIndex(VendasProvider.FLAG_JA_BUSCOU));
-                v.setFlagJaBuscou(flagJaBuscou==1);
+                v.setFlagJaBuscou(flagJaBuscou == 1);
 
 
                 try {
