@@ -207,13 +207,11 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public boolean hasStableIds() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -222,14 +220,13 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
         Map<Long, String[]> selecionados = new HashMap<>();
 
         for (int i = 0; i < produtos.size(); ++i) {
-            Produto item = produtos.get(i);
-            int qtdeUnidades = item.getUnidades().size();
+            Produto produto = produtos.get(i);
+            int qtdeUnidades = produto.getUnidades().size();
             Set<String> set = new HashSet<>();
 
             for (int j = 0; j < qtdeUnidades; ++j) {
-                String unidade = item.getUnidades().get(j);
-                // so envia quem tiver marcado e tiver ao menos 1 item em estoque
-                if (this.unidadesSelecionadas.get(i)[j] && produtos.get(i).getQuantidades().get(unidade) > 0) {
+                if (this.unidadesSelecionadas.get(i)[j]) {
+                    String unidade = produto.getUnidades().get(j);
                     set.add(unidade);
                 }
             }
@@ -237,7 +234,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
             if (set.size() > 0) {
                 String[] unidades = new String[set.size()];
                 set.toArray(unidades);
-                selecionados.put(item.getId(), unidades);
+                selecionados.put(produto.getId(), unidades);
             }
         }
 
