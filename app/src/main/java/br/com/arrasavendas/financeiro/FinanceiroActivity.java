@@ -1,12 +1,10 @@
 package br.com.arrasavendas.financeiro;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,7 +32,7 @@ public class FinanceiroActivity extends AppCompatActivity implements Observer {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.financeiro_activity);
+        setContentView(R.layout.activity_financeiro);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         this.dao = new FinanceiroDAO(this);

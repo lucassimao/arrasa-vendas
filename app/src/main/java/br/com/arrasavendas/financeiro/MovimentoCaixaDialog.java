@@ -55,7 +55,7 @@ public class MovimentoCaixaDialog extends DialogFragment {
         Bundle args = getArguments();
         this.dao = (FinanceiroDAO) args.get(FinanceiroActivity.FINANCEIRO_DAO);
 
-        final View view = inflater.inflate(R.layout.movimento_caixa_dialog, null);
+        final View view = inflater.inflate(R.layout.dialog_movimento_caixa, null);
         edtTxtDescricao = (EditText) view.findViewById(R.id.editTxtDescricao);
         radioGrpFormaPagamento = (RadioGroup) view.findViewById(R.id.radioGrpFormaPagamento);
         radioGrpTipoMovimento = (RadioGroup) view.findViewById(R.id.radioGroupTipoMovimento);

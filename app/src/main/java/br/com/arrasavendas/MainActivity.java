@@ -69,22 +69,24 @@ public class MainActivity extends Activity {
                 new ConsultarFreteAsyncTask(new ConsultarFreteAsyncTask.OnComplete() {
 
                     @Override
-                    public void run(Map<String, String> fretesMap) {
+                    public void run(Map response) {
                         progressDialog.dismiss();
 
                         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
                         alert.setTitle("Valor do frete para " + cep);
 
-                        if (fretesMap != null) {
-                            String fretesAsString = fretesMap.toString().replace("}", "").replace("{", "");
+                        if (!response.containsKey(ConsultarFreteAsyncTask.ERROR_FIELD)) {
+                            String fretesAsString = response.toString().replace("}", "").replace("{", "");
 
-                            ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = android.content.ClipData.newPlainText("fretesMap", fretesAsString);
+                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("response", fretesAsString);
                             clipboard.setPrimaryClip(clip);
 
                             alert.setMessage(fretesAsString);
-                        } else
-                            alert.setMessage("Serviço dos correios indisponível");
+                        } else {
+                            String msg = (String) response.get(ConsultarFreteAsyncTask.ERROR_FIELD);
+                            alert.setMessage(msg);
+                        }
 
                         alert.setPositiveButton("OK", null);
                         alert.show();

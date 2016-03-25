@@ -1,6 +1,5 @@
 package br.com.arrasavendas;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -8,17 +7,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String, String>> {
+import br.com.arrasavendas.model.ServicoCorreios;
 
+public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map> {
+
+    public static final String ERROR_FIELD = "Erro";
     private static final String XML_PATTERN = "<Valor>(.*?)</Valor>.*<Erro>(.*?)</Erro>.*<MsgErro>(.*?)</MsgErro>";
     private OnComplete onComplete;
 
@@ -27,20 +28,23 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
     }
 
     @Override
-    protected Map<String, String> doInBackground(String... params) {
+    protected Map doInBackground(String... params) {
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map map = new HashMap();
 
         try {
             String cepDestino = params[0];
-            map.put("PAC", calcularValorPAC(cepDestino));
-            map.put("SEDEX", calcularValorSEDEX(cepDestino));
+            String valor = calcularValorPAC(cepDestino).replace(",", ".");
+            map.put(ServicoCorreios.PAC, new BigDecimal(valor));
+
+            valor = calcularValorSEDEX(cepDestino).replace(",", ".");
+            map.put(ServicoCorreios.SEDEX, new BigDecimal(valor));
 
             return map;
 
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
-            map.put("Erro", e.getMessage());
+            map.put(ERROR_FIELD, e.getMessage());
             return map;
         }
     }
@@ -100,6 +104,7 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
                 appendQueryParameter("sCdAvisoRecebimento", "N").
                 appendQueryParameter("StrRetorno", "xml").build();
 
+
         URL url = new URL(uri.toString());
         HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
         httpConnection.setDoInput(true);
@@ -127,14 +132,14 @@ public class ConsultarFreteAsyncTask extends AsyncTask<String, Void, Map<String,
     }
 
     @Override
-    protected void onPostExecute(Map<String, String> fretes) {
+    protected void onPostExecute(Map response) {
         if (this.onComplete != null) {
-            onComplete.run(fretes);
+            onComplete.run(response);
         }
     }
 
     public interface OnComplete {
-        void run(Map<String, String> response);
+        void run(Map response);
     }
 
 

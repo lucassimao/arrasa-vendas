@@ -120,6 +120,7 @@ public class DownloadJSONAsyncTask extends AsyncTask<RemotePath, Void, Response>
         for (int i = 0; i < itens.length(); ++i) {
             JSONObject venda = itens.getJSONObject(i);
 
+            // se nao for para outra cidade
             if (!venda.isNull("dataEntrega")) {
                 service.save(venda);
             }
@@ -220,17 +221,17 @@ public class DownloadJSONAsyncTask extends AsyncTask<RemotePath, Void, Response>
                 return 0L;
         }
 
+        long timestamp = 0;
         String[] projection = {String.format("MAX(%s)", coluna)};
         ContentResolver contentResolver = this.ctx.getContentResolver();
         Cursor cursor = contentResolver.query(contentUri, projection, null, null, null);
         cursor.moveToFirst();
 
-        if (cursor.getCount() > 0) {
-            long timestamp = cursor.getLong(0);
-            cursor.close();
-            return timestamp;
-        } else
-            return 0L;
+        if (cursor.getCount() > 0)
+            timestamp = cursor.getLong(0);
+
+        cursor.close();
+        return timestamp;
     }
 
     protected void onPostExecute(Response result) {

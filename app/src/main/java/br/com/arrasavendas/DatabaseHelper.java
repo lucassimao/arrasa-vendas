@@ -7,15 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 58;
+	private static final int DATABASE_VERSION = 65;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String CREATE_TABLE_VENDAS = "create table "
 			+ TABLE_VENDAS
 			+ "(_id integer primary key, vendedor_id integer not null, carrinho text not null,"
-			+ " data_entrega integer not null, forma_pagamento text null,status text null," +
-			"turno text null, cliente text not null, anexos_json_array text," +
-			"last_updated_timestamp integer);";
+			+ " data_entrega integer not null, forma_pagamento text null,status text null,flag_vai_buscar integer,flag_ja_buscou integer," +
+			"turno text null, cliente text not null, anexos_json_array text,abatimento integer," +
+			"last_updated_timestamp integer,servico_correios text,frete text,codigo_rastreio text);";
 
 	public static final String TABLE_ESTOQUE = "ESTOQUE";
 	private static final String CREATE_TABLE_ESTOQUE = "create table "
@@ -51,6 +51,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			+ TABLE_FINANCEIRO
 			+ "(_id integer primary key, json text not null)";
 
+
+
+	public static final String TABLE_CIDADE = "CIDADE";
+	private static final String CREATE_TABLE_CIDADE = "create table "
+			+ TABLE_CIDADE
+			+ "(_id integer primary key, nome text not null,uf text not null)";
+
     public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -65,6 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_INDEX_TELEFONE);
         db.execSQL(CREATE_INDEX_CELULAR);
 		db.execSQL(CREATE_TABLE_FINANCEIRO);
+		db.execSQL(CREATE_TABLE_CIDADE);
 
 	}
 
@@ -75,6 +83,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_ESTOQUE);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLIENTES);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_FINANCEIRO);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_FINANCEIRO);
+
 
 		onCreate(db);
 	}

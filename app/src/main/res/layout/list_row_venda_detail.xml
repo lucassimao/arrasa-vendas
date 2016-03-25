@@ -33,18 +33,25 @@
 
         <TextView
             android:id="@+id/txtTurno"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:gravity="right"
             android:layout_gravity="right"
             android:layout_height="wrap_content"
+            android:visibility="invisible"
             android:textColor="#D13408"
             android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/image_customer_pick_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            />
 
         <TextView
             android:id="@+id/txtValor"
             android:layout_width="0dp"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:textColor="#267F0F"
@@ -58,10 +65,11 @@
         android:layout_width="64px"
         android:layout_height="64px"
         android:src="@drawable/paperclip3_black"
-        android:layout_below="@+id/linear_layout"
+        android:layout_below="@id/linear_layout"
         android:layout_alignParentLeft="true"
         android:visibility="invisible"
         android:layout_alignParentStart="true" />
+
 
     <TextView
         android:id="@+id/txtItensVenda"

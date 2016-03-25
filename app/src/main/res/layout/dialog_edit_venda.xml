@@ -1,149 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="10dip"
-    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:orientation="horizontal">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="textCapWords"
-            android:text="Nome:" />
-
-        <EditText
-            android:id="@+id/editTextNome"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DDD:" />
-
-        <EditText
-            android:id="@+id/editTextDDDTelefone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Telefone:" />
-
-        <EditText
-            android:id="@+id/editTextTelefone"
-            android:layout_width="fill_parent"
-            android:drawableRight="@android:drawable/ic_menu_search"
-            android:layout_height="wrap_content"
-            android:inputType="number" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DDD:" />
-
-        <EditText
-            android:inputType="number"
-            android:id="@+id/editTextDDDCelular"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Celular:" />
-
-        <EditText
-            android:inputType="number"
-            android:drawableRight="@android:drawable/ic_menu_search"
-            android:id="@+id/editTextCelular"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dip"
-            android:text="Turno:" />
-
-        <Spinner
-            android:id="@+id/spinnerTurnoEntrega"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp" />
-
-        <CheckBox
-            android:id="@+id/cbJaPagou"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:text="Já Pagou" />
-    </LinearLayout>
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtVendedor"
-        android:visibility="invisible"
-        android:layout_marginLeft="10dip"
-        android:text="Vendedor:" />
-
-    <Spinner
-        android:id="@+id/spVendedor"
-        android:visibility="invisible"
-        android:layout_height="40dp"
+    <android.support.design.widget.TabLayout
+        android:id="@+id/sliding_tabs"
+        style="@style/MyCustomTabLayout"
         android:layout_width="match_parent"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:text="Endereço:" />
+        app:tabGravity="center"
+        app:tabMode="scrollable"/>
 
-    <EditText
-        android:id="@+id/editTextEndereco"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_below="@id/sliding_tabs"
+        android:background="@android:color/white"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:text="Bairro:" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_below="@id/pager"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight=".5"
+            android:id="@+id/btn_cancelar"
+            android:text="Cancelar"
+            android:layout_height="wrap_content" />
 
-    <EditText
-        android:id="@+id/editTextBairro"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight=".5"
+            android:id="@+id/btn_ok"
+            android:text="OK"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
-</LinearLayout>
+
+</RelativeLayout>
+
+
+
+
+
+
+

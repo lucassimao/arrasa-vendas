@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Venda implements Serializable{
+public class Venda implements Serializable,Cloneable{
 	
 	private Long id;
 	private Date dataEntrega;
@@ -15,9 +15,47 @@ public class Venda implements Serializable{
 	private List<ItemVenda> itens;
     private FormaPagamento formaDePagamento;
     private StatusVenda status;
+    private ServicoCorreios servicoCorreios;
     private TurnoEntrega turnoEntrega;
     private Double taxaEntrega = 2d;
     private String[] anexos;
+    private int abatimento;
+    private boolean flagVaiBuscar;
+    private boolean flagJaBuscou;
+    private long freteEmCentavos;
+    private String codigoRastreio;
+
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        // deep copy
+        Venda v = (Venda) super.clone();
+        v.cliente = (Cliente) cliente.clone();
+        v.itens = new LinkedList<>();
+
+        for(ItemVenda i: this.itens)
+            v.addToItens((ItemVenda) i.clone());
+
+        return v;
+    }
+
+
+
+    public ServicoCorreios getServicoCorreios() {
+        return servicoCorreios;
+    }
+
+    public void setServicoCorreios(ServicoCorreios servicoCorreios) {
+        this.servicoCorreios = servicoCorreios;
+    }
+
+    public long getFreteEmCentavos() {
+        return freteEmCentavos;
+    }
+
+    public void setFreteEmCentavos(long freteEmCentavos) {
+        this.freteEmCentavos = freteEmCentavos;
+    }
 
     public Date getDataEntrega() {
 		return dataEntrega;
@@ -60,7 +98,15 @@ public class Venda implements Serializable{
 
 	}
 
-	public Long getId() {
+    public boolean isFlagVaiBuscar() {
+        return flagVaiBuscar;
+    }
+
+    public void setFlagVaiBuscar(boolean flagVaiBuscar) {
+        this.flagVaiBuscar = flagVaiBuscar;
+    }
+
+    public Long getId() {
 		return id;
 	}
 
@@ -116,7 +162,7 @@ public class Venda implements Serializable{
     }
 
     public Double getValorTotal() {
-        BigDecimal valorTotal = BigDecimal.valueOf(taxaEntrega);
+        BigDecimal valorTotal = (flagVaiBuscar)?BigDecimal.ZERO:BigDecimal.valueOf(taxaEntrega);
         BigDecimal subTotal = null;
 
         for(ItemVenda item: itens){
@@ -132,7 +178,7 @@ public class Venda implements Serializable{
             }
         }
 
-        return valorTotal.doubleValue();
+        return valorTotal.doubleValue() - getAbatimentoEmReais();
     }
 
     public boolean contemItem(Long produtoID, String unidade) {
@@ -152,5 +198,33 @@ public class Venda implements Serializable{
 
     public void setAnexos(String[] anexos) {
         this.anexos = anexos;
+    }
+
+    public void setAbatimentoEmCentavos(int abatimento) {
+        this.abatimento = abatimento;
+    }
+
+    public int getAbatimentoEmCentavos() {
+        return abatimento;
+    }
+
+    public double getAbatimentoEmReais(){
+        return this.abatimento/100.0;
+    }
+
+    public String getCodigoRastreio() {
+        return codigoRastreio;
+    }
+
+    public void setCodigoRastreio(String codigoRastreio) {
+        this.codigoRastreio = codigoRastreio;
+    }
+
+    public void setFlagJaBuscou(boolean flagJaBuscou) {
+        this.flagJaBuscou = flagJaBuscou;
+    }
+
+    public boolean isFlagJaBuscou() {
+        return flagJaBuscou;
     }
 }

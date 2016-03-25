@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dip">
+
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Envio: " />
+
+        <Spinner
+            android:id="@+id/spinner_envio"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="CEP:" />
+
+        <EditText
+            android:id="@+id/edit_text_cep"
+            android:inputType="number"
+            android:maxLength="8"
+            android:minEms="5"
+            android:layout_height="wrap_content" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Frete:" />
+
+        <EditText
+            android:id="@+id/edit_text_frete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal" />
+
+        <Button android:text="Calcular"
+            android:layout_width="wrap_content"
+            android:id="@+id/btn_calcular_frete"
+            android:layout_height="wrap_content"/>
+    </TableRow>
+
+
+    <TableRow>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Rastreio:" />
+
+        <EditText
+            android:id="@+id/edit_text_rastreio"
+            android:layout_width="match_parent"
+            android:layout_span="2"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters" />
+    </TableRow>
+
+</TableLayout>

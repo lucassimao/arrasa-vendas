@@ -1,10 +1,11 @@
 package br.com.arrasavendas.entregas;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.LoaderManager;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -22,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.ExpandableListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -37,21 +40,19 @@ import java.util.TimeZone;
 import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
-import br.com.arrasavendas.model.Cliente;
-import br.com.arrasavendas.model.StatusVenda;
-import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.VendasProvider;
 import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
+import static br.com.arrasavendas.Application.ENTREGAS_LOADER;
 
 // http://www.technotalkative.com/contextual-action-bar-cab-android/
 
-public class EntregasActivity extends Activity {
+public class EntregasActivity extends FragmentActivity {
 
-    private static final int ENTREGAS_LOADER = 1;
     private static final int EDIT_ITENS_VENDA_RESULT = 1;
+    private static final int MENU_SEARCH = 0;
     Venda vendaSelecionada = null;
     View vendaSelecionadaView = null;
     private ActionMode actionMode = null;
@@ -66,7 +67,6 @@ public class EntregasActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (resultCode == RESULT_OK && requestCode == EDIT_ITENS_VENDA_RESULT) {
-
             if (actionMode != null) {
                 actionMode.finish();
                 actionMode = null;
@@ -77,6 +77,17 @@ public class EntregasActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Bundle bundle = new Bundle();
+            bundle.putString("query",query);
+            getLoaderManager().restartLoader(ENTREGAS_LOADER, bundle, entregasCursorCallback);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entregas);
@@ -84,7 +95,7 @@ public class EntregasActivity extends Activity {
 
         getLoaderManager().initLoader(ENTREGAS_LOADER, null, entregasCursorCallback);
 
-        vendasListAdapter = new EntregasExpandableListAdapter(this, null);
+        vendasListAdapter = new EntregasExpandableListAdapter(this);
         list = (ExpandableListView) findViewById(R.id.listItemsEntregas);
         list.setAdapter(vendasListAdapter);
 
@@ -204,35 +215,62 @@ public class EntregasActivity extends Activity {
     }
 
     void showEditVendaDialog() {
-        EditVendaDialog dlg = new EditVendaDialog();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(EditVendaDialog.VENDA, this.vendaSelecionada);
-        dlg.setArguments(bundle);
+        Venda clone = null;
+
+        // clonando a venda p/ que os Fragmentos de edição
+        // da venda possam atualizar livrimente os dados da venda
+        // Caso a atualizaçao seja cancelada, o clone eh simplismente
+        // descartado
+        try {
+            clone = (Venda) this.vendaSelecionada.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        EditVendaDialog dlg = EditVendaDialog.newInstance(clone);
 
 
-        dlg.setClienteDialogListener(new EditVendaDialog.EditVendaDialogListener() {
+        dlg.setListener(new EditVendaDialog.Listener() {
 
             @Override
-            public void onPositiveClick(final Cliente updatedCliente,
-                                        final TurnoEntrega turnoEntrega,
-                                        final StatusVenda statusVenda, final Vendedor vendedor) {
+            public void onOK(final Venda updatedVenda) {
 
-                final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando activity_venda", "Aguarde ...");
+                final ProgressDialog dlg = ProgressDialog.show(EntregasActivity.this, "Atualizando Venda", "Aguarde ...");
                 JSONObject obj = new JSONObject();
 
                 try {
-                    obj.put("cliente", updatedCliente.toJson());
-                    obj.put("turnoEntrega", turnoEntrega.name());
-                    obj.put("status", statusVenda.name());
+                    obj.put("cliente", updatedVenda.getCliente().toJson());
+                    obj.put("abatimentoEmCentavos", updatedVenda.getAbatimentoEmCentavos());
+                    obj.put("formaPagamento", updatedVenda.getFormaDePagamento().name());
+                    obj.put("turnoEntrega", updatedVenda.getTurnoEntrega().name());
+                    obj.put("status", updatedVenda.getStatus().name());
+                    obj.put("flagClienteVaiBuscar", updatedVenda.isFlagVaiBuscar());
+                    obj.put("flagClienteJaBuscou", updatedVenda.isFlagJaBuscou());
 
-                    if (vendedor != null){
+                    if (updatedVenda.getServicoCorreios() == null)
+                        obj.put("servicoCorreio", "");
+                    else
+                        obj.put("servicoCorreio", updatedVenda.getServicoCorreios().name());
+
+                    obj.put("freteEmCentavos", updatedVenda.getFreteEmCentavos());
+                    obj.put("codigoRastreio", updatedVenda.getCodigoRastreio());
+
+
+                    Vendedor vendedor = updatedVenda.getVendedor();
+                    if (vendedor != null) {
                         JSONObject vendedorJSONObj = new JSONObject();
                         vendedorJSONObj.put("id", vendedor.getId());
                         obj.put("vendedor", vendedorJSONObj);
-                    }else
-                        obj.put("vendedor","null");
+                    } else
+                        obj.put("vendedor", "null"); // site
 
-                    new UpdateVendaAsyncTask(vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
+//                    Log.d(getClass().getName(), RemotePath.getEntityPath(RemotePath.VendaPath,vendaSelecionada.getId()));
+//                    Log.d(getClass().getName(), obj.toString(1));
+
+
+                    new UpdateVendaAsyncTask(EntregasActivity.this.vendaSelecionada.getId(), obj, new UpdateVendaAsyncTask.OnComplete() {
 
                         @Override
                         public void run(Response response) {
@@ -242,16 +280,25 @@ public class EntregasActivity extends Activity {
 
                             if (statusCode == HttpURLConnection.HTTP_OK) {
 
-                                vendaSelecionada.setCliente(updatedCliente);
-                                vendaSelecionada.setTurnoEntrega(turnoEntrega);
-                                vendaSelecionada.setStatus(statusVenda);
-                                vendaSelecionada.setVendedor(vendedor);
+                                EntregasActivity.this.vendaSelecionada.setCliente(updatedVenda.getCliente());
+                                EntregasActivity.this.vendaSelecionada.setTurnoEntrega(updatedVenda.getTurnoEntrega());
+                                EntregasActivity.this.vendaSelecionada.setFormaDePagamento(updatedVenda.getFormaDePagamento());
+                                EntregasActivity.this.vendaSelecionada.setStatus(updatedVenda.getStatus());
+                                EntregasActivity.this.vendaSelecionada.setAbatimentoEmCentavos(updatedVenda.getAbatimentoEmCentavos());
+                                EntregasActivity.this.vendaSelecionada.setVendedor(updatedVenda.getVendedor());
+                                EntregasActivity.this.vendaSelecionada.setServicoCorreios(updatedVenda.getServicoCorreios());
+                                EntregasActivity.this.vendaSelecionada.setFreteEmCentavos(updatedVenda.getFreteEmCentavos());
+                                EntregasActivity.this.vendaSelecionada.setCodigoRastreio(updatedVenda.getCodigoRastreio());
+                                EntregasActivity.this.vendaSelecionada.setFlagVaiBuscar(updatedVenda.isFlagVaiBuscar());
+                                EntregasActivity.this.vendaSelecionada.setFlagJaBuscou(updatedVenda.isFlagJaBuscou());
+
                                 vendasListAdapter.refreshView();
 
                                 VendaService service = new VendaService(getApplication());
+
                                 try {
                                     JSONObject object = new JSONObject(response.getMessage());
-                                    service.update(vendaSelecionada.getId(), object);
+                                    service.update(EntregasActivity.this.vendaSelecionada.getId(), object);
                                 } catch (JSONException e) {
                                     // se der pau, no prox acesso o sistema baixa novamente
                                     e.printStackTrace();
@@ -280,8 +327,7 @@ public class EntregasActivity extends Activity {
 
         });
 
-
-        dlg.show(getFragmentManager(), "tag");
+        dlg.show(getSupportFragmentManager(), "editVenda");
     }
 
     void excluirVenda() {
@@ -340,7 +386,7 @@ public class EntregasActivity extends Activity {
             public void run(Response response) {
                 progressDlg.dismiss();
 
-                switch(response.getStatus()){
+                switch (response.getStatus()) {
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_NO_CONTENT:
                         getLoaderManager().restartLoader(ENTREGAS_LOADER, null,
@@ -348,7 +394,7 @@ public class EntregasActivity extends Activity {
                         break;
                     default:
                         Toast.makeText(getApplicationContext(),
-                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                "Erro " + response.getStatus() + ": " + response.getMessage(),
                                 Toast.LENGTH_LONG).show();
                 }
 
@@ -372,6 +418,32 @@ public class EntregasActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.entregas_activity_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        MenuItem mSearchMenu = menu.findItem(R.id.search);
+
+        mSearchMenu.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true; // Return true to expand action view
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                getLoaderManager().restartLoader(ENTREGAS_LOADER, null, entregasCursorCallback);
+                return true; // Return true to collapse action view
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -384,7 +456,15 @@ public class EntregasActivity extends Activity {
     private class EntregasCursorCallback implements LoaderManager.LoaderCallbacks<Cursor> {
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             if (id == ENTREGAS_LOADER) {
-                return new CursorLoader(getApplicationContext(), VendasProvider.CONTENT_URI, null, null, null, VendasProvider.DATA_ENTREGA);
+                String selection = null;
+                String[] selectionArgs = null;
+                if (args!=null){
+                    selection = VendasProvider.CLIENTE +" LIKE ?";
+                    String query = args.getString("query");
+                    selectionArgs = new String[]{"%"+ query +"%,\"dddCelular\"%"};
+                }
+                return new CursorLoader(getApplicationContext(),
+                        VendasProvider.CONTENT_URI, null, selection, selectionArgs, VendasProvider.DATA_ENTREGA);
             }
             return null;
         }

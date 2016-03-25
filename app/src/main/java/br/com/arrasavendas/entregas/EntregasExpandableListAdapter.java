@@ -1,14 +1,13 @@
 package br.com.arrasavendas.entregas;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -38,10 +38,12 @@ import java.util.TimeZone;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.model.StatusVenda;
+import br.com.arrasavendas.model.ServicoCorreios;
 import br.com.arrasavendas.model.TurnoEntrega;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.VendasProvider;
@@ -61,7 +63,7 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - EEEE", Locale.getDefault());
     private Cursor cursor;
 
-    public EntregasExpandableListAdapter(Context ctx, Cursor cursor) {
+    public EntregasExpandableListAdapter(Context ctx) {
         this.ctx = ctx;
         sdf.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
         this.inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -71,7 +73,8 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         this.PINK_ADNA = resources.getColor(R.color.pinkAdna);
         this.AMARELO_MCLARA = resources.getColor(R.color.amareloMClara);
 
-        processarVendas();
+        datasDeEntregas = new LinkedList<>();
+        vendasPorDataDeEntrega = new HashMap<>();
 
     }
 
@@ -80,7 +83,6 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         this.vendas = getData();
         atualizarDatasDeEntregas();
         notifyDataSetChanged();
-
     }
 
     public void atualizarDatasDeEntregas() {
@@ -130,10 +132,17 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 @Override
                 public int compare(Venda venda, Venda venda2) {
 
-                    if (venda.getTurnoEntrega() == venda2.getTurnoEntrega())
-                        return 0;
-                    else
-                        return venda.getTurnoEntrega().equals(TurnoEntrega.Tarde) ? 1 : -1;
+                    if (!venda.isFlagVaiBuscar() && !venda2.isFlagVaiBuscar()){
+
+                        if (venda.getTurnoEntrega() == venda2.getTurnoEntrega())
+                            return 0;
+                        else
+                            return venda.getTurnoEntrega().equals(TurnoEntrega.Tarde) ? 1 : -1;
+
+                    }else {
+                        return Boolean.valueOf(venda.isFlagVaiBuscar()).compareTo(venda2.isFlagVaiBuscar());
+                    }
+
 
                 }
             });
@@ -187,7 +196,25 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         txtValor.setText(String.format("R$ %.2f", venda.getValorTotal()));
 
         TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
-        txtTurno.setText(venda.getTurnoEntrega().name());
+        ImageView imgCustomerPickUp = (ImageView) convertView.findViewById(R.id.image_customer_pick_up);
+
+        if (!venda.isFlagVaiBuscar()) {
+            txtTurno.setVisibility(View.VISIBLE);
+            txtTurno.setText(venda.getTurnoEntrega().name());
+
+            imgCustomerPickUp.setVisibility(View.INVISIBLE);
+        }else{
+            txtTurno.setVisibility(View.INVISIBLE);
+
+            imgCustomerPickUp.setVisibility(View.VISIBLE);
+
+            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.customer_pick_up);
+            if (!venda.isFlagJaBuscou()){
+                Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
+                imgCustomerPickUp.setBackground(dimmedIcon);
+            }else
+                imgCustomerPickUp.setBackground(originalIcon);
+        }
 
         ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
         img.setVisibility(View.INVISIBLE);
@@ -218,14 +245,13 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         ImageView imgPaperclip = (ImageView) convertView.findViewById(R.id.imgPaperclip);
-        if (venda.getAnexos() == null){
+        if (venda.getAnexos() == null) {
             imgPaperclip.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             imgPaperclip.setVisibility(View.VISIBLE);
         }
 
         if (venda.getItens() != null) {
-            RelativeLayout lLayout = (RelativeLayout) convertView.findViewById(R.id.row_layout);
             TextView txtView = (TextView) convertView.findViewById(R.id.txtItensVenda);
             txtView.setText(Html.fromHtml(TextUtils.join("<br>", venda.getItens())));
         }
@@ -287,18 +313,18 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
     public void setCursor(Cursor cursor) {
         this.cursor = cursor;
-        processarVendas();
-        notifyDataSetChanged();
+        if (cursor != null && !cursor.isClosed()) {
+            processarVendas();
+            notifyDataSetChanged();
+        }
     }
 
     private List<Venda> getData() {
 
         List<Venda> vendas = new LinkedList<Venda>();
 
-        if (cursor != null) {
-
-            cursor.moveToFirst();
-            while (cursor.moveToNext()) {
+        if (cursor!=null && cursor.moveToFirst()) {
+            do {
 
                 Venda v = new Venda();
 
@@ -312,11 +338,28 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 String formaPagamento = cursor.getString(cursor.getColumnIndex(VendasProvider.FORMA_PAGAMENTO));
                 v.setFormaDePagamento(FormaPagamento.valueOf(formaPagamento));
 
+                int abatimento = cursor.getInt(cursor.getColumnIndex(VendasProvider.ABATIMENTO));
+                v.setAbatimentoEmCentavos(abatimento);
+
                 String status = cursor.getString(cursor.getColumnIndex(VendasProvider.STATUS));
                 v.setStatus(StatusVenda.valueOf(status));
 
                 String turnoEntrega = cursor.getString(cursor.getColumnIndex(VendasProvider.TURNO_ENTREGA));
                 v.setTurnoEntrega(TurnoEntrega.valueOf(turnoEntrega));
+
+                String tipoFrete = cursor.getString(cursor.getColumnIndex(VendasProvider.SERVICO_CORREIOS));
+                if (!TextUtils.isEmpty(tipoFrete.trim()))
+                 v.setServicoCorreios(ServicoCorreios.valueOf(tipoFrete));
+
+                v.setFreteEmCentavos(cursor.getLong(cursor.getColumnIndex(VendasProvider.FRETE)));
+                v.setCodigoRastreio(cursor.getString(cursor.getColumnIndex(VendasProvider.CODIGO_RASTREIO)));
+
+                int flagVaiBuscar = cursor.getInt(cursor.getColumnIndex(VendasProvider.FLAG_VAI_BUSCAR));
+                v.setFlagVaiBuscar(flagVaiBuscar==1);
+
+                int flagJaBuscou = cursor.getInt(cursor.getColumnIndex(VendasProvider.FLAG_JA_BUSCOU));
+                v.setFlagJaBuscou(flagJaBuscou==1);
+
 
                 try {
 
@@ -337,6 +380,7 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 try {
 
                     JSONObject clienteJSONObj = new JSONObject(cursor.getString(cursor.getColumnIndex(VendasProvider.CLIENTE)));
+//                    Log.d(getClass().getName(),clienteJSONObj.toString());
 
                     Cliente cliente = new Cliente();
                     cliente.setId(clienteJSONObj.getLong("id"));
@@ -349,6 +393,11 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                     JSONObject enderecoJSONObj = clienteJSONObj.getJSONObject("endereco");
                     cliente.setEndereco(enderecoJSONObj.getString("complemento"));
                     cliente.setBairro(enderecoJSONObj.getString("bairro"));
+                    cliente.setCep(enderecoJSONObj.getString("cep"));
+
+                    long idCity = enderecoJSONObj.getJSONObject("cidade").getLong("id");
+                    Cidade cidade = Cidade.fromId(idCity, ctx);
+                    cliente.setCidade(cidade);
 
                     v.setCliente(cliente);
 
@@ -362,26 +411,28 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                         Long produtoID = jsonObj.getLong("produto_id");
                         String unidade = jsonObj.getString("unidade");
                         Integer quantidade = jsonObj.getInt("quantidade");
-                        BigDecimal precoAVistaEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAVistaEmCentavos")/100d);
-                        BigDecimal precoAPrazoEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAPrazoEmCentavos")/100d);
+                        BigDecimal precoAVistaEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAVistaEmCentavos") / 100d);
+                        BigDecimal precoAPrazoEmReais = BigDecimal.valueOf(jsonObj.getDouble("precoAPrazoEmCentavos") / 100d);
 
-                        ItemVenda item = new ItemVenda(id,produtoID, produto, unidade, quantidade, precoAVistaEmReais, precoAPrazoEmReais);
+                        ItemVenda item = new ItemVenda(id, produtoID, produto, unidade, quantidade, precoAVistaEmReais, precoAPrazoEmReais);
                         v.addToItens(item);
                     }
-                    if (v.getItens() == null){
-                        int i=0;
+                    if (v.getItens() == null) {
+                        int i = 0;
                     }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-
                 vendas.add(v);
 
             }
+            while (cursor.moveToNext());
         }
 
         return vendas;
     }
+
+
 }

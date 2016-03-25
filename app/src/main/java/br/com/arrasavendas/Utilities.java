@@ -27,9 +27,34 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URL;
 import java.text.DecimalFormat;
 
 public class Utilities {
+
+
+/*
+    Setando o proxy
+
+    Authenticator authenticator = new Authenticator() {
+
+        public PasswordAuthentication getPasswordAuthentication() {
+            return (new PasswordAuthentication("lucas.simao",
+                    "123456".toCharArray()));
+        }
+    };
+    Authenticator.setDefault(authenticator);
+
+    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.trt22.jus.br", 3128));
+
+    URL url = new URL(uri.toString());
+    HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection(proxy);*/
+
 
     private static final String TAG = "Utilities";
     private static final boolean DEBUG = true;

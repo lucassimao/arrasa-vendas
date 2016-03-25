@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dip">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pagamento:  "
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupFormaPagamento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoAVista"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A Vista" />
+
+            <RadioButton
+                android:id="@+id/radioFormaPagamentoParcelado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Parcelado" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/cbJaPagou"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Já Pagou" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Desconto (R$):  "
+            android:textStyle="bold" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:inputType="numberDecimal"
+            android:id="@+id/edit_text_abatimento"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -2,15 +2,16 @@ package br.com.arrasavendas.entregas;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 
@@ -23,10 +24,19 @@ import br.com.arrasavendas.model.Cliente;
 public class SelectClienteDialog extends DialogFragment {
 
     public static final String CLIENTES = "SelectClienteDialog.clientes";
-    private SelectClienteDialogListener selectClienteDialogListener;
+    private Listener listener;
 
-    public void setSelectClienteDialogListener(SelectClienteDialogListener selectClienteDialogListener) {
-        this.selectClienteDialogListener = selectClienteDialogListener;
+
+    public static SelectClienteDialog newInstance(LinkedList<Cliente> list){
+        SelectClienteDialog dlg = new SelectClienteDialog();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(SelectClienteDialog.CLIENTES, list);
+        dlg.setArguments(bundle);
+        return dlg;
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -58,25 +68,29 @@ public class SelectClienteDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        if (selectClienteDialogListener != null) {
+                        if (listener != null) {
                             int radioButtonId = radioGroup.getCheckedRadioButtonId();
-                            RadioButton selectedRadioButton = (RadioButton) radioGroup.findViewById(radioButtonId);
-                            Cliente clienteSelecionado = (Cliente) selectedRadioButton.getTag();
-                            selectClienteDialogListener.onOK(clienteSelecionado);
+
+                            if (radioButtonId != -1) {
+                                RadioButton selectedRadioButton = (RadioButton) radioGroup.findViewById(radioButtonId);
+                                Cliente clienteSelecionado = (Cliente) selectedRadioButton.getTag();
+                                listener.onOK(clienteSelecionado);
+                            }else
+                                Toast.makeText(getActivity(),"Selecione um dos endereços",Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
                 .setNegativeButton("Cancelar",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                SelectClienteDialog.this.getDialog().cancel();
+                                getDialog().cancel();
                             }
                         }).setTitle("Resultado da Pesquisa");
 
         return builder.create();
     }
 
-    public interface SelectClienteDialogListener {
+    public interface Listener {
         void onOK(Cliente cliente);
     }
 }

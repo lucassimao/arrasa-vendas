@@ -51,8 +51,10 @@ class EntregasActionBarCallback implements ActionMode.Callback {
             case R.id.add_anexo:
                 entregasActivity.adicionarAnexo();
                 break;
+            default:
+                return false;
         }
-        return false;
+        return true;
     }
 
     @Override

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dip"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:text="Nome:" />
+
+        <EditText
+            android:id="@+id/editTextNome"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DDD:" />
+
+        <EditText
+            android:id="@+id/editTextDDDTelefone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Telefone:" />
+
+        <EditText
+            android:id="@+id/editTextTelefone"
+            android:layout_width="fill_parent"
+            android:drawableRight="@android:drawable/ic_menu_search"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DDD:" />
+
+        <EditText
+            android:inputType="number"
+            android:id="@+id/editTextDDDCelular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Celular:" />
+
+        <EditText
+            android:inputType="number"
+            android:drawableRight="@android:drawable/ic_menu_search"
+            android:id="@+id/editTextCelular"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtVendedor"
+        android:visibility="invisible"
+        android:layout_marginTop="5dip"
+        android:text="Vendedor(a):" />
+
+    <Spinner
+        android:id="@+id/spVendedor"
+        android:visibility="invisible"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dip"
+        android:layout_width="match_parent"
+        />
+
+</LinearLayout>

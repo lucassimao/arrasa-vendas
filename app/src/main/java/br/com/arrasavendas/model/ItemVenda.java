@@ -7,7 +7,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ItemVenda implements Serializable {
+public class ItemVenda implements Serializable,Cloneable {
 
 	private Long id;
     private String nomeProduto;
@@ -27,7 +27,12 @@ public class ItemVenda implements Serializable {
 		this.precoAPrazo = precoAPrazo;
 	}
 
-    public Integer getQuantidade() {
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
+	public Integer getQuantidade() {
         return quantidade;
     }
 

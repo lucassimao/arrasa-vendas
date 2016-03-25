@@ -11,13 +11,11 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
 import br.com.arrasavendas.DatabaseHelper;
 
 public class VendasProvider extends ContentProvider {
 
-    private static final String PROVIDER_NAME = VendasProvider.class.getName();
-
-    public static final Uri CONTENT_URI = Uri.parse("content://" + PROVIDER_NAME + "/vendas");
     public final static String _ID = "_id";
     public final static String DATA_ENTREGA = "data_entrega";
     public final static String VENDEDOR = "vendedor_id";
@@ -27,20 +25,27 @@ public class VendasProvider extends ContentProvider {
     public final static String TURNO_ENTREGA = "turno";
     public static final String CARRINHO = "carrinho";
     public static final String LAST_UPDATED_TIMESTAMP = "last_updated_timestamp";
-    public static final String ANEXOS_JSON_ARRAY = "anexos_json_array";
+    public static final String ABATIMENTO = "abatimento";
+    public static final String SERVICO_CORREIOS = "servico_correios";
+    public static final String FRETE = "frete";
+    public static final String CODIGO_RASTREIO = "codigo_rastreio";
+    public static final String FLAG_VAI_BUSCAR = "flag_vai_buscar";
+    public static final String FLAG_JA_BUSCOU = "flag_ja_buscou";
 
+    public static final String ANEXOS_JSON_ARRAY = "anexos_json_array";
+    private static final String PROVIDER_NAME = VendasProvider.class.getName();
+    public static final Uri CONTENT_URI = Uri.parse("content://" + PROVIDER_NAME + "/vendas");
     private static final UriMatcher uriMatcher;
     private static final int VENDAS = 1;
     private static final int VENDA_ID = 2;
-
-
-    private SQLiteDatabase arrasaVendasDb;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(PROVIDER_NAME, "vendas", VENDAS);
         uriMatcher.addURI(PROVIDER_NAME, "vendas/#", VENDA_ID);
     }
+
+    private SQLiteDatabase arrasaVendasDb;
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {

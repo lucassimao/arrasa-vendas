@@ -4,7 +4,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-beta6'
+        classpath 'com.android.tools.build:gradle:2.0.0-beta7'
     }
 }
 
@@ -24,10 +24,10 @@ android {
         }*/
     }
     compileSdkVersion 22
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "23.0.1"
     defaultConfig {
         applicationId "br.com.arrasavendas"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"

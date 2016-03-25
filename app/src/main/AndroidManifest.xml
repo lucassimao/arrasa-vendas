@@ -68,7 +68,15 @@
         <activity
             android:name=".entregas.EntregasActivity"
             android:label="Entregas"
+            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity" >
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/entregas_searchable" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -99,6 +107,11 @@
 
         <service android:name=".SyncEnderecosService" android:exported="false"/>
 
+
+        <provider
+            android:name=".providers.CidadesProvider"
+            android:authorities="br.com.arrasavendas.providers.CidadesProvider"
+            android:exported="false" />
         <provider
             android:name=".providers.ClientesProvider"
             android:authorities="br.com.arrasavendas.providers.ClientesProvider"
