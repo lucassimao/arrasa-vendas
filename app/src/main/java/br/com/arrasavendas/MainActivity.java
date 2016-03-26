@@ -120,7 +120,6 @@ public class MainActivity extends Activity {
                 switch(response.getStatus()){
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_NO_CONTENT:
-
                         startEstoqueActivity();
                         break;
                     default:
@@ -175,7 +174,6 @@ public class MainActivity extends Activity {
                 switch(response.getStatus()){
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_NO_CONTENT:
-
                         Intent i = new Intent(getBaseContext(), EntregasActivity.class);
                         startActivity(i);
                         break;

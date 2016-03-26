@@ -12,4 +12,24 @@
         android:showAsAction="always|withText"
         android:title="Atualizar"
         arrasavendas:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/show_all"
+        android:showAsAction="never"
+        android:title="Exibir Todas"/>
+
+    <item
+        android:id="@+id/show_entregas_por_correios"
+        android:showAsAction="never"
+        android:title="Enviar por correios"/>
+
+    <item
+        android:id="@+id/show_cliente_vai_buscar"
+        android:showAsAction="never"
+        android:title="Cliente vai buscar"/>
+
+    <item
+        android:id="@+id/show_iniciados_e_nao_finalizados"
+        android:showAsAction="never"
+        android:title="Não finalizados"/>
 </menu>

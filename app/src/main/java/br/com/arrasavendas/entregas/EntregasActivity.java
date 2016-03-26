@@ -15,7 +15,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +39,8 @@ import java.util.TimeZone;
 import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.model.FormaPagamento;
+import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.VendasProvider;
@@ -53,6 +54,7 @@ public class EntregasActivity extends FragmentActivity {
 
     private static final int EDIT_ITENS_VENDA_RESULT = 1;
     private static final int MENU_SEARCH = 0;
+    private static final String TIPO_FILTRO = "TIPO_FILTRO";
     Venda vendaSelecionada = null;
     View vendaSelecionadaView = null;
     private ActionMode actionMode = null;
@@ -60,6 +62,7 @@ public class EntregasActivity extends FragmentActivity {
     private EntregasExpandableListAdapter vendasListAdapter;
     private ExpandableListView list;
     private EntregasCursorCallback entregasCursorCallback = new EntregasCursorCallback();
+    private Menu menu;
 
 
     @Override
@@ -83,6 +86,7 @@ public class EntregasActivity extends FragmentActivity {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Bundle bundle = new Bundle();
             bundle.putString("query",query);
+            bundle.putSerializable(TIPO_FILTRO,TipoFiltro.NOME_CLIENTE);
             getLoaderManager().restartLoader(ENTREGAS_LOADER, bundle, entregasCursorCallback);
         }
     }
@@ -173,8 +177,7 @@ public class EntregasActivity extends FragmentActivity {
 
                                     service.update(vendaSelecionada.getId(), venda);
                                     vendaSelecionada.setDataEntrega(novaDataDeEntrega.getTime());
-                                    vendasListAdapter.atualizarDatasDeEntregas();
-                                    vendasListAdapter.notifyDataSetChanged();
+                                    vendasListAdapter.refreshView();
                                     actionMode.finish();
 
                                     Toast.makeText(EntregasActivity.this, "Data de entrega atualizada!", Toast.LENGTH_LONG).show();
@@ -404,14 +407,33 @@ public class EntregasActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        // ocultando o campo de busca
+        menu.findItem(R.id.search).collapseActionView();
+        Bundle bundle = new Bundle();
+
         switch (item.getItemId()) {
             case R.id.sync:
                 sincronizar();
                 return true;
+            case R.id.show_all:
+                vendasListAdapter.setCursor(null);
+                bundle.putSerializable(TIPO_FILTRO,TipoFiltro.TODOS);
+                break;
+            case R.id.show_entregas_por_correios:
+                bundle.putSerializable(TIPO_FILTRO,TipoFiltro.ENTREGAS_POR_CORREIOS);
+                break;
+            case R.id.show_cliente_vai_buscar:
+                bundle.putSerializable(TIPO_FILTRO,TipoFiltro.CLIENTE_VAI_BUSCAR);
+                break;
+            case R.id.show_iniciados_e_nao_finalizados:
+                bundle.putSerializable(TIPO_FILTRO,TipoFiltro.NAO_FINALIZADOS);
+                break;
             default:
                 return super.onOptionsItemSelected(item);
-
         }
+        getLoaderManager().restartLoader(ENTREGAS_LOADER, bundle,entregasCursorCallback);
+        return true;
     }
 
     @Override
@@ -444,6 +466,7 @@ public class EntregasActivity extends FragmentActivity {
             }
         });
 
+        this.menu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -459,9 +482,27 @@ public class EntregasActivity extends FragmentActivity {
                 String selection = null;
                 String[] selectionArgs = null;
                 if (args!=null){
-                    selection = VendasProvider.CLIENTE +" LIKE ?";
-                    String query = args.getString("query");
-                    selectionArgs = new String[]{"%"+ query +"%,\"dddCelular\"%"};
+                    TipoFiltro filtro = (TipoFiltro) args.getSerializable(TIPO_FILTRO);
+                    switch (filtro){
+                        case NOME_CLIENTE:
+                            selection = VendasProvider.CLIENTE +" LIKE ?";
+                            String query = args.getString("query");
+                            selectionArgs = new String[]{"%"+ query +"%,\"dddCelular\"%"};
+                            break;
+                        case ENTREGAS_POR_CORREIOS:
+                            selection = VendasProvider.DATA_ENTREGA +" = ?";
+                            selectionArgs = new String[]{"-1"};
+                            break;
+                        case CLIENTE_VAI_BUSCAR:
+                            selection = VendasProvider.FLAG_VAI_BUSCAR +" = ?";
+                            selectionArgs = new String[]{"1"};
+                            break;
+                        case NAO_FINALIZADOS:
+                            selection = VendasProvider.FORMA_PAGAMENTO +" = ? AND " + VendasProvider.STATUS + "=?";
+                            selectionArgs = new String[]{FormaPagamento.PagSeguro.name(),
+                                    StatusVenda.AguardandoPagamento.name()};
+                            break;
+                    }
                 }
                 return new CursorLoader(getApplicationContext(),
                         VendasProvider.CONTENT_URI, null, selection, selectionArgs, VendasProvider.DATA_ENTREGA);

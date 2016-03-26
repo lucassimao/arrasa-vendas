@@ -160,8 +160,9 @@ public class DownloadJSONAsyncTask extends AsyncTask<RemotePath, Void, Response>
 
                     payload = readStream(connection.getInputStream());
 
+                    int length = payload.getBytes().length;
                     Log.d("DownloadJSONFeedTask",
-                            "Download concluido: " + payload.getBytes().length +
+                            "Download concluido: " + length +
                                     " bytes de " + uri.toString());
                     break;
                 case HttpURLConnection.HTTP_NO_CONTENT:

@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,35 +52,46 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
     private final int PINK_ADNA;
     private final int AMARELO_MCLARA;
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy - EEEE", Locale.getDefault());
+    private final Comparator<Venda> comparator = new VendaComparator();
     private Map<Long, List<Venda>> vendasPorDataDeEntrega;
     private List<Long> datasDeEntregas;
-    private LayoutInflater inflater;
     private Context ctx;
     private List<Venda> vendas;
     private Cursor cursor;
 
+
     public EntregasExpandableListAdapter(Context ctx) {
         this.ctx = ctx;
         sdf.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
-        this.inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         Resources resources = ctx.getResources();
         this.BLUE_LUCAS = resources.getColor(R.color.blueLucas);
         this.PINK_ADNA = resources.getColor(R.color.pinkAdna);
         this.AMARELO_MCLARA = resources.getColor(R.color.amareloMClara);
-
-        datasDeEntregas = new LinkedList<>();
-        vendasPorDataDeEntrega = new HashMap<>();
     }
 
-    private void processarVendas() {
+    public void setCursor(Cursor cursor) {
+        this.cursor = cursor;
+
         vendasPorDataDeEntrega = new HashMap<Long, List<Venda>>();
         this.vendas = getData();
-        atualizarDatasDeEntregas();
+        agruparVendasPorDataDeEntrega();
         notifyDataSetChanged();
     }
 
-    public void atualizarDatasDeEntregas() {
+    public void removerVenda(Venda venda) {
+        vendas.remove(venda);
+        agruparVendasPorDataDeEntrega();
+        notifyDataSetChanged();
+    }
+
+    public void refreshView() {
+        agruparVendasPorDataDeEntrega();
+        notifyDataSetChanged();
+    }
+
+    //    método responsável por agrupar venda por data de entrega
+    private void agruparVendasPorDataDeEntrega() {
 
         datasDeEntregas = new LinkedList<Long>();
 
@@ -104,9 +114,7 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
                 // se a data de entrega da venda é nula, usa uma chave especial
                 // para indexar vendas p/ outras cidades
                 time = CORREIOS_KEY;
-
             }
-
 
             if (!datasDeEntregas.contains(time)) {
                 datasDeEntregas.add(time);
@@ -115,220 +123,20 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
 
             vendasPorDataDeEntrega.get(time).add(v);
         }
-
+        // ordenando as datas de entrega em ordem decrescente
         Collections.sort(datasDeEntregas, new Comparator<Long>() {
             @Override
             public int compare(Long lhs, Long rhs) {
                 return -1 * lhs.compareTo(rhs);  // ordem decrescente
             }
         });
-        ordenarVendas();
-    }
 
-    public void removerVenda(Venda venda) {
-        vendas.remove(venda);
-        atualizarDatasDeEntregas();
-        notifyDataSetChanged();
-    }
-
-    public void refreshView() {
-        ordenarVendas();
-        notifyDataSetChanged();
-    }
-
-    private void ordenarVendas() {
-        for (List<Venda> vendas : vendasPorDataDeEntrega.values()) {
-            Collections.sort(vendas, new Comparator<Venda>() {
-                @Override
-                public int compare(Venda venda, Venda venda2) {
-
-                    if (!venda.isFlagVaiBuscar() && !venda2.isFlagVaiBuscar()) {
-
-                        if (venda.getTurnoEntrega() == venda2.getTurnoEntrega())
-                            return 0;
-                        else
-                            return venda.getTurnoEntrega().equals(TurnoEntrega.Tarde) ? 1 : -1;
-
-                    } else {
-                        return Boolean.valueOf(venda.isFlagVaiBuscar()).compareTo(venda2.isFlagVaiBuscar());
-                    }
-
-
-                }
-            });
-        }
-    }
-
-    @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        return this.vendasPorDataDeEntrega.get(
-                datasDeEntregas.get(groupPosition)).get(childPosition);
-
-    }
-
-    @Override
-    public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
-    }
-
-    @Override
-    public View getChildView(final int groupPosition, final int childPosition,
-                             boolean isLastChild, View convertView, ViewGroup parent) {
-
-        final Venda venda = (Venda) getChild(groupPosition, childPosition);
-
-        if (convertView == null)
-            convertView = inflater.inflate(R.layout.list_row_venda_detail, null);
-
-        if (venda.getVendedor() == null)
-            convertView.setBackgroundColor(Color.WHITE);
-        else
-            switch (venda.getVendedor()) {
-                case Lucas:
-                    convertView.setBackgroundColor(BLUE_LUCAS);
-                    break;
-                case Adna:
-                    convertView.setBackgroundColor(PINK_ADNA);
-                    break;
-                case MariaClara:
-                    convertView.setBackgroundColor(AMARELO_MCLARA);
-                    break;
-                default:
-
-            }
-
-        convertView.setTag(venda.getId());
-
-        TextView txtCliente = (TextView) convertView.findViewById(R.id.txtCliente);
-        txtCliente.setText(venda.getCliente().getNome());
-
-        TextView txtValor = (TextView) convertView.findViewById(R.id.txtValor);
-        txtValor.setText(String.format("R$ %.2f", venda.getValorTotal()));
-
-        TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
-        ImageView imgCustomerPickUp = (ImageView) convertView.findViewById(R.id.image_customer_pick_up);
-
-        if (!venda.isFlagVaiBuscar()) {
-            txtTurno.setVisibility(View.VISIBLE);
-            txtTurno.setText(venda.getTurnoEntrega().name());
-
-            imgCustomerPickUp.setVisibility(View.INVISIBLE);
-        } else {
-            txtTurno.setVisibility(View.INVISIBLE);
-
-            imgCustomerPickUp.setVisibility(View.VISIBLE);
-
-            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.customer_pick_up);
-            if (!venda.isFlagJaBuscou()) {
-                Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
-                imgCustomerPickUp.setBackground(dimmedIcon);
-            } else
-                imgCustomerPickUp.setBackground(originalIcon);
+        // responsável por ordenar as vendas baseando-se no turno das mesmas, dentro de cada
+        // grupo de data de entrega
+        for (Long key : vendasPorDataDeEntrega.keySet()) {
+            Collections.sort(vendasPorDataDeEntrega.get(key), comparator);
         }
 
-        ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
-        img.setVisibility(View.INVISIBLE);
-
-        StatusVenda statusVenda = venda.getStatus();
-        FormaPagamento formaDePagamento = venda.getFormaDePagamento();
-
-        if (statusVenda.equals(StatusVenda.PagamentoRecebido)) {
-
-            switch (formaDePagamento) {
-                case AVista:
-                    img.setBackgroundResource(R.drawable.dollar_currency_sign);
-                    img.setVisibility(View.VISIBLE);
-                    break;
-                case PagSeguro:
-                    img.setBackgroundResource(R.drawable.credit_card_icon);
-                    img.setVisibility(View.VISIBLE);
-                    break;
-
-            }
-        }
-
-        if (statusVenda.equals(StatusVenda.AguardandoPagamento) && formaDePagamento.equals(FormaPagamento.PagSeguro)) {
-            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.credit_card_icon);
-            Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
-            img.setBackground(dimmedIcon);
-            img.setVisibility(View.VISIBLE);
-        }
-
-        ImageView imgPaperclip = (ImageView) convertView.findViewById(R.id.imgPaperclip);
-        if (venda.getAnexos() == null) {
-            imgPaperclip.setVisibility(View.INVISIBLE);
-        } else {
-            imgPaperclip.setVisibility(View.VISIBLE);
-        }
-
-        if (venda.getItens() != null) {
-            TextView txtView = (TextView) convertView.findViewById(R.id.txtItensVenda);
-            txtView.setText(Html.fromHtml(TextUtils.join("<br>", venda.getItens())));
-        }
-
-        return convertView;
-    }
-
-    @Override
-    public int getChildrenCount(int groupPosition) {
-        return this.vendasPorDataDeEntrega.get(
-                datasDeEntregas.get(groupPosition)).size();
-    }
-
-    @Override
-    public Object getGroup(int groupPosition) {
-        Long time = datasDeEntregas.get(groupPosition);
-
-        if (time == CORREIOS_KEY)
-            return "CORREIOS";
-        else {
-            Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Etc/UTC"));
-            c.setTimeInMillis(time);
-            return sdf.format(c.getTime());
-        }
-    }
-
-    @Override
-    public int getGroupCount() {
-        return this.datasDeEntregas.size();
-    }
-
-    @Override
-    public long getGroupId(int groupPosition) {
-        return groupPosition;
-    }
-
-    @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
-
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.list_row_group_venda, null);
-        }
-        String text = (String) getGroup(groupPosition);
-        ((CheckedTextView) convertView).setText(text);
-        ((CheckedTextView) convertView).setChecked(isExpanded);
-        return convertView;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return false;
-    }
-
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
-    }
-
-
-    public void setCursor(Cursor cursor) {
-        this.cursor = cursor;
-        if (cursor != null && !cursor.isClosed()) {
-            processarVendas();
-            notifyDataSetChanged();
-        }
     }
 
     private List<Venda> getData() {
@@ -449,5 +257,178 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
         return vendas;
     }
 
+
+    @Override
+    public Object getChild(int groupPosition, int childPosition) {
+        return this.vendasPorDataDeEntrega.get(
+                datasDeEntregas.get(groupPosition)).get(childPosition);
+
+    }
+
+    @Override
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
+
+    @Override
+    public View getChildView(final int groupPosition, final int childPosition,
+                             boolean isLastChild, View convertView, ViewGroup parent) {
+
+        final Venda venda = (Venda) getChild(groupPosition, childPosition);
+
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_row_venda_detail, null);
+        }
+
+        if (venda.getVendedor() == null)
+            convertView.setBackgroundColor(Color.WHITE);
+        else
+            switch (venda.getVendedor()) {
+                case Lucas:
+                    convertView.setBackgroundColor(BLUE_LUCAS);
+                    break;
+                case Adna:
+                    convertView.setBackgroundColor(PINK_ADNA);
+                    break;
+                case MariaClara:
+                    convertView.setBackgroundColor(AMARELO_MCLARA);
+                    break;
+                default:
+
+            }
+
+        convertView.setTag(venda.getId());
+
+        TextView txtCliente = (TextView) convertView.findViewById(R.id.txtCliente);
+        txtCliente.setText(venda.getCliente().getNome());
+
+        TextView txtValor = (TextView) convertView.findViewById(R.id.txtValor);
+        txtValor.setText(String.format("R$ %.2f", venda.getValorTotal()));
+
+        TextView txtTurno = (TextView) convertView.findViewById(R.id.txtTurno);
+        ImageView imgCustomerPickUp = (ImageView) convertView.findViewById(R.id.image_customer_pick_up);
+
+        if (!venda.isFlagVaiBuscar()) {
+            txtTurno.setVisibility(View.VISIBLE);
+            txtTurno.setText(venda.getTurnoEntrega().name());
+
+            imgCustomerPickUp.setVisibility(View.INVISIBLE);
+        } else {
+            txtTurno.setVisibility(View.INVISIBLE);
+
+            imgCustomerPickUp.setVisibility(View.VISIBLE);
+
+            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.customer_pick_up);
+            if (!venda.isFlagJaBuscou()) {
+                Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
+                imgCustomerPickUp.setBackground(dimmedIcon);
+            } else
+                imgCustomerPickUp.setBackground(originalIcon);
+        }
+
+        ImageView img = (ImageView) convertView.findViewById(R.id.imgFormaPagamento);
+        img.setVisibility(View.INVISIBLE);
+
+        StatusVenda statusVenda = venda.getStatus();
+        FormaPagamento formaDePagamento = venda.getFormaDePagamento();
+
+        if (statusVenda.equals(StatusVenda.PagamentoRecebido)) {
+
+            switch (formaDePagamento) {
+                case AVista:
+                    img.setBackgroundResource(R.drawable.dollar_currency_sign);
+                    img.setVisibility(View.VISIBLE);
+                    break;
+                case PagSeguro:
+                    img.setBackgroundResource(R.drawable.credit_card_icon);
+                    img.setVisibility(View.VISIBLE);
+                    break;
+
+            }
+        }
+
+        if (statusVenda.equals(StatusVenda.AguardandoPagamento) && formaDePagamento.equals(FormaPagamento.PagSeguro)) {
+            Drawable originalIcon = ctx.getResources().getDrawable(R.drawable.credit_card_icon);
+            Drawable dimmedIcon = Utilities.convertDrawableToGrayScale(originalIcon);
+            img.setBackground(dimmedIcon);
+            img.setVisibility(View.VISIBLE);
+        }
+
+        ImageView imgPaperclip = (ImageView) convertView.findViewById(R.id.imgPaperclip);
+        if (venda.getAnexos() == null) {
+            imgPaperclip.setVisibility(View.INVISIBLE);
+        } else {
+            imgPaperclip.setVisibility(View.VISIBLE);
+        }
+
+        if (venda.getItens() != null) {
+            TextView txtView = (TextView) convertView.findViewById(R.id.txtItensVenda);
+            txtView.setText(Html.fromHtml(TextUtils.join("<br>", venda.getItens())));
+        }
+
+        return convertView;
+    }
+
+    @Override
+    public int getChildrenCount(int groupPosition) {
+        if (vendasPorDataDeEntrega != null && datasDeEntregas != null) {
+            Long key = datasDeEntregas.get(groupPosition);
+            return this.vendasPorDataDeEntrega.get(key).size();
+        }
+        else
+            return 0;
+    }
+
+    @Override
+    public Object getGroup(int groupPosition) {
+        Long time = datasDeEntregas.get(groupPosition);
+
+        if (time == CORREIOS_KEY)
+            return "CORREIOS";
+        else {
+            Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Etc/UTC"));
+            c.setTimeInMillis(time);
+            return sdf.format(c.getTime());
+        }
+    }
+
+    @Override
+    public int getGroupCount() {
+        if (this.datasDeEntregas != null)
+            return this.datasDeEntregas.size();
+        else
+            return 0;
+    }
+
+    @Override
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
+
+    @Override
+    public View getGroupView(int groupPosition, boolean isExpanded,
+                             View convertView, ViewGroup parent) {
+
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_row_group_venda, null);
+        }
+        String text = (String) getGroup(groupPosition);
+        ((CheckedTextView) convertView).setText(text);
+        ((CheckedTextView) convertView).setChecked(isExpanded);
+        return convertView;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return false;
+    }
 
 }
