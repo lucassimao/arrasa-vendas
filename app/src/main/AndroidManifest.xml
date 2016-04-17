@@ -5,9 +5,15 @@
     android:versionCode="2"
     android:versionName="1.2" >
 
+    <permission android:name="br.com.arrasavendas.permission.C2D_MESSAGE"
+        android:protectionLevel="signature"/>
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="br.com.arrasavendas.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <application
         android:name=".Application"
@@ -99,14 +105,52 @@
                 android:value="br.com.arrasavendas.entregas.EntregasActivity" />
         </activity>
 
+        <activity android:label="Alerta"
+            android:theme="@style/Theme.Transparent"
+            android:name=".gcm.NotificationPopUp">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name=".BootReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.example.gcm" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".SyncEnderecosService" android:exported="false"/>
 
+        <service
+            android:name=".gcm.MsgListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".gcm.RegistrationIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".gcm.InstanceIDListenerService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
 
         <provider
             android:name=".providers.CidadesProvider"

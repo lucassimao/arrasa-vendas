@@ -3,8 +3,8 @@ package br.com.arrasavendas;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +20,7 @@ import br.com.arrasavendas.util.Response;
 public class LoginActivity extends Activity {
 
 
+    private static final String TAG = LoginActivity.class.getName();
     private TextView editTextLogin, editTextSenha;
 
     @Override
@@ -58,7 +59,7 @@ public class LoginActivity extends Activity {
                         try {
 
                             JSONObject obj = new JSONObject(response.getMessage());
-                            Application.salvarToken(obj.getString("username"),
+                            Application.salvarAuthToken(obj.getString("username"),
                                     obj.getString("roles"),obj.getString("access_token"));
                             showMainActivity();
 
