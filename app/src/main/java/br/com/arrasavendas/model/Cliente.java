@@ -127,10 +127,16 @@ public class Cliente implements Serializable, Cloneable {
             enderecoObj.put("cep", this.cep);
 
 
-            int idCity = this.cidade.getId();
-            enderecoObj.put("cidade", new JSONObject().put("id", idCity));
+            int idCity = 3582; // default: Teresina-PI
+            int idUf = 17; // default PI
 
-            int idUf = this.cidade.getUf().getId();
+            if (this.cidade != null) {
+                idCity = this.cidade.getId();
+                idUf = this.cidade.getUf().getId();
+
+            }
+
+            enderecoObj.put("cidade", new JSONObject().put("id", idCity));
             enderecoObj.put("uf", new JSONObject().put("id", idUf));
 
             objCliente.put("endereco", enderecoObj);
