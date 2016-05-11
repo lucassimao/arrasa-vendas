@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -39,6 +40,7 @@ import java.util.TimeZone;
 import br.com.arrasavendas.DownloadJSONAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.Venda;
@@ -142,7 +144,10 @@ public class EntregasActivity extends FragmentActivity {
 
     void updateDataEntrega() {
         final Calendar dataEntrega = Calendar.getInstance();
-        dataEntrega.setTime(vendaSelecionada.getDataEntrega());
+        if (vendaSelecionada.getDataEntrega() != null)
+            dataEntrega.setTime(vendaSelecionada.getDataEntrega());
+        else
+            dataEntrega.setTime(new Date());
 
         DatePickerDialog dlg = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -244,6 +249,9 @@ public class EntregasActivity extends FragmentActivity {
                 JSONObject obj = new JSONObject();
 
                 try {
+                    if (updatedVenda.getCliente().getCidade().getId() != Cidade.TERESINA_ID)
+                        obj.put("dataEntrega", "");
+
                     obj.put("cliente", updatedVenda.getCliente().toJson());
                     obj.put("abatimentoEmCentavos", updatedVenda.getAbatimentoEmCentavos());
                     obj.put("formaPagamento", updatedVenda.getFormaDePagamento().name());

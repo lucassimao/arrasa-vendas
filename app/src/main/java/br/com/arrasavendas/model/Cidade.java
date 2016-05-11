@@ -15,6 +15,7 @@ public class Cidade implements Serializable,Cloneable{
     private String nome;
     private int id;
     private Uf uf;
+    public final static int TERESINA_ID = 3582;
 
 
     @Override

@@ -127,8 +127,8 @@ public class Cliente implements Serializable, Cloneable {
             enderecoObj.put("cep", this.cep);
 
 
-            int idCity = 3582; // default: Teresina-PI
-            int idUf = 17; // default PI
+            int idCity = Cidade.TERESINA_ID; // default: Teresina-PI
+            int idUf = Uf.PI.getId(); // default PI
 
             if (this.cidade != null) {
                 idCity = this.cidade.getId();
