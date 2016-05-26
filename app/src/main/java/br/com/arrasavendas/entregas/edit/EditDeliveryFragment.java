@@ -51,15 +51,6 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
         return rootView;
     }
 
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        Log.d(getClass().getName(), "isVisibleToUser: " + isVisibleToUser);
-        if (isVisibleToUser)
-            setupView();
-    }
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -154,12 +145,12 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
         spTunoEntrega.setSelection(position);
     }
 
-    @Override
+/*    @Override
     public void onPause() {
         super.onPause();
         Log.d(getClass().getName(), "onPause");
         writeChanges();
-    }
+    }*/
 
 
     public Venda getVenda() {
@@ -176,6 +167,7 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
             return;
         }
 
+        Log.d(getClass().getName(),"writing changes ....");
         Cliente cliente = venda.getCliente();
 
         EditText editTextEndereco = (EditText) view.findViewById(R.id.editTextEndereco);

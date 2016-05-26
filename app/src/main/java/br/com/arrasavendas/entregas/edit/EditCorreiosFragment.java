@@ -50,6 +50,7 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(getClass().getName(),"onViewCreated");
 
         setupCourrierDeliveryMethod(view);
 
@@ -135,17 +136,13 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(getClass().getName(), "onPause");
-        writeChanges();
-    }
-
-    @Override
     public void writeChanges() {
         View view = getView();
-        if (view == null)
+        if (view == null) {
+            Log.d(getClass().getName(),"getView()== null skiping ...");
             return;
+        }
+        Log.d(getClass().getName(),"writing changes ...");
 
         Spinner spinnerDeliveryMethod = (Spinner) view.findViewById(R.id.spinner_envio);
         if (spinnerDeliveryMethod.getSelectedItemPosition() == 0)

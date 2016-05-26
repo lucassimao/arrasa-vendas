@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 
 import br.com.arrasavendas.entregas.edit.EditClientFragment;
 import br.com.arrasavendas.entregas.edit.EditCorreiosFragment;
@@ -62,12 +63,6 @@ class EditVendaPagerAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         return tabTitles[position];
-    }
-
-    public void commitChanges(){
-        for(Fragment f: fragments)
-            if (f!=null)
-                ((EditVendaListener)f).writeChanges();
     }
 
 }

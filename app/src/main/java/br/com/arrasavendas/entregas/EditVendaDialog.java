@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.entregas.edit.EditVendaListener;
 import br.com.arrasavendas.model.Venda;
 
 public class EditVendaDialog extends DialogFragment {
@@ -18,6 +21,7 @@ public class EditVendaDialog extends DialogFragment {
     public static final String VENDA = EditVendaDialog.class.getName() + "activity_venda";
     private Listener listener;
     private EditVendaPagerAdapter pagerAdapter;
+    private int currentTab;
 
 
     public static EditVendaDialog newInstance(Venda venda) {
@@ -33,7 +37,7 @@ public class EditVendaDialog extends DialogFragment {
      */
     public void onClickOK() {
         if (listener != null) {
-            pagerAdapter.commitChanges();
+            writeChanges();
             Venda v = (Venda) getArguments().get(EditVendaDialog.VENDA);
             listener.onOK(v);
             dismiss();
@@ -45,18 +49,34 @@ public class EditVendaDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_edit_venda, null);
         Venda venda = (Venda) getArguments().get(EditVendaDialog.VENDA);
+        currentTab = 0;
+
         getDialog().setTitle("Editar Venda");
 
         this.pagerAdapter = new EditVendaPagerAdapter(venda, getChildFragmentManager());
-        ViewPager mViewPager = (ViewPager) view.findViewById(R.id.pager);
+        final ViewPager mViewPager = (ViewPager) view.findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                // gravando alterações do Tab atual e atualizando variavel currentTab
+                writeChanges();
+                currentTab = position;
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(mViewPager);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-
+        mViewPager.setCurrentItem(currentTab);
         return view;
+    }
+
+    private final void writeChanges() {
+        Fragment f = pagerAdapter.getItem(currentTab);
+        String simpleName = f.getClass().getSimpleName();
+        Log.d(EditVendaDialog.class.getSimpleName(), "writing changes from last fragment " + simpleName);
+        ((EditVendaListener) f).writeChanges();
     }
 
     @Override

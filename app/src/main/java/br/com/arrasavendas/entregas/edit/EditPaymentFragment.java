@@ -23,9 +23,6 @@ import br.com.arrasavendas.model.Venda;
 /**
  * Created by lsimaocosta on 11/02/16.
  * <p/>
- * Não é necesário implementar setUserVisibleHint
- * para atualizar a view quando a mesma exebida pois as informações desse fragment
- * nao sao alteradas por outra aba
  */
 public class EditPaymentFragment extends Fragment implements EditVendaListener {
 
@@ -47,6 +44,7 @@ public class EditPaymentFragment extends Fragment implements EditVendaListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(getClass().getName(),"onViewCreated");
 
         if (venda.getStatus().equals(StatusVenda.PagamentoRecebido))
             ((CheckBox) view.findViewById(R.id.cbJaPagou)).setChecked(true);
@@ -60,16 +58,9 @@ public class EditPaymentFragment extends Fragment implements EditVendaListener {
                 break;
         }
 
-        ((EditText)view.findViewById(R.id.edit_text_abatimento)).setText(String.format("%.2f",venda.getAbatimentoEmReais()));
+        EditText editText = (EditText) view.findViewById(R.id.edit_text_abatimento);
+        editText.setText(String.format("%.2f",venda.getAbatimentoEmReais()));
     }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(getClass().getName(),"onPause");
-        writeChanges();
-    }
-
 
     @Override
     public void writeChanges() {
@@ -81,6 +72,7 @@ public class EditPaymentFragment extends Fragment implements EditVendaListener {
             return;
         }
 
+        Log.d(getClass().getName(),"writing changes ...");
         CheckBox checkBoxJaPagou = (CheckBox) view.findViewById(R.id.cbJaPagou);
         StatusVenda statusVenda = (checkBoxJaPagou.isChecked()) ? StatusVenda.PagamentoRecebido :
                 StatusVenda.AguardandoPagamento;

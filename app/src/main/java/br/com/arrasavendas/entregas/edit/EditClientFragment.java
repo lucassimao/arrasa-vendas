@@ -47,7 +47,6 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         ((EditText) view.findViewById(R.id.editTextTelefone)).setText(cliente.getTelefone());
         ((EditText) view.findViewById(R.id.editTextCelular)).setText(cliente.getCelular());
         ((EditText) view.findViewById(R.id.editTextDDDCelular)).setText(cliente.getDddCelular());
-
     }
 
 
@@ -67,6 +66,7 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(getClass().getName(),"onViewCreated");
 
         setCliente(venda.getCliente());
         configurarSpinnerVendedor(view);
@@ -111,13 +111,6 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(getClass().getName(),"onPause");
-        writeChanges();
-    }
-
-    @Override
     public void writeChanges() {
 
         View view = getView();
@@ -126,6 +119,7 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
             Log.d(getClass().getName(),"getView() == null . skiping");
             return;
         }
+        Log.d(getClass().getName(),"writing changes ....");
         Cliente cliente = venda.getCliente();
 
         EditText editTextNome = (EditText) view.findViewById(R.id.editTextNome);
@@ -145,14 +139,16 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
 
         if (Application.getInstance().isAdmin()){
             Vendedor vendedor = null;
+            Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
+            Object selectedItem = spVendedor.getSelectedItem();
+
+            //TODO corrigir isso aqui ... horrivel ... shame on me!
             try {
 
-                Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
-                Object selectedItem = spVendedor.getSelectedItem();
                 vendedor = Vendedor.valueOf(selectedItem.toString());
             } catch (IllegalArgumentException e) {
                 // se arremessar exceção significa que o item selecionado foi "Site"
-                e.printStackTrace();
+                vendedor = null;
             }
             this.venda.setVendedor(vendedor);
         }
