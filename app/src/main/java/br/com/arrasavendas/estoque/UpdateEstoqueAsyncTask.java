@@ -26,7 +26,7 @@ public class UpdateEstoqueAsyncTask extends AsyncTask<Void, Void, Response> {
     public UpdateEstoqueAsyncTask(long estoqueId, long quantidade, OnComplete onComplete) {
         this.jsonObj = new JSONObject();
         try {
-            this.jsonObj.put("quantidade", quantidade * -1);
+            this.jsonObj.put("quantidade", quantidade);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -59,10 +59,6 @@ public class UpdateEstoqueAsyncTask extends AsyncTask<Void, Void, Response> {
             dos.write(bytes);
             dos.flush();
             dos.close();
-
-            for (String s : httpConnection.getHeaderFields().keySet())
-                Log.d(UpdateEstoqueAsyncTask.class.getName(),
-                        s + ": " + httpConnection.getHeaderField(s));
 
             String line = null;
             BufferedReader reader = null;
