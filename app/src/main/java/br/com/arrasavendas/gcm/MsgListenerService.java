@@ -14,7 +14,6 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Random;
 
-import br.com.arrasavendas.MainActivity;
 import br.com.arrasavendas.R;
 
 /**
@@ -22,39 +21,43 @@ import br.com.arrasavendas.R;
  */
 public class MsgListenerService extends GcmListenerService {
 
-    private static final String TAG = MsgListenerService.class.getName();
     public static final String TITLE = "title";
     public static final String MESSAGE = "message";
+    private static final String TAG = MsgListenerService.class.getName();
+    private static final Random random = new Random(System.currentTimeMillis());
+
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        Log.d(TAG,data.toString());
         String resumo = data.getString("resumo");
         String message = data.getString("message");
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
+        Log.d(TAG, "Data: " +data.toString());
 
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
+        switch (message) {
+            case "DELETE":
+                break;
+            case "UPDATE":
+                break;
+            default:
+                sendNotification(resumo, message);
+                break;
         }
 
-        sendNotification(resumo,message);
     }
 
 
     private void sendNotification(String resumo, String message) {
+
         Intent intent = new Intent(this, NotificationPopUp.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // Pass on the alarm ID as extra data
         intent.putExtra(TITLE, "Alertas Arrasa Amiga");
         intent.putExtra(MESSAGE, message);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,random.nextInt(),
+                intent,PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
@@ -68,7 +71,6 @@ public class MsgListenerService extends GcmListenerService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Random r = new Random(System.currentTimeMillis());
-        notificationManager.notify(r.nextInt() /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(random.nextInt(), notificationBuilder.build());
     }
 }
