@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "ArrasaVendas";
-	private static final int DATABASE_VERSION = 65;
+	private static final int DATABASE_VERSION = 66;
 
 	public static final String TABLE_VENDAS = "VENDAS";
 	private static final String CREATE_TABLE_VENDAS = "create table "
@@ -20,7 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String TABLE_ESTOQUE = "ESTOQUE";
 	private static final String CREATE_TABLE_ESTOQUE = "create table "
 			+ TABLE_ESTOQUE
-			+ "(_id integer primary key, produto_nome text not null, produto_nome_ascii text not null," +
+			+ "(_id integer primary key, produto_nome text not null, produto_nome_ascii text not null collate nocase," +
 			"produto_id integer not null,prevoAVista REAL,prevoAPrazo REAL, " +
 			"unidade text not null, quantidade integer not null, last_updated_timestamp integer);";
 
@@ -83,8 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_ESTOQUE);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLIENTES);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_FINANCEIRO);
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_FINANCEIRO);
-
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CIDADE);
 
 		onCreate(db);
 	}

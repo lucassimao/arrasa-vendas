@@ -36,6 +36,7 @@ public class Application extends android.app.Application {
 
     public static final String ARRASAVENDAS_AUTH_PREFS_KEY = "br.com.arrasavendas.auth";
     public static final int ENTREGAS_LOADER = 1;
+    public static final int ESTOQUE_LOADER = 2;
     public final static int CIDADES_LOADER = 10;
     private static final String TAG = Application.class.getName();
     private static Application mApp = null;

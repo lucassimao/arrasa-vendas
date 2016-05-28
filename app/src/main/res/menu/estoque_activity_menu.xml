@@ -2,6 +2,12 @@
     xmlns:arrasavendas="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/tools">
 
+    <item
+        android:id="@+id/search"
+        android:actionViewClass="android.widget.SearchView"
+        android:icon="@drawable/system_search"
+        android:showAsAction="collapseActionView|ifRoom" />
+
     <item android:id="@+id/share_with_whatsapp"
         android:icon="@drawable/whatsapp"
         android:title="Compartilhar"

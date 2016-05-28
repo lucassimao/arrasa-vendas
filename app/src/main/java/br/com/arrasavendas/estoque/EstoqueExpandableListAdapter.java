@@ -1,17 +1,27 @@
 package br.com.arrasavendas.estoque;
 
-import android.app.*;
-import android.content.ContentValues;
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Produto;
@@ -23,32 +33,71 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
     private final FragmentManager fragmentManager;
     private final Activity ctx;
-    private List<Produto> produtos;
-    private Map<Integer, Boolean[]> unidadesSelecionadas;
     private LayoutInflater inflater;
 
-    public EstoqueExpandableListAdapter(Activity ctx, List<Produto> produtos) {
+    private Produto[] produtos;
+    private Map<Integer, Boolean[]> unidadesSelecionadas;
+
+    public EstoqueExpandableListAdapter(Activity ctx) {
         this.ctx = ctx;
         this.fragmentManager = ctx.getFragmentManager();
         this.inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this.produtos = produtos;
+        this.produtos = new Produto[0];
         this.unidadesSelecionadas = new HashMap<>();
 
-        for (int i = 0; i < produtos.size(); ++i) {
-            Produto itemEstoque = produtos.get(i);
-            int qtdeDeUnidades = itemEstoque.getUnidades().size();
+    }
 
-            Boolean[] flags = new Boolean[qtdeDeUnidades];
-            Arrays.fill(flags, false);
+    public void setCursor(Cursor cursor) {
+        this.produtos = new Produto[0];
+        this.unidadesSelecionadas = new HashMap<>();
+        int idx = 0;
 
-            this.unidadesSelecionadas.put(i, flags);
+        if (cursor != null && cursor.moveToFirst()) {
+            this.produtos = new Produto[cursor.getCount()];
+
+            do {
+                String nomeProduto = cursor.getString(cursor.getColumnIndex(EstoqueProvider.PRODUTO));
+                Long produtoId = cursor.getLong(cursor.getColumnIndex(EstoqueProvider.PRODUTO_ID));
+                Produto itemEstoque = new Produto(produtoId, nomeProduto);
+
+                // consultando as unidades do produto
+                String[] projection = {EstoqueProvider.UNIDADE, EstoqueProvider.QUANTIDADE, EstoqueProvider._ID};
+                String selection = EstoqueProvider.PRODUTO_ID + " = ?";
+                String[] selectionArgs = {produtoId.toString()};
+                String sortOrder = EstoqueProvider.UNIDADE;
+
+                Cursor cursorUnidades = ctx.getContentResolver().query(EstoqueProvider.CONTENT_URI, projection,
+                        selection, selectionArgs, sortOrder);
+                cursorUnidades.moveToFirst();
+                int columnIndex0 = cursorUnidades.getColumnIndex(EstoqueProvider.UNIDADE);
+                int columnIndex1 = cursorUnidades.getColumnIndex(EstoqueProvider.QUANTIDADE);
+                int columnIndex2 = cursorUnidades.getColumnIndex(EstoqueProvider._ID);
+
+                do {
+                    String unidade = cursorUnidades.getString(columnIndex0);
+                    int qtde = cursorUnidades.getInt(columnIndex1);
+                    long estoqueId = cursorUnidades.getLong(columnIndex2);
+
+                    itemEstoque.addUnidade(estoqueId, unidade, qtde);
+                } while (cursorUnidades.moveToNext());
+
+                cursorUnidades.close();
+
+                this.produtos[idx] = itemEstoque;
+                Boolean[] flags = new Boolean[itemEstoque.getUnidades().size()];
+                Arrays.fill(flags, false);
+
+                this.unidadesSelecionadas.put(idx++, flags);
+
+            } while (cursor.moveToNext());
         }
 
+        notifyDataSetChanged();
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return this.produtos.get(groupPosition).getUnidades().get(childPosition);
+        return this.produtos[groupPosition].getUnidades().get(childPosition);
     }
 
     @Override
@@ -61,7 +110,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, final ViewGroup parent) {
 
         final String unidade = (String) getChild(groupPosition, childPosition);
-        final Produto produto = this.produtos.get(groupPosition);
+        final Produto produto = this.produtos[groupPosition];
         final Integer quantidade = produto.getQuantidades().get(unidade);
 
 
@@ -73,7 +122,7 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
         btnEditQuantidadeEmEstoque.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                atualizarQuantidadeEmEstoque(produto,unidade);
+                atualizarQuantidadeEmEstoque(produto, unidade);
             }
         });
 
@@ -110,12 +159,12 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
                 try {
 
-                    JSONObject obj =new JSONObject(response.getMessage());
+                    JSONObject obj = new JSONObject(response.getMessage());
                     int novaQuantidade = obj.getInt("quantidade");
                     EstoqueService service = new EstoqueService(ctx);
 
-                    service.update(estoqueId,obj);
-                    produto.updateQuantidade(unidade,novaQuantidade);
+                    service.update(estoqueId, obj);
+                    produto.updateQuantidade(unidade, novaQuantidade);
                     notifyDataSetChanged();
                     Toast.makeText(ctx, "Estoque atualizado", Toast.LENGTH_SHORT).show();
 
@@ -128,25 +177,25 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
             @Override
             public void onFail(String error) {
-                Toast.makeText(ctx,error , Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, error, Toast.LENGTH_SHORT).show();
             }
         });
-        dialogFragment.show(this.fragmentManager,"updateQtde");
+        dialogFragment.show(this.fragmentManager, "updateQtde");
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.produtos.get(groupPosition).getUnidades().size();
+        return this.produtos[groupPosition].getUnidades().size();
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return this.produtos.get(groupPosition);
+        return this.produtos[groupPosition];
     }
 
     @Override
     public int getGroupCount() {
-        return this.produtos.size();
+        return this.produtos.length;
     }
 
     @Override
@@ -219,8 +268,8 @@ public class EstoqueExpandableListAdapter extends BaseExpandableListAdapter {
 
         Map<Long, String[]> selecionados = new HashMap<>();
 
-        for (int i = 0; i < produtos.size(); ++i) {
-            Produto produto = produtos.get(i);
+        for (int i = 0; i < produtos.length; ++i) {
+            Produto produto = produtos[i];
             int qtdeUnidades = produto.getUnidades().size();
             Set<String> set = new HashSet<>();
 
