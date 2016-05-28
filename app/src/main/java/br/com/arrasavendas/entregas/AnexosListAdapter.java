@@ -3,12 +3,18 @@ package br.com.arrasavendas.entregas;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
@@ -20,18 +26,16 @@ class AnexosListAdapter extends BaseAdapter {
 
     private final Activity ctx;
     private final OnClickBtnExcluirAnexo listener;
+    private final Bitmap PDF_BITMAP;
     private Bitmap[] thumbnails;
     private String[] anexos;
-
-    public interface OnClickBtnExcluirAnexo {
-        void excluirAnexo(int position);
-    }
 
     public AnexosListAdapter(String[] anexos, Activity ctx, OnClickBtnExcluirAnexo listener) {
         super();
         this.ctx = ctx;
         this.anexos = anexos;
         this.listener = listener;
+        PDF_BITMAP = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.pdf_icon);
         notifyDataSetChanged();
     }
 
@@ -60,21 +64,26 @@ class AnexosListAdapter extends BaseAdapter {
                 String filename = anexos[i];
                 String imagePath = Utilities.ImageFolder.ANEXOS.getPath(ctx) + filename;
 
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(imagePath, options);
-
-                // se for algum arquivo de image, cria um thumbnail
-                if (options.outWidth != -1 && options.outHeight != -1) {
-
-                    options.inSampleSize = Utilities.calculateInSampleSize(options, 50, 50);
-                    options.inJustDecodeBounds = false;
-                    thumbnails[i] = BitmapFactory.decodeFile(imagePath, options);
-
+                if (filename.toLowerCase().endsWith("pdf")) {
+                    thumbnails[i] = PDF_BITMAP;
                 } else {
-                    // o arquivo eh do tipo pdf, n precisa de thumbnail
-                    thumbnails[i] = null;
+
+                    if (new File(imagePath).exists()) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(imagePath,options);
+
+                        // se for algum arquivo de image, cria um thumbnail
+                        if (options.outWidth != -1 && options.outHeight != -1) {
+                            options.inSampleSize = Utilities.calculateInSampleSize(options, 50, 50);
+                            options.inJustDecodeBounds = false;
+                            thumbnails[i] = BitmapFactory.decodeFile(imagePath, options);
+                        }
+                    } else
+                        thumbnails[i] = null;
+
                 }
+
             }
         }
 
@@ -103,11 +112,9 @@ class AnexosListAdapter extends BaseAdapter {
             convertView = ctx.getLayoutInflater().inflate(R.layout.list_item_anexos_manager, parent, false);
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
-        // se for uma image
+
         if (thumbnails[position] != null)
             imageView.setImageBitmap(thumbnails[position]);
-        else
-            imageView.setImageResource(R.drawable.pdf_icon);
 
         TextView textView = (TextView) convertView.findViewById(R.id.textView);
         textView.setText(anexos[position]);
@@ -121,6 +128,10 @@ class AnexosListAdapter extends BaseAdapter {
             }
         });
         return convertView;
+    }
+
+    public interface OnClickBtnExcluirAnexo {
+        void excluirAnexo(int position);
     }
 
 }

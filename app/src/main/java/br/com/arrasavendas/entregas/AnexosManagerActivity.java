@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -218,10 +219,7 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
-        /**
-         * executado quando o usuário seleciona algum arquivo. faz o upload do arquivo imediatamente
-         */
+         //executado quando o usuário seleciona algum arquivo. faz o upload do arquivo imediatamente
         if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && null != data) {
 
             final ProgressDialog progressDlg = ProgressDialog.show(this, "Enviando anexo", "Aguarde ...");
@@ -240,7 +238,6 @@ public class AnexosManagerActivity extends ListActivity implements AnexosListAda
                         msg = response.getMessage();
 
                         try {
-
                             // salvando copia da imagem na pasta local do app
                             String fileName = response.getFileName();
                             Utilities.salvarImagem(activity, ImageFolder.ANEXOS, fileName, uri);
