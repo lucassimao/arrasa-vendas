@@ -355,11 +355,21 @@ public class EntregasExpandableListAdapter extends BaseExpandableListAdapter {
             img.setVisibility(View.VISIBLE);
         }
 
-        ImageView imgPaperclip = (ImageView) convertView.findViewById(R.id.imgPaperclip);
-        if (venda.getAnexos() == null) {
-            imgPaperclip.setVisibility(View.INVISIBLE);
-        } else {
-            imgPaperclip.setVisibility(View.VISIBLE);
+        boolean hasAttatchment = venda.getAnexos() != null;
+        boolean wasDispached = !TextUtils.isEmpty(venda.getCodigoRastreio());
+        ImageView flag1 = (ImageView) convertView.findViewById(R.id.flag1);
+        flag1.setImageResource(android.R.color.transparent);
+
+        ImageView flag2 = (ImageView) convertView.findViewById(R.id.flag2);
+        flag2.setImageResource(android.R.color.transparent);
+
+        if (hasAttatchment && wasDispached){
+            flag1.setImageResource(R.drawable.paperclip3_black);
+            flag2.setImageResource(R.drawable.icon_correios);
+        }else if (!hasAttatchment && wasDispached){
+            flag1.setImageResource(R.drawable.icon_correios);
+        }else if (hasAttatchment && !wasDispached){
+            flag1.setImageResource(R.drawable.paperclip3_black);
         }
 
         if (venda.getItens() != null) {

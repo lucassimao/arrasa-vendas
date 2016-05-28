@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:id="@+id/row_layout"
     android:layout_height="match_parent"
     android:padding="3dp"
@@ -61,23 +61,28 @@
 
 
     <ImageView
-        android:id="@+id/imgPaperclip"
+        android:id="@+id/flag1"
         android:layout_width="64px"
         android:layout_height="64px"
-        android:src="@drawable/paperclip3_black"
         android:layout_below="@id/linear_layout"
         android:layout_alignParentLeft="true"
-        android:visibility="invisible"
         android:layout_alignParentStart="true" />
 
+    <ImageView
+        android:id="@+id/flag2"
+        android:layout_width="64px"
+        android:layout_height="64px"
+        android:layout_below="@id/flag1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/txtItensVenda"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:layout_alignTop="@+id/imgPaperclip"
-        android:layout_toRightOf="@+id/imgPaperclip"
-        android:layout_toEndOf="@+id/imgPaperclip"   />
+        android:layout_alignTop="@+id/flag1"
+        android:layout_toRightOf="@+id/flag1"
+        android:layout_toEndOf="@+id/flag1"   />
 
 </RelativeLayout>
