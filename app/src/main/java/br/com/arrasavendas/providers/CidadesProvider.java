@@ -79,6 +79,21 @@ public class CidadesProvider  extends ContentProvider {
         return null;
     }
 
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        int qty = values.length;
+        long rowId = 0;
+        arrasaVendasDb.beginTransaction();
+
+        for(ContentValues cv : values) {
+            rowId = arrasaVendasDb.insert(DatabaseHelper.TABLE_CIDADE, "", cv);
+            if (rowId<=0) --qty;
+        }
+        arrasaVendasDb.setTransactionSuccessful();
+        arrasaVendasDb.endTransaction();
+        return qty;
+    }
+
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {

@@ -38,11 +38,9 @@ public class LoginActivity extends Activity {
             this.editTextSenha = (TextView) findViewById(R.id.editTextSenha);
         }
 
-
     }
 
     public void onClickButtonLogin(View view) {
-
 
         String login = this.editTextLogin.getText().toString();
         String senha = this.editTextSenha.getText().toString();

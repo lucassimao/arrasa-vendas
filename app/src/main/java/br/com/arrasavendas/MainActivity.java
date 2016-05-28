@@ -13,6 +13,7 @@ import android.widget.Toast;
 import br.com.arrasavendas.entregas.EntregasActivity;
 import br.com.arrasavendas.estoque.EstoqueActivity;
 import br.com.arrasavendas.financeiro.FinanceiroActivity;
+import br.com.arrasavendas.gcm.RegistrationIntentService;
 import br.com.arrasavendas.imagesManager.ImagesManagerActivity;
 import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.VendaActivity;
@@ -27,26 +28,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-        atualizarEnderecos();
-    }
-
-
-    /**
-     * Método chamado no onCreate e caso
-     * seja a primeira execuçao do aplicativo,
-     * faz o 1º agendamento do sincronizador de endereços e baixa o estoque
-     */
-    private void atualizarEnderecos() {
-        final String ARRASAVENDAS = "br.com.arrasavendas";
-        final String KEY_PREFS_FIRST_LAUNCH = "br.com.arrasavendas.first_launch";
-
-        SharedPreferences prefs = getSharedPreferences(ARRASAVENDAS,Activity.MODE_PRIVATE);
-
-        if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH,true)){
-            prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH,false).commit();
-            new DownloadJSONAsyncTask(this,null).execute(RemotePath.EstoquePath);
-            Utilities.registrarSyncEnderecoAlarm(this);
-        }
     }
 
     public void onClickBtnCalcularFrete(View v) {

@@ -26,13 +26,15 @@ import br.com.arrasavendas.providers.ClientesProvider;
  */
 public class SyncEnderecosService extends IntentService {
 
+    private final String TAG = "::SyncEnderecos::";
+
     public SyncEnderecosService() {
         super("SyncEnderecosService");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(":: SyncEnderecos :: ", "baixando os enderecos");
+        Log.d(TAG, "baixando os enderecos");
 
         Application app = (Application) getApplicationContext();
 
@@ -45,10 +47,10 @@ public class SyncEnderecosService extends IntentService {
                 Long lastTimestamp = getLastTimestamp();
                 String path = RemotePath.EnderecosPath.getUrl();
                 Uri uri = Uri.parse(path).buildUpon().
-                        appendQueryParameter("lastDownloadedTimestamp",lastTimestamp.toString()).
-                        appendQueryParameter("login",login).build();
+                        appendQueryParameter("lastDownloadedTimestamp", lastTimestamp.toString()).
+                        appendQueryParameter("login", login).build();
 
-                Log.d(":: SyncEnderecos :: ", "Timestamp do ultimo cliente: " + lastTimestamp);
+                Log.d(TAG, "Timestamp do ultimo cliente: " + lastTimestamp);
 
                 HttpURLConnection connection = (HttpURLConnection) new URL(uri.toString()).openConnection();
                 connection.setRequestProperty("Accept", "application/json");
@@ -74,7 +76,7 @@ public class SyncEnderecosService extends IntentService {
                     }
 
                     JSONArray jsonArray = new JSONArray(sb.toString());
-                    Log.d(":: SyncEnderecos :: ", String.format("%d novos clientes", jsonArray.length()));
+                    Log.d(TAG, String.format("%d novos clientes", jsonArray.length()));
                     if (jsonArray.length() > 0)
                         salvarNovosEnderecos(jsonArray);
 
@@ -87,15 +89,17 @@ public class SyncEnderecosService extends IntentService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
+        } else
+            Log.d(TAG, "ainda nao autenticado ... skipping");
+
     }
 
     private long getLastTimestamp() {
-        String[] projection = {String.format("MAX(%s) as max_last_updated_timestamp",ClientesProvider.LAST_UPDATED_TIMESTAMP)};
+        String[] projection = {String.format("MAX(%s) as max_last_updated_timestamp", ClientesProvider.LAST_UPDATED_TIMESTAMP)};
 
-        Cursor cursor = getContentResolver().query(ClientesProvider.CONTENT_URI,projection,null,null,null);
+        Cursor cursor = getContentResolver().query(ClientesProvider.CONTENT_URI, projection, null, null, null);
         cursor.moveToFirst();
-        if (cursor.getCount() > 0){
+        if (cursor.getCount() > 0) {
             long timestamp = cursor.getLong(cursor.getColumnIndex("max_last_updated_timestamp"));
             cursor.close();
             return timestamp;
@@ -105,8 +109,8 @@ public class SyncEnderecosService extends IntentService {
     }
 
     private void salvarNovosEnderecos(JSONArray jsonArray) {
-        for (int i = 0; i < jsonArray.length(); ++i) {
-
+        ContentValues[] contentValues = new ContentValues[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); ++i)
             try {
 
                 JSONObject endereco = jsonArray.getJSONObject(i);
@@ -126,26 +130,26 @@ public class SyncEnderecosService extends IntentService {
                 long lastUpdatedTimestamp = endereco.getLong("last_updated_unix_timestamp");
 
                 ContentValues cv = new ContentValues();
-                cv.put(ClientesProvider.CLIENTE_ID,id);
-                cv.put(ClientesProvider.NOME,cliente);
-                cv.put(ClientesProvider.CELULAR,celular);
-                cv.put(ClientesProvider.DDD_CELULAR,dddCelular);
-                cv.put(ClientesProvider.TELEFONE,telefone);
-                cv.put(ClientesProvider.DDD_TELEFONE,dddTelefone);
-                cv.put(ClientesProvider.ENDERECO,complemento);
-                cv.put(ClientesProvider.ID_UF,idUf);
-                cv.put(ClientesProvider.UF,uf);
-                cv.put(ClientesProvider.CIDADE,cidade);
-                cv.put(ClientesProvider.ID_CIDADE,idCidade);
-                cv.put(ClientesProvider.BAIRRO,bairro);
-                cv.put(ClientesProvider.LAST_UPDATED_TIMESTAMP,lastUpdatedTimestamp);
+                cv.put(ClientesProvider.CLIENTE_ID, id);
+                cv.put(ClientesProvider.NOME, cliente);
+                cv.put(ClientesProvider.CELULAR, celular);
+                cv.put(ClientesProvider.DDD_CELULAR, dddCelular);
+                cv.put(ClientesProvider.TELEFONE, telefone);
+                cv.put(ClientesProvider.DDD_TELEFONE, dddTelefone);
+                cv.put(ClientesProvider.ENDERECO, complemento);
+                cv.put(ClientesProvider.ID_UF, idUf);
+                cv.put(ClientesProvider.UF, uf);
+                cv.put(ClientesProvider.CIDADE, cidade);
+                cv.put(ClientesProvider.ID_CIDADE, idCidade);
+                cv.put(ClientesProvider.BAIRRO, bairro);
+                cv.put(ClientesProvider.LAST_UPDATED_TIMESTAMP, lastUpdatedTimestamp);
 
-                getContentResolver().insert(ClientesProvider.CONTENT_URI, cv);
-
+                contentValues[i] = cv;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-        }
+        getContentResolver().bulkInsert(ClientesProvider.CONTENT_URI, contentValues);
+        Log.d(TAG, jsonArray.length() + " novos clientes salvos!");
     }
 }
