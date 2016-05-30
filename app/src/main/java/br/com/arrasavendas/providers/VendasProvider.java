@@ -105,6 +105,21 @@ public class VendasProvider extends ContentProvider {
     }
 
     @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        int qty = values.length;
+        long rowId = 0;
+        arrasaVendasDb.beginTransaction();
+
+        for(ContentValues cv : values) {
+            rowId = arrasaVendasDb.insert(DatabaseHelper.TABLE_VENDAS, "", cv);
+            if (rowId<=0) --qty;
+        }
+        arrasaVendasDb.setTransactionSuccessful();
+        arrasaVendasDb.endTransaction();
+        return qty;
+    }
+
+    @Override
     public boolean onCreate() {
         Context ctx = getContext();
         DatabaseHelper dbHelper = new DatabaseHelper(ctx);

@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.StrictMode;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import br.com.arrasavendas.providers.CidadesProvider;
 import br.com.arrasavendas.gcm.RegistrationIntentService;
+import br.com.arrasavendas.providers.EstoqueProvider;
 
 import static br.com.arrasavendas.Utilities.ImageFolder.ANEXOS;
 import static br.com.arrasavendas.Utilities.ImageFolder.PRODUTOS;
@@ -34,7 +35,8 @@ import static br.com.arrasavendas.Utilities.ImageFolder.PRODUTOS;
  */
 public class Application extends android.app.Application {
 
-    public static final String ARRASAVENDAS_AUTH_PREFS_KEY = "br.com.arrasavendas.auth";
+    public static final String PREFS_AUTH_KEY = "br.com.arrasavendas.auth";
+    public static final String PREFS_FLAG_LAST_UPDATED = "br.com.arrasavendas.lastUpdated";
     public static final int ENTREGAS_LOADER = 1;
     public static final int ESTOQUE_LOADER = 2;
     public final static int CIDADES_LOADER = 10;
@@ -53,7 +55,7 @@ public class Application extends android.app.Application {
     }
 
     public static void salvarAuthToken(String username, String roles, String access_token) {
-        SharedPreferences sp = context().getSharedPreferences(ARRASAVENDAS_AUTH_PREFS_KEY, Activity.MODE_PRIVATE);
+        SharedPreferences sp = context().getSharedPreferences(PREFS_AUTH_KEY, Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
 
         editor.putString("username", username);
@@ -69,6 +71,62 @@ public class Application extends android.app.Application {
         Application.mApp.registerGCM();
         Intent intent = new Intent(mApp, SyncEnderecosService.class);
         Application.mApp.startService(intent);
+
+        // forçar ser atualizado logo depois de logar
+        setVendasLastUpdated(0);
+        setEstoquesLastUpdated(0);
+    }
+
+    public final static void setVendasLastUpdated(long newVendasLastUpdated){
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+
+        if (!sp.contains("vendasLastUpdated") ||
+                newVendasLastUpdated < getVendasLastUpdated() ){
+
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putLong("vendasLastUpdated", newVendasLastUpdated);
+            editor.commit();
+        }
+    }
+
+    /**
+     *
+     * @return o valor da vendasLastUpdated ou -1 caso esteja vazio
+     */
+    public final static long getVendasLastUpdated(){
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+        return sp.getLong("vendasLastUpdated",-1);
+    }
+
+    public final static void setEstoquesLastUpdated(long newEstoquesLastUpdated){
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+
+        if (!sp.contains("estoquesLastUpdated") ||
+                newEstoquesLastUpdated < getVendasLastUpdated() ){
+
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putLong("estoquesLastUpdated", newEstoquesLastUpdated);
+            editor.commit();
+        }
+    }
+
+    /**
+     *
+     * @return o valor da estoquesLastUpdated ou -1 caso esteja vazio
+     */
+    public final static long getEstoquesLastUpdated(){
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+        return sp.getLong("estoquesLastUpdated", -1);
+    }
+
+    public final static boolean isDBUpdated(){
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+        return !sp.contains("vendasLastUpdated") && !sp.contains("estoquesLastUpdated");
+    }
+
+    public static void setDBUpdated() {
+        SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
+        sp.edit().remove("vendasLastUpdated").remove("estoquesLastUpdated").apply();
     }
 
     @Override
@@ -83,6 +141,7 @@ public class Application extends android.app.Application {
         mApp = this;
         // se ja tiver logado, conecta logo no GCM
         registerGCM();
+
     }
 
     private void registerGCM() {
@@ -195,7 +254,7 @@ public class Application extends android.app.Application {
     }
 
     private void loadAuthenticationInfo() {
-        SharedPreferences sp = getSharedPreferences(ARRASAVENDAS_AUTH_PREFS_KEY, MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences(PREFS_AUTH_KEY, MODE_PRIVATE);
         this.currentUser = sp.getString("username", null);
         this.accessToken = sp.getString("access_token", null);
         this.roles = sp.getString("roles", null);
@@ -215,4 +274,6 @@ public class Application extends android.app.Application {
 
         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, INTERVAL_3_HOURS, alarmIntent);
     }
+
+
 }

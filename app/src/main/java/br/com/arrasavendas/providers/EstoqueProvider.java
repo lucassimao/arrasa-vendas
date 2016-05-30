@@ -1,16 +1,22 @@
 package br.com.arrasavendas.providers;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 import br.com.arrasavendas.DatabaseHelper;
 
@@ -102,6 +108,27 @@ public class EstoqueProvider extends ContentProvider {
             Log.e("EstoqueProvider", "Failed to insert row into " + uri);
         }
         return null;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        int qty = values.length;
+        long rowId = 0;
+        arrasaVendasDb.beginTransaction();
+
+        for(ContentValues cv : values) {
+            rowId = arrasaVendasDb.insert(DatabaseHelper.TABLE_ESTOQUE, "", cv);
+            if (rowId<=0) --qty;
+        }
+        arrasaVendasDb.setTransactionSuccessful();
+        arrasaVendasDb.endTransaction();
+        return qty;
+    }
+
+    @NonNull
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        return super.applyBatch(operations);
     }
 
     @Override

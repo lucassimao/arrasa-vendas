@@ -16,7 +16,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,18 +24,15 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import br.com.arrasavendas.DownloadJSONAsyncTask;
+import br.com.arrasavendas.UpdateDBAsyncTask;
 import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.Utilities;
-import br.com.arrasavendas.entregas.TipoFiltro;
 import br.com.arrasavendas.imagesManager.DownloadImagesTask;
-import br.com.arrasavendas.model.Produto;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.util.Response;
 
-import static br.com.arrasavendas.Application.ENTREGAS_LOADER;
 import static br.com.arrasavendas.Application.ESTOQUE_LOADER;
 
 public class EstoqueActivity extends Activity {
@@ -124,7 +120,7 @@ public class EstoqueActivity extends Activity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this,
                 "Atualizando informações", "Aguarde ...");
-        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
+        new UpdateDBAsyncTask(this, new UpdateDBAsyncTask.OnCompleteListener() {
 
             @Override
             public void run(Response response) {
@@ -144,7 +140,7 @@ public class EstoqueActivity extends Activity {
 
 
             }
-        }).execute(RemotePath.EstoquePath);
+        }).execute();
     }
 
     private void shareWithWhatsApp() {

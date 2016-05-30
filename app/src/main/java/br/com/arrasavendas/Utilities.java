@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.Normalizer;
 
 public class Utilities {
 
@@ -49,6 +50,11 @@ public class Utilities {
 
     private static final String TAG = "Utilities";
     private static final boolean DEBUG = true;
+
+    public final static String excluirCaracteresEspeciais(String original){
+        return Normalizer.normalize(original, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "");
+    }
 
     public static String makePlaceholders(int len) {
         if (len < 1) {

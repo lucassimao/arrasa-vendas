@@ -2,9 +2,12 @@ package br.com.arrasavendas.service;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,13 +18,66 @@ import br.com.arrasavendas.providers.VendasProvider;
  */
 public class VendaService {
 
+    private static final String TAG = VendaService.class.getSimpleName();
     private final Context ctx;
 
     public VendaService(Context ctx) {
         this.ctx = ctx;
     }
 
-    public void save(JSONObject venda) throws JSONException {
+    public final void delete(Long id) {
+        Log.d(TAG,"excluindo venda #"+id);
+        Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
+        ctx.getContentResolver().delete(uri, null, null);
+    }
+
+    public final void update(Long id, JSONObject venda) throws JSONException {
+        Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
+        ContentValues values = convertJSONObject2ContentValue(venda);
+
+        ctx.getContentResolver().update(uri,values,null,null);
+    }
+
+    public final void save(JSONObject venda) throws JSONException {
+        ContentValues values = convertJSONObject2ContentValue(venda);
+        this.ctx.getContentResolver().insert(VendasProvider.CONTENT_URI, values);
+    }
+
+    public final void save(JSONArray itens) {
+        Cursor cursor = ctx.getContentResolver().query(VendasProvider.CONTENT_URI, new String[]{VendasProvider._ID}, null, null, null);
+        int count = cursor.getCount();
+        cursor.close();
+
+        try {
+
+            // se ja houver registros no banco de dados
+            if (count > 0)
+                for (int i = 0; i < itens.length(); ++i) {
+                    JSONObject jsonObject = itens.getJSONObject(i);
+                    long vendaId = jsonObject.getLong("id");
+
+                    update(vendaId, jsonObject);
+                }
+            else { // se nao, faz um bulk insert
+                ContentValues[] contentValues = new ContentValues[itens.length()];
+
+                for (int i = 0; i < itens.length(); ++i)
+                    contentValues[i] = convertJSONObject2ContentValue(itens.getJSONObject(i));
+
+
+                ctx.getContentResolver().bulkInsert(VendasProvider.CONTENT_URI, contentValues);
+            }
+
+        } catch (JSONException e) {
+            Log.d(TAG, "Erro ao converter json object da venda em content value: ");
+            e.printStackTrace();
+        }
+    }
+
+
+
+    @NonNull
+    private ContentValues convertJSONObject2ContentValue(JSONObject venda) throws JSONException {
         ContentValues values = new ContentValues();
         values.put(VendasProvider._ID, venda.getInt("id"));
         values.put(VendasProvider.VENDEDOR, venda.getString("vendedor"));
@@ -44,18 +100,6 @@ public class VendaService {
         values.put(VendasProvider.CODIGO_RASTREIO, venda.getString("codigoRastreio"));
         values.put(VendasProvider.FLAG_VAI_BUSCAR, venda.getBoolean("flagClienteVaiBuscar") ? 1 : 0);
         values.put(VendasProvider.FLAG_JA_BUSCOU, venda.getBoolean("flagClienteJaBuscou") ? 1 : 0);
-
-
-        this.ctx.getContentResolver().insert(VendasProvider.CONTENT_URI, values);
-    }
-
-    public void update(Long id, JSONObject venda) throws JSONException {
-        delete(id);
-        save(venda);
-    }
-
-    public void delete(Long id) {
-        Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
-        ctx.getContentResolver().delete(uri, null, null);
+        return values;
     }
 }

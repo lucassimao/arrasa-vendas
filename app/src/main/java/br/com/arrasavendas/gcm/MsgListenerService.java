@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +15,11 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 import java.util.Random;
 
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.service.VendaService;
 
 /**
  * Created by lsimaocosta on 27/03/16.
@@ -24,31 +29,101 @@ public class MsgListenerService extends GcmListenerService {
     public static final String TITLE = "title";
     public static final String MESSAGE = "message";
     private static final String TAG = MsgListenerService.class.getName();
-    private static final Random random = new Random(System.currentTimeMillis());
 
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String resumo = data.getString("resumo");
         String message = data.getString("message");
+
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
-        Log.d(TAG, "Data: " +data.toString());
+        Log.d(TAG, "Data: " + data.toString());
 
         switch (message) {
             case "DELETE":
+                String entity = data.getString("entity", "");
+                long id = Long.valueOf(data.getString("id"));
+
+                switch (entity) {
+                    case "Venda":
+                        new VendaService(getApplication()).delete(id);
+                        break;
+                    case "Estoque":
+                        Log.d(TAG, "Exclusao p/ estoque #" + id + " não era pra aparecer aqui");
+                        break;
+                    default:
+                        Log.d(TAG, "Delete não identificou entidade " + entity);
+                }
                 break;
             case "UPDATE":
+                synchronized (Application.class) {
+
+                    if (data.containsKey("estoquesLastUpdated")) {
+
+                        long lastUpdated = data.getLong("estoquesLastUpdated");
+                        String idEstoque = data.getString("id");
+
+                        if (isEstoqueUpdateUnknow(lastUpdated, idEstoque))
+                            Application.setEstoquesLastUpdated(lastUpdated);
+                        else
+                            Log.d(TAG,"estoquesLastUpdated ja conhecido ... ignorando");
+                    }
+
+                    if (data.containsKey("vendasLastUpdated")) {
+                        long lastUpdated = data.getLong("vendasLastUpdated");
+                        String idVenda = data.getString("id");
+
+                        if (isVendaUpdateUnknow(lastUpdated, idVenda))
+                            Application.setVendasLastUpdated(lastUpdated);
+                        else
+                            Log.d(TAG,"vendasLastUpdated ja conhecido ... ignorando");
+                    }
+                }
                 break;
             default:
+                String resumo = data.getString("resumo");
                 sendNotification(resumo, message);
                 break;
         }
 
     }
 
+    private final boolean isVendaUpdateUnknow(long lastUpdated, String idVenda) {
+        String[] projection = {"count(" + VendasProvider._ID + ")"};
+        String selection = VendasProvider._ID + "=? AND " + VendasProvider.LAST_UPDATED_TIMESTAMP+"=?";
+        String[] selectionArgs = {idVenda,String.valueOf(lastUpdated)};
 
-    private void sendNotification(String resumo, String message) {
+        Cursor c = getContentResolver().query(VendasProvider.CONTENT_URI,
+                projection,selection,selectionArgs,null);
+
+        int count = 0;
+        if (c.moveToFirst()){
+            count = c.getInt(0);
+        }
+        c.close();
+        return (count==0);
+    }
+
+    private final boolean isEstoqueUpdateUnknow(long lastUpdated, String idEstoque) {
+        String[] projection = {"count(" + EstoqueProvider._ID + ")"};
+        String selection = EstoqueProvider._ID + "=? AND " + EstoqueProvider.LAST_UPDATED_TIMESTAMP+"=?";
+        String[] selectionArgs = {idEstoque,String.valueOf(lastUpdated)};
+
+        Cursor c = getContentResolver().query(EstoqueProvider.CONTENT_URI,
+                projection,selection,selectionArgs,null);
+        int count = 0;
+
+        if (c.moveToFirst()){
+            count = c.getInt(0);
+        }
+        c.close();
+        return (count==0);
+    }
+
+
+    private final void sendNotification(String resumo, String message) {
+
+        Random random = new Random(System.currentTimeMillis());
 
         Intent intent = new Intent(this, NotificationPopUp.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -56,8 +131,8 @@ public class MsgListenerService extends GcmListenerService {
         intent.putExtra(TITLE, "Alertas Arrasa Amiga");
         intent.putExtra(MESSAGE, message);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,random.nextInt(),
-                intent,PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, random.nextInt(),
+                intent, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)

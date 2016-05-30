@@ -10,8 +10,7 @@ import java.util.Locale;
 import android.widget.*;
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.model.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

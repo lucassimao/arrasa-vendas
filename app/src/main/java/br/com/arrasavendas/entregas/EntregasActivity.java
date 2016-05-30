@@ -37,9 +37,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import br.com.arrasavendas.DownloadJSONAsyncTask;
+import br.com.arrasavendas.UpdateDBAsyncTask;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.RemotePath;
 import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.StatusVenda;
@@ -391,7 +390,7 @@ public class EntregasActivity extends FragmentActivity {
 
         final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
         vendasListAdapter.setCursor(null);
-        new DownloadJSONAsyncTask(this, new DownloadJSONAsyncTask.OnCompleteListener() {
+        new UpdateDBAsyncTask(this, new UpdateDBAsyncTask.OnCompleteListener() {
 
             @Override
             public void run(Response response) {
@@ -410,7 +409,7 @@ public class EntregasActivity extends FragmentActivity {
                 }
 
             }
-        }).execute(RemotePath.VendaPath);
+        }).execute();
     }
 
     @Override

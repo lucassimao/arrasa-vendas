@@ -21,7 +21,6 @@ import br.com.arrasavendas.R;
 public class RegistrationIntentService extends IntentService{
 
     private static final String TAG = RegistrationIntentService.class.getName();
-    private final String SENT_TOKEN_TO_SERVER = "SENT_TOKEN_TO_SERVER";
 
     public RegistrationIntentService(){
         this("RegistrationIntentService");
@@ -37,9 +36,9 @@ public class RegistrationIntentService extends IntentService{
 
     @Override
     protected void onHandleIntent(Intent intent) {
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         InstanceID instanceID = InstanceID.getInstance(this);
+
         try {
             String senderID = getString(R.string.gcm_defaultSenderId);
             String token = instanceID.getToken(senderID,
@@ -47,19 +46,13 @@ public class RegistrationIntentService extends IntentService{
 
             Log.i(TAG, "GCM Registration Token: " + token);
 
-//            sendRegistrationToServer(token);
             subscribeTopics(token);
-
-//            sharedPreferences.edit().putBoolean(SENT_TOKEN_TO_SERVER, true).apply();
 
         } catch (IOException e) {
             e.printStackTrace();
             Log.d(TAG, "Failed to complete token refresh", e);
-//            sharedPreferences.edit().putBoolean(SENT_TOKEN_TO_SERVER, false).apply();
         }
 
-//        Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
     private void subscribeTopics(String token) throws IOException {

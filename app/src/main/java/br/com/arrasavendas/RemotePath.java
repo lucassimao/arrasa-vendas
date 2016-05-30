@@ -4,12 +4,12 @@ package br.com.arrasavendas;
 import android.net.Uri;
 
 public enum RemotePath {
-	EstoquePath(Constants.host + "/api/estoque"),
+    EstoquePath(Constants.host + "/api/estoque"),
 	VendaPath(Constants.host + "/api/vendas"),
     LoginPath(Constants.host +  "/api/login"),
-    CaixaPath(Constants.host +  "/api/caixa"),
     MovimentoCaixaPath(Constants.host +  "/api/movimentoCaixa"),
-    EnderecosPath(Constants.host +  "/api/enderecos");
+    EnderecosPath(Constants.host +  "/api/enderecos"),
+    SyncPath(Constants.host +"/sync");
 
     private String url;
 
