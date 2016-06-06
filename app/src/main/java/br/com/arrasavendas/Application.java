@@ -80,6 +80,9 @@ public class Application extends android.app.Application {
     public final static void setVendasLastUpdated(long newVendasLastUpdated){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
 
+        Log.d(TAG,"existe a chave vendasLastUpdated: " + sp.contains("vendaLastUpdated"));
+        Log.d(TAG,"VendasLastUpdated:" + getVendasLastUpdated());
+
         if (!sp.contains("vendasLastUpdated") ||
                 newVendasLastUpdated < getVendasLastUpdated() ){
 

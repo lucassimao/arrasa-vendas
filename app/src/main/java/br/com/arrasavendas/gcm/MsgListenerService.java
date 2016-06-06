@@ -60,7 +60,7 @@ public class MsgListenerService extends GcmListenerService {
 
                     if (data.containsKey("estoquesLastUpdated")) {
 
-                        long lastUpdated = data.getLong("estoquesLastUpdated");
+                        long lastUpdated = Long.valueOf(data.getString("estoquesLastUpdated"));
                         String idEstoque = data.getString("id");
 
                         if (isEstoqueUpdateUnknow(lastUpdated, idEstoque))
@@ -70,7 +70,7 @@ public class MsgListenerService extends GcmListenerService {
                     }
 
                     if (data.containsKey("vendasLastUpdated")) {
-                        long lastUpdated = data.getLong("vendasLastUpdated");
+                        long lastUpdated = Long.valueOf(data.getString("vendasLastUpdated"));
                         String idVenda = data.getString("id");
 
                         if (isVendaUpdateUnknow(lastUpdated, idVenda))

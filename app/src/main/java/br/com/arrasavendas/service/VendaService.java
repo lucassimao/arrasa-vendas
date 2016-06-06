@@ -26,7 +26,7 @@ public class VendaService {
     }
 
     public final void delete(Long id) {
-        Log.d(TAG,"excluindo venda #"+id);
+        Log.d(TAG, "excluindo venda #" + id);
         Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
         ctx.getContentResolver().delete(uri, null, null);
     }
@@ -35,7 +35,7 @@ public class VendaService {
         Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
         ContentValues values = convertJSONObject2ContentValue(venda);
 
-        ctx.getContentResolver().update(uri,values,null,null);
+        ctx.getContentResolver().update(uri, values, null, null);
     }
 
     public final void save(JSONObject venda) throws JSONException {
@@ -44,29 +44,38 @@ public class VendaService {
     }
 
     public final void save(JSONArray itens) {
-        Cursor cursor = ctx.getContentResolver().query(VendasProvider.CONTENT_URI, new String[]{VendasProvider._ID}, null, null, null);
-        int count = cursor.getCount();
-        cursor.close();
 
         try {
 
-            // se ja houver registros no banco de dados
-            if (count > 0)
+            if (isTableVendaEmpty()) { // estando vazio, faz bulk insert
+                Log.d(TAG,"Tabela de vendas vazia, fazendo bulk insert!");
+
+                ContentValues[] contentValues = new ContentValues[itens.length()];
+                for (int i = 0; i < itens.length(); ++i)
+                    contentValues[i] = convertJSONObject2ContentValue(itens.getJSONObject(i));
+
+                ctx.getContentResolver().bulkInsert(VendasProvider.CONTENT_URI, contentValues);
+
+            } else
                 for (int i = 0; i < itens.length(); ++i) {
                     JSONObject jsonObject = itens.getJSONObject(i);
                     long vendaId = jsonObject.getLong("id");
 
-                    update(vendaId, jsonObject);
+                    Uri uri = VendasProvider.CONTENT_URI.buildUpon().
+                            appendPath(String.valueOf(vendaId)).build();
+                    Cursor c = ctx.getContentResolver().query(uri, new String[]{VendasProvider._ID}, null, null, null);
+
+                    // se a venda não existe, salva; caso contrario, atualiza
+                    if (c.getCount() == 0) {
+                        Log.d(TAG,"VENDA #"+vendaId+ " nao existe, save!");
+                        save(jsonObject);
+                    }
+                    else {
+                        Log.d(TAG,"VENDA #"+vendaId+ " ja existe, update!");
+                        update(vendaId, jsonObject);
+                    }
+                    c.close();
                 }
-            else { // se nao, faz um bulk insert
-                ContentValues[] contentValues = new ContentValues[itens.length()];
-
-                for (int i = 0; i < itens.length(); ++i)
-                    contentValues[i] = convertJSONObject2ContentValue(itens.getJSONObject(i));
-
-
-                ctx.getContentResolver().bulkInsert(VendasProvider.CONTENT_URI, contentValues);
-            }
 
         } catch (JSONException e) {
             Log.d(TAG, "Erro ao converter json object da venda em content value: ");
@@ -74,6 +83,12 @@ public class VendaService {
         }
     }
 
+    private boolean isTableVendaEmpty() {
+        Cursor cursor = ctx.getContentResolver().query(VendasProvider.CONTENT_URI, new String[]{VendasProvider._ID}, null, null, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count == 0;
+    }
 
 
     @NonNull
