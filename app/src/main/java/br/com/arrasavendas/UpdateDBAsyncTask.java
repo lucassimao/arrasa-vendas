@@ -1,6 +1,7 @@
 package br.com.arrasavendas;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -68,6 +69,10 @@ public class UpdateDBAsyncTask extends AsyncTask<Void, Void, Response> {
                         JSONArray vendas = data.getJSONArray("vendas");
                         Log.d(TAG, "salvando " + vendas.length() + " registros de venda ...");
                         saveVendas(vendas);
+
+                        // aproveitando p/ verificar se houve alguma altualização nos endereços
+                        Intent intent = new Intent(ctx, SyncEnderecosService.class);
+                        ctx.startService(intent);
                     }
 
                     if (data.has("caixa")) {
