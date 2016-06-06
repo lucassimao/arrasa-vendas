@@ -19,6 +19,7 @@
     <item android:id="@+id/delete"
         android:icon="@drawable/delete"
         android:title="Excluir"
+        android:visible="false"
         arrasavendas:showAsAction="always"
         android:showAsAction="always"
         />

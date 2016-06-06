@@ -37,6 +37,7 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.UpdateDBAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Cidade;
@@ -54,7 +55,6 @@ import static br.com.arrasavendas.Application.ENTREGAS_LOADER;
 public class EntregasActivity extends FragmentActivity {
 
     private static final int EDIT_ITENS_VENDA_RESULT = 1;
-    private static final int MENU_SEARCH = 0;
     private static final String TIPO_FILTRO = "TIPO_FILTRO";
     Venda vendaSelecionada = null;
     View vendaSelecionadaView = null;

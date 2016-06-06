@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Venda;
 
@@ -24,6 +25,15 @@ class EntregasActionBarCallback implements ActionMode.Callback {
     @Override
     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
         actionMode.getMenuInflater().inflate(R.menu.entregas_contextual_menu, menu);
+
+        Application instance = Application.getInstance();
+        Venda venda = entregasActivity.vendaSelecionada;
+        String vendedor = venda.getVendedor().getLogin();
+
+        if (instance.isAdmin() || instance.getCurrentUser().equals(vendedor)) {
+            MenuItem item = menu.findItem(R.id.delete);
+            item.setVisible(true);
+        }
         return true;
     }
 
