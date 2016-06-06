@@ -2,6 +2,7 @@ package br.com.arrasavendas.entregas;
 
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +29,7 @@ class EntregasActionBarCallback implements ActionMode.Callback {
 
         Application instance = Application.getInstance();
         Venda venda = entregasActivity.vendaSelecionada;
-        String vendedor = venda.getVendedor().getLogin();
+        String vendedor = venda.getVendedor()!=null?venda.getVendedor().getLogin():null;
 
         if (instance.isAdmin() || instance.getCurrentUser().equals(vendedor)) {
             MenuItem item = menu.findItem(R.id.delete);
