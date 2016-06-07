@@ -80,14 +80,14 @@ public class Application extends android.app.Application {
     public final static void setVendasLastUpdated(long newVendasLastUpdated){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
 
-        Log.d(TAG,"existe a chave vendasLastUpdated: " + sp.contains("vendaLastUpdated"));
+        Log.d(TAG,"Key vendasLastUpdated presente: " + sp.contains("vendaLastUpdated"));
         Log.d(TAG,"VendasLastUpdated:" + getVendasLastUpdated());
 
-        if (!sp.contains("vendasLastUpdated") ||
-                newVendasLastUpdated < getVendasLastUpdated() ){
+        final String key = "vendasLastUpdated";
 
+        if (!sp.contains(key) ||  newVendasLastUpdated < getVendasLastUpdated() ){
             SharedPreferences.Editor editor = sp.edit();
-            editor.putLong("vendasLastUpdated", newVendasLastUpdated);
+            editor.putLong(key, newVendasLastUpdated);
             editor.commit();
         }
     }
@@ -104,11 +104,11 @@ public class Application extends android.app.Application {
     public final static void setEstoquesLastUpdated(long newEstoquesLastUpdated){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
 
-        if (!sp.contains("estoquesLastUpdated") ||
-                newEstoquesLastUpdated < getVendasLastUpdated() ){
+        final String key = "estoquesLastUpdated";
 
+        if (!sp.contains(key) || newEstoquesLastUpdated < getVendasLastUpdated() ){
             SharedPreferences.Editor editor = sp.edit();
-            editor.putLong("estoquesLastUpdated", newEstoquesLastUpdated);
+            editor.putLong(key, newEstoquesLastUpdated);
             editor.commit();
         }
     }

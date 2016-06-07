@@ -45,8 +45,8 @@ public class SalvarVendaAsyncTask extends AsyncTask<JSONObject, Void, Response> 
 
         httpConnection.setDoInput(true);
         httpConnection.setDoOutput(true);
-        httpConnection.setRequestMethod("POST");
         httpConnection.setUseCaches(false);
+        httpConnection.setRequestMethod("POST");
         httpConnection.setRequestProperty("Content-Type", "application/json");
         httpConnection.setRequestProperty("Accept", "application/json");
         httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
@@ -62,8 +62,9 @@ public class SalvarVendaAsyncTask extends AsyncTask<JSONObject, Void, Response> 
 
         String line = null;
         BufferedReader reader = null;
+        int responseCode = httpConnection.getResponseCode();
 
-        if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED)
+        if (responseCode == HttpURLConnection.HTTP_CREATED)
             reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
         else
             reader = new BufferedReader(new InputStreamReader(httpConnection.getErrorStream()));
@@ -75,7 +76,6 @@ public class SalvarVendaAsyncTask extends AsyncTask<JSONObject, Void, Response> 
         }
 
         String message = stringBuilder.toString();
-        int responseCode = httpConnection.getResponseCode();
         Response response = new Response(message, responseCode);
 
         httpConnection.disconnect();

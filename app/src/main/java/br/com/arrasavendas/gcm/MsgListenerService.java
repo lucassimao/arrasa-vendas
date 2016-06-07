@@ -41,44 +41,10 @@ public class MsgListenerService extends GcmListenerService {
 
         switch (message) {
             case "DELETE":
-                String entity = data.getString("entity", "");
-                long id = Long.valueOf(data.getString("id"));
-
-                switch (entity) {
-                    case "Venda":
-                        new VendaService(getApplication()).delete(id);
-                        break;
-                    case "Estoque":
-                        Log.d(TAG, "Exclusao p/ estoque #" + id + " não era pra aparecer aqui");
-                        break;
-                    default:
-                        Log.d(TAG, "Delete não identificou entidade " + entity);
-                }
+                handleDelete(data);
                 break;
             case "UPDATE":
-                synchronized (Application.class) {
-
-                    if (data.containsKey("estoquesLastUpdated")) {
-
-                        long lastUpdated = Long.valueOf(data.getString("estoquesLastUpdated"));
-                        String idEstoque = data.getString("id");
-
-                        if (isEstoqueUpdateUnknow(lastUpdated, idEstoque))
-                            Application.setEstoquesLastUpdated(lastUpdated);
-                        else
-                            Log.d(TAG,"estoquesLastUpdated ja conhecido ... ignorando");
-                    }
-
-                    if (data.containsKey("vendasLastUpdated")) {
-                        long lastUpdated = Long.valueOf(data.getString("vendasLastUpdated"));
-                        String idVenda = data.getString("id");
-
-                        if (isVendaUpdateUnknow(lastUpdated, idVenda))
-                            Application.setVendasLastUpdated(lastUpdated);
-                        else
-                            Log.d(TAG,"vendasLastUpdated ja conhecido ... ignorando");
-                    }
-                }
+                handleUpdate(data);
                 break;
             default:
                 String resumo = data.getString("resumo");
@@ -88,6 +54,56 @@ public class MsgListenerService extends GcmListenerService {
 
     }
 
+    private void handleDelete(Bundle data) {
+        String entity = data.getString("entity", "");
+        long id = Long.valueOf(data.getString("id"));
+
+        switch (entity) {
+            case "Venda":
+                new VendaService(getApplication()).delete(id);
+                break;
+            case "Estoque":
+                Log.d(TAG, "Exclusao p/ estoque #" + id + " não era pra aparecer aqui");
+                break;
+            default:
+                Log.d(TAG, "Delete não identificou entidade " + entity);
+        }
+    }
+
+    private void handleUpdate(Bundle data) {
+        synchronized (Application.class) {
+
+            if (data.containsKey("estoquesLastUpdated")) {
+
+                long lastUpdated = Long.valueOf(data.getString("estoquesLastUpdated"));
+                String idEstoque = data.getString("id");
+
+                if (isEstoqueUpdateUnknow(lastUpdated, idEstoque))
+                    Application.setEstoquesLastUpdated(lastUpdated);
+                else
+                    Log.d(TAG,"estoquesLastUpdated ja conhecido ... ignorando");
+            }
+
+            if (data.containsKey("vendasLastUpdated")) {
+                long lastUpdated = Long.valueOf(data.getString("vendasLastUpdated"));
+                String idVenda = data.getString("id");
+
+                if (isVendaUpdateUnknow(lastUpdated, idVenda))
+                    Application.setVendasLastUpdated(lastUpdated);
+                else
+                    Log.d(TAG,"vendasLastUpdated ja conhecido ... ignorando");
+            }
+        }
+    }
+
+    /**
+     * verificação feita para evitar requisição de atualização
+     * a ser feita a partir do dispositivo que criou a propria atualização
+     *
+     * @param lastUpdated
+     * @param idVenda
+     * @return se o update é desconhecido no dispositivo ou não
+     */
     private final boolean isVendaUpdateUnknow(long lastUpdated, String idVenda) {
         String[] projection = {"count(" + VendasProvider._ID + ")"};
         String selection = VendasProvider._ID + "=? AND " + VendasProvider.LAST_UPDATED_TIMESTAMP+"=?";

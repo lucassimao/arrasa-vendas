@@ -133,17 +133,19 @@ public class UpdateDBAsyncTask extends AsyncTask<Void, Void, Response> {
         Response response = null;
 
         if (app.isAuthenticated()) {
+            Log.d(TAG, "Iniciando atualização do banco local ....");
+
             Uri.Builder builder = Uri.parse(RemotePath.SyncPath.getUrl()).buildUpon();
 
-            long vendaLastUpdated = Application.getVendasLastUpdated();
-            Log.d(TAG, "Venda lastUpdated : " + vendaLastUpdated);
-            if (vendaLastUpdated >= 0)
-                builder.appendQueryParameter("vendaLastUpdated", String.valueOf(vendaLastUpdated));
+            long vendasLastUpdated = Application.getVendasLastUpdated();
+            Log.d(TAG, "Venda lastUpdated : " + vendasLastUpdated);
+            if (vendasLastUpdated >= 0)
+                builder.appendQueryParameter("vendasLastUpdated", String.valueOf(vendasLastUpdated));
 
-            long estoqueLastUpdated = Application.getEstoquesLastUpdated();
-            Log.d(TAG, "Estoque lastUpdated : " + estoqueLastUpdated);
-            if (estoqueLastUpdated >= 0)
-                builder.appendQueryParameter("estoqueLastUpdated", String.valueOf(estoqueLastUpdated));
+            long estoquesLastUpdated = Application.getEstoquesLastUpdated();
+            Log.d(TAG, "Estoque lastUpdated : " + estoquesLastUpdated);
+            if (estoquesLastUpdated >= 0)
+                builder.appendQueryParameter("estoquesLastUpdated", String.valueOf(estoquesLastUpdated));
 
             String accessToken = app.getAccessToken();
             Uri uri = builder.build();

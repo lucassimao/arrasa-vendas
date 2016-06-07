@@ -374,7 +374,6 @@ public class VendaActivity extends Activity {
 
             new SalvarVendaAsyncTask(new OnComplete() {
 
-
                 @Override
                 public void run(Response response) {
                     dlg.dismiss();
@@ -382,17 +381,17 @@ public class VendaActivity extends Activity {
                     int statusCode = response.getStatus();
 
                     if (statusCode == HttpURLConnection.HTTP_CREATED){
-                        atualizarEstoque();
 
                         VendaService service = new VendaService(VendaActivity.this);
                         try {
                             service.save(new JSONObject(response.getMessage()));
+                            atualizarEstoque();
+                            Toast.makeText(getBaseContext(), "Venda salva !", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
-                            // fail silently
                             e.printStackTrace();
+                            Toast.makeText(getBaseContext(), "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
 
-                        Toast.makeText(getBaseContext(), "Venda salva!", Toast.LENGTH_LONG).show();
                         finish();
                     }else{
                         Toast.makeText(getBaseContext(), "Erro " + statusCode + ": " + response.getMessage(), Toast.LENGTH_LONG).show();
@@ -403,7 +402,6 @@ public class VendaActivity extends Activity {
 
         } catch (JSONException e) {
             e.printStackTrace();
-
         }
 
     }
@@ -417,18 +415,15 @@ public class VendaActivity extends Activity {
             String selection = EstoqueProvider.PRODUTO_ID + "=? and " + EstoqueProvider.UNIDADE + "=?";
             String[] selectionArgs = {item.getProdutoID().toString(), item.getUnidade()};
 
-            CursorLoader loader = new CursorLoader(getApplicationContext(), EstoqueProvider.CONTENT_URI, projection, selection, selectionArgs, null);
+            Cursor c = getContentResolver().query(EstoqueProvider.CONTENT_URI,projection,selection,selectionArgs,null);
+            c.moveToFirst();
 
-            Cursor c = loader.loadInBackground();
-            c.moveToNext();
-
-            ContentValues cv = new ContentValues();
-            cv.put(EstoqueProvider.QUANTIDADE, c.getInt(c.getColumnIndex(EstoqueProvider.QUANTIDADE)) - item.getQuantidade());
-
+            int quantidadeAtual = c.getInt(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
             c.close();
 
+            ContentValues cv = new ContentValues();
+            cv.put(EstoqueProvider.QUANTIDADE, quantidadeAtual - item.getQuantidade());
             getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, selection, selectionArgs);
-
 
         }
 
