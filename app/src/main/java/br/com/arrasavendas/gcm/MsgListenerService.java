@@ -58,84 +58,51 @@ public class MsgListenerService extends GcmListenerService {
         String entity = data.getString("entity", "");
         long id = Long.valueOf(data.getString("id"));
 
-        switch (entity) {
-            case "Venda":
-                new VendaService(getApplication()).delete(id);
-                break;
-            case "Estoque":
-                Log.d(TAG, "Exclusao p/ estoque #" + id + " não era pra aparecer aqui");
-                break;
-            default:
-                Log.d(TAG, "Delete não identificou entidade " + entity);
+        String clienteId = data.getString("clienteId", null);
+        Application app = Application.getInstance();
+
+        if (!app.getId().equals(clienteId)) {
+
+            switch (entity) {
+                case "Venda":
+                    new VendaService(getApplication()).delete(id);
+                    break;
+                case "Estoque":
+                    Log.d(TAG, "Exclusao p/ estoque #" + id + " não era pra aparecer aqui");
+                    break;
+                default:
+                    Log.d(TAG, "Delete não identificou entidade " + entity);
+            }
+
         }
     }
 
     private void handleUpdate(Bundle data) {
+        String clienteId = data.getString("clienteId", null);
+        Application app = Application.getInstance();
+
         synchronized (Application.class) {
 
             if (data.containsKey("estoquesLastUpdated")) {
 
                 long lastUpdated = Long.valueOf(data.getString("estoquesLastUpdated"));
-                String idEstoque = data.getString("id");
 
-                if (isEstoqueUpdateUnknow(lastUpdated, idEstoque))
+                if (!app.getId().equals(clienteId))
                     Application.setEstoquesLastUpdated(lastUpdated);
                 else
-                    Log.d(TAG,"estoquesLastUpdated ja conhecido ... ignorando");
+                    Log.d(TAG, "estoquesLastUpdated ja conhecido ... ignorando");
             }
 
             if (data.containsKey("vendasLastUpdated")) {
                 long lastUpdated = Long.valueOf(data.getString("vendasLastUpdated"));
-                String idVenda = data.getString("id");
 
-                if (isVendaUpdateUnknow(lastUpdated, idVenda))
+                if (!app.getId().equals(clienteId))
                     Application.setVendasLastUpdated(lastUpdated);
                 else
-                    Log.d(TAG,"vendasLastUpdated ja conhecido ... ignorando");
+                    Log.d(TAG, "vendasLastUpdated ja conhecido ... ignorando");
             }
         }
     }
-
-    /**
-     * verificação feita para evitar requisição de atualização
-     * a ser feita a partir do dispositivo que criou a propria atualização
-     *
-     * @param lastUpdated
-     * @param idVenda
-     * @return se o update é desconhecido no dispositivo ou não
-     */
-    private final boolean isVendaUpdateUnknow(long lastUpdated, String idVenda) {
-        String[] projection = {"count(" + VendasProvider._ID + ")"};
-        String selection = VendasProvider._ID + "=? AND " + VendasProvider.LAST_UPDATED_TIMESTAMP+"=?";
-        String[] selectionArgs = {idVenda,String.valueOf(lastUpdated)};
-
-        Cursor c = getContentResolver().query(VendasProvider.CONTENT_URI,
-                projection,selection,selectionArgs,null);
-
-        int count = 0;
-        if (c.moveToFirst()){
-            count = c.getInt(0);
-        }
-        c.close();
-        return (count==0);
-    }
-
-    private final boolean isEstoqueUpdateUnknow(long lastUpdated, String idEstoque) {
-        String[] projection = {"count(" + EstoqueProvider._ID + ")"};
-        String selection = EstoqueProvider._ID + "=? AND " + EstoqueProvider.LAST_UPDATED_TIMESTAMP+"=?";
-        String[] selectionArgs = {idEstoque,String.valueOf(lastUpdated)};
-
-        Cursor c = getContentResolver().query(EstoqueProvider.CONTENT_URI,
-                projection,selection,selectionArgs,null);
-        int count = 0;
-
-        if (c.moveToFirst()){
-            count = c.getInt(0);
-        }
-        c.close();
-        return (count==0);
-    }
-
 
     private final void sendNotification(String resumo, String message) {
 

@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.iid.InstanceID;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,13 +36,17 @@ import static br.com.arrasavendas.Utilities.ImageFolder.PRODUTOS;
  */
 public class Application extends android.app.Application {
 
+    private static final String TAG = Application.class.getName();
+
     public static final String PREFS_AUTH_KEY = "br.com.arrasavendas.auth";
     public static final String PREFS_FLAG_LAST_UPDATED = "br.com.arrasavendas.lastUpdated";
     public static final int ENTREGAS_LOADER = 1;
     public static final int ESTOQUE_LOADER = 2;
-    public final static int CIDADES_LOADER = 10;
-    private static final String TAG = Application.class.getName();
+    public static final int CIDADES_LOADER = 10;
+    public static final String VENDAS_LAST_UPDATED_KEY = "vendasLastUpdated";
+    public static final String ESTOQUES_LAST_UPDATED_KEY = "estoquesLastUpdated";
     private static Application mApp = null;
+
     private String currentUser = null;
     private String accessToken;
     private String roles;
@@ -80,14 +85,12 @@ public class Application extends android.app.Application {
     public final static void setVendasLastUpdated(long newVendasLastUpdated){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
 
-        Log.d(TAG,"Key vendasLastUpdated presente: " + sp.contains("vendaLastUpdated"));
+        Log.d(TAG,"Key vendasLastUpdated presente: " + sp.contains(VENDAS_LAST_UPDATED_KEY));
         Log.d(TAG,"VendasLastUpdated:" + getVendasLastUpdated());
 
-        final String key = "vendasLastUpdated";
-
-        if (!sp.contains(key) ||  newVendasLastUpdated < getVendasLastUpdated() ){
+        if (!sp.contains(VENDAS_LAST_UPDATED_KEY) ||  newVendasLastUpdated < getVendasLastUpdated() ){
             SharedPreferences.Editor editor = sp.edit();
-            editor.putLong(key, newVendasLastUpdated);
+            editor.putLong(VENDAS_LAST_UPDATED_KEY, newVendasLastUpdated);
             editor.commit();
         }
     }
@@ -98,17 +101,18 @@ public class Application extends android.app.Application {
      */
     public final static long getVendasLastUpdated(){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
-        return sp.getLong("vendasLastUpdated",-1);
+        return sp.getLong(VENDAS_LAST_UPDATED_KEY,-1);
     }
 
     public final static void setEstoquesLastUpdated(long newEstoquesLastUpdated){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
 
-        final String key = "estoquesLastUpdated";
+        Log.d(TAG,"Key estoquesLastUpdated presente: " + sp.contains(ESTOQUES_LAST_UPDATED_KEY));
+        Log.d(TAG,"EstoquesLastUpdated:" + getEstoquesLastUpdated());
 
-        if (!sp.contains(key) || newEstoquesLastUpdated < getVendasLastUpdated() ){
+        if (!sp.contains(ESTOQUES_LAST_UPDATED_KEY) || newEstoquesLastUpdated < getEstoquesLastUpdated() ){
             SharedPreferences.Editor editor = sp.edit();
-            editor.putLong(key, newEstoquesLastUpdated);
+            editor.putLong(ESTOQUES_LAST_UPDATED_KEY, newEstoquesLastUpdated);
             editor.commit();
         }
     }
@@ -119,17 +123,17 @@ public class Application extends android.app.Application {
      */
     public final static long getEstoquesLastUpdated(){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
-        return sp.getLong("estoquesLastUpdated", -1);
+        return sp.getLong(ESTOQUES_LAST_UPDATED_KEY, -1);
     }
 
     public final static boolean isDBUpdated(){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
-        return !sp.contains("vendasLastUpdated") && !sp.contains("estoquesLastUpdated");
+        return !sp.contains(VENDAS_LAST_UPDATED_KEY) && !sp.contains(ESTOQUES_LAST_UPDATED_KEY);
     }
 
     public static void setDBUpdated() {
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
-        sp.edit().remove("vendasLastUpdated").remove("estoquesLastUpdated").apply();
+        sp.edit().remove(VENDAS_LAST_UPDATED_KEY).remove(ESTOQUES_LAST_UPDATED_KEY).apply();
     }
 
     @Override
@@ -279,4 +283,8 @@ public class Application extends android.app.Application {
     }
 
 
+    public String getId() {
+        InstanceID instanceID = InstanceID.getInstance(this);
+        return instanceID.getId();
+    }
 }

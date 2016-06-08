@@ -38,7 +38,8 @@ public class UpdateEstoqueAsyncTask extends AsyncTask<Void, Void, Response> {
     protected Response doInBackground(Void... params) {
         try {
 
-            String accessToken = Application.getInstance().getAccessToken();
+            Application app = Application.getInstance();
+            String accessToken = app.getAccessToken();
             String entityPath = RemotePath.getEntityPath(RemotePath.EstoquePath, this.estoqueId);
 
 
@@ -49,6 +50,7 @@ public class UpdateEstoqueAsyncTask extends AsyncTask<Void, Void, Response> {
             httpConnection.setRequestMethod("PUT");
             httpConnection.setUseCaches(false);
             httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+            httpConnection.setRequestProperty("clienteId", app.getId());
             httpConnection.setRequestProperty("Accept", "application/json");
             httpConnection.setRequestProperty("Content-Type", "application/json");
             httpConnection.connect();

@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.providers.DownloadedImagesProvider;
 import br.com.arrasavendas.providers.EstoqueProvider;
 
@@ -147,5 +148,22 @@ public class EstoqueService {
         values.put(EstoqueProvider.QUANTIDADE, estoque.getInt("quantidade"));
 
         return values;
+    }
+
+    public void devolverItens(List<ItemVenda> itens) {
+        for(ItemVenda item: itens){
+            long id = item.getId();
+            Uri uri = EstoqueProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+
+            Cursor c = ctx.getContentResolver().query(uri,new String[]{EstoqueProvider.QUANTIDADE},null,null,null);
+            c.moveToFirst();
+            long quantidade = c.getLong(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
+            c.close();
+
+            ContentValues cv = new ContentValues();
+            cv.put(EstoqueProvider.QUANTIDADE,quantidade + item.getQuantidade());
+
+            ctx.getContentResolver().update(uri,cv,null,null);
+        }
     }
 }

@@ -58,6 +58,7 @@ public class SalvarMovimentoDeCaixaAsyncTask extends AsyncTask<Void, Void, Respo
             httpConnection.setDoOutput(true);
             httpConnection.setRequestMethod("POST");
             httpConnection.setUseCaches(false);
+            httpConnection.setRequestProperty("clienteId", app.getId());
             httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
             httpConnection.setRequestProperty("Content-Type", "application/json");
             httpConnection.connect();

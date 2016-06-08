@@ -99,13 +99,13 @@ public class SyncEnderecosService extends IntentService {
 
         Cursor cursor = getContentResolver().query(ClientesProvider.CONTENT_URI, projection, null, null, null);
         cursor.moveToFirst();
-        if (cursor.getCount() > 0) {
-            long timestamp = cursor.getLong(cursor.getColumnIndex("max_last_updated_timestamp"));
-            cursor.close();
-            return timestamp;
-        }
+        long timestamp = 0;
 
-        return 0;
+        if (cursor.getCount() > 0) {
+            timestamp = cursor.getLong(cursor.getColumnIndex("max_last_updated_timestamp"));
+        }
+        cursor.close();
+        return timestamp;
     }
 
     private void salvarNovosEnderecos(JSONArray jsonArray) {

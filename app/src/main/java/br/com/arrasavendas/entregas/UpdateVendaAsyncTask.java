@@ -63,6 +63,7 @@ public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,Response>{
 		httpConnection.setRequestMethod("PUT");
 		httpConnection.setUseCaches(false);
 		httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+		httpConnection.setRequestProperty("clienteId", app.getId());
 		httpConnection.setRequestProperty("Accept", "application/json");
 		httpConnection.setRequestProperty("Content-Type", "application/json");
 		httpConnection.connect();

@@ -140,12 +140,12 @@ public class UpdateDBAsyncTask extends AsyncTask<Void, Void, Response> {
             long vendasLastUpdated = Application.getVendasLastUpdated();
             Log.d(TAG, "Venda lastUpdated : " + vendasLastUpdated);
             if (vendasLastUpdated >= 0)
-                builder.appendQueryParameter("vendasLastUpdated", String.valueOf(vendasLastUpdated));
+                builder.appendQueryParameter(Application.VENDAS_LAST_UPDATED_KEY, String.valueOf(vendasLastUpdated));
 
             long estoquesLastUpdated = Application.getEstoquesLastUpdated();
             Log.d(TAG, "Estoque lastUpdated : " + estoquesLastUpdated);
             if (estoquesLastUpdated >= 0)
-                builder.appendQueryParameter("estoquesLastUpdated", String.valueOf(estoquesLastUpdated));
+                builder.appendQueryParameter(Application.ESTOQUES_LAST_UPDATED_KEY, String.valueOf(estoquesLastUpdated));
 
             String accessToken = app.getAccessToken();
             Uri uri = builder.build();

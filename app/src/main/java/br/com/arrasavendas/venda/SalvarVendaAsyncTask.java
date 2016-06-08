@@ -2,6 +2,8 @@ package br.com.arrasavendas.venda;
 
 import android.os.AsyncTask;
 
+import com.google.android.gms.iid.InstanceID;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -50,6 +52,8 @@ public class SalvarVendaAsyncTask extends AsyncTask<JSONObject, Void, Response> 
         httpConnection.setRequestProperty("Content-Type", "application/json");
         httpConnection.setRequestProperty("Accept", "application/json");
         httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+        httpConnection.setRequestProperty("clienteId", app.getId());
+
 
         httpConnection.connect();
 

@@ -46,6 +46,7 @@ import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.VendasProvider;
+import br.com.arrasavendas.service.EstoqueService;
 import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
 import static br.com.arrasavendas.Application.ENTREGAS_LOADER;
@@ -365,6 +366,9 @@ public class EntregasActivity extends FragmentActivity {
                                     VendaService service = new VendaService(EntregasActivity.this);
                                     service.delete(venda.getId());
                                     vendasListAdapter.removerVenda(venda);
+
+                                    EstoqueService estoqueService = new EstoqueService(EntregasActivity.this);
+                                    estoqueService.devolverItens(venda.getItens());
 
                                     Toast.makeText(EntregasActivity.this, "Venda excluida!",
                                             Toast.LENGTH_LONG).show();

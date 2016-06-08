@@ -53,6 +53,7 @@ public class ExcluirVendaAsyncTask extends AsyncTask<Void, Void, Response> {
             httpConnection.setDoOutput(false);
             httpConnection.setUseCaches(false);
             httpConnection.setRequestProperty("Content-Type", "none");
+            httpConnection.setRequestProperty("clienteId", app.getId());
             httpConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
             httpConnection.setRequestMethod("DELETE");
             httpConnection.connect();
