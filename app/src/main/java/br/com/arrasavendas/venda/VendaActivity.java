@@ -1,23 +1,8 @@
 package br.com.arrasavendas.venda;
 
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
-import android.widget.*;
-import br.com.arrasavendas.Application;
-import br.com.arrasavendas.model.*;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -26,9 +11,42 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CursorAdapter;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.FilterQueryProvider;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
+import br.com.arrasavendas.model.Cliente;
+import br.com.arrasavendas.model.FormaPagamento;
+import br.com.arrasavendas.model.ItemVenda;
+import br.com.arrasavendas.model.StatusVenda;
+import br.com.arrasavendas.model.TurnoEntrega;
+import br.com.arrasavendas.model.Vendedor;
 import br.com.arrasavendas.providers.EstoqueProvider;
+import br.com.arrasavendas.service.EstoqueService;
 import br.com.arrasavendas.service.VendaService;
 import br.com.arrasavendas.util.Response;
 import br.com.arrasavendas.venda.SalvarVendaAsyncTask.OnComplete;
@@ -382,11 +400,15 @@ public class VendaActivity extends Activity {
 
                     if (statusCode == HttpURLConnection.HTTP_CREATED){
 
-                        VendaService service = new VendaService(VendaActivity.this);
+                        VendaService vendaService = new VendaService(VendaActivity.this);
+                        EstoqueService estoqueService = new EstoqueService(VendaActivity.this);
+
                         try {
-                            service.save(new JSONObject(response.getMessage()));
-                            atualizarEstoque();
+
+                            vendaService.save(new JSONObject(response.getMessage()));
+                            estoqueService.retirarItens(listProdutosAdapter.getItens());
                             Toast.makeText(getBaseContext(), "Venda salva !", Toast.LENGTH_LONG).show();
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(getBaseContext(), "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -394,6 +416,7 @@ public class VendaActivity extends Activity {
 
                         finish();
                     }else{
+
                         Toast.makeText(getBaseContext(), "Erro " + statusCode + ": " + response.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
@@ -406,28 +429,7 @@ public class VendaActivity extends Activity {
 
     }
 
-    protected void atualizarEstoque() {
-        String[] projection = {EstoqueProvider.QUANTIDADE};
 
-        for (int i = 0; i < listProdutosAdapter.getCount(); ++i) {
-            ItemVenda item = (ItemVenda) listProdutosAdapter.getItem(i);
-
-            String selection = EstoqueProvider.PRODUTO_ID + "=? and " + EstoqueProvider.UNIDADE + "=?";
-            String[] selectionArgs = {item.getProdutoID().toString(), item.getUnidade()};
-
-            Cursor c = getContentResolver().query(EstoqueProvider.CONTENT_URI,projection,selection,selectionArgs,null);
-            c.moveToFirst();
-
-            int quantidadeAtual = c.getInt(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
-            c.close();
-
-            ContentValues cv = new ContentValues();
-            cv.put(EstoqueProvider.QUANTIDADE, quantidadeAtual - item.getQuantidade());
-            getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, selection, selectionArgs);
-
-        }
-
-    }
 
     public void onClickSair(View v) {
         finish();

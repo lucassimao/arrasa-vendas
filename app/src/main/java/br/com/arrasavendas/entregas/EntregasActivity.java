@@ -37,7 +37,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import br.com.arrasavendas.Application;
 import br.com.arrasavendas.UpdateDBAsyncTask;
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.model.Cidade;
@@ -368,7 +367,7 @@ public class EntregasActivity extends FragmentActivity {
                                     vendasListAdapter.removerVenda(venda);
 
                                     EstoqueService estoqueService = new EstoqueService(EntregasActivity.this);
-                                    estoqueService.devolverItens(venda.getItens());
+                                    estoqueService.reportItens(venda.getItens());
 
                                     Toast.makeText(EntregasActivity.this, "Venda excluida!",
                                             Toast.LENGTH_LONG).show();

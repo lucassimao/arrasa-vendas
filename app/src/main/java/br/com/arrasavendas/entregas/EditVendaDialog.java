@@ -19,6 +19,7 @@ import br.com.arrasavendas.model.Venda;
 public class EditVendaDialog extends DialogFragment {
 
     public static final String VENDA = EditVendaDialog.class.getName() + "activity_venda";
+    private final static String TAG = EditVendaDialog.class.getSimpleName();
     private Listener listener;
     private EditVendaPagerAdapter pagerAdapter;
     private int currentTab;
@@ -54,6 +55,7 @@ public class EditVendaDialog extends DialogFragment {
         getDialog().setTitle("Editar Venda");
 
         this.pagerAdapter = new EditVendaPagerAdapter(venda, getChildFragmentManager());
+
         final ViewPager mViewPager = (ViewPager) view.findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -62,20 +64,27 @@ public class EditVendaDialog extends DialogFragment {
                 // gravando alterações do Tab atual e atualizando variavel currentTab
                 writeChanges();
                 currentTab = position;
+
+                // mandando a nova aba recarregar as informações na view
+                Fragment f = pagerAdapter.getItem(currentTab);
+                ((EditVendaListener) f).setupView();
             }
         });
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         mViewPager.setCurrentItem(currentTab);
+
         return view;
     }
 
     private final void writeChanges() {
         Fragment f = pagerAdapter.getItem(currentTab);
         String simpleName = f.getClass().getSimpleName();
-        Log.d(EditVendaDialog.class.getSimpleName(), "writing changes from last fragment " + simpleName);
+
+        Log.d(TAG, "writing changes from last fragment " + simpleName);
         ((EditVendaListener) f).writeChanges();
     }
 

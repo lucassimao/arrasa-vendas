@@ -1,5 +1,6 @@
 package br.com.arrasavendas.service;
 
+import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -43,46 +44,58 @@ public class EstoqueService {
 
         List<ContentValues> fotos = convertJSONProdutoFotos2ContentValue(estoque);
         ctx.getContentResolver().bulkInsert(DownloadedImagesProvider.CONTENT_URI, fotos.toArray(new ContentValues[0]));
+    }
+
+    private void save(JSONObject estoque) throws JSONException {
+        ContentValues values = convertEstoqueJSONObject2ContentValue(estoque);
+        this.ctx.getContentResolver().insert(EstoqueProvider.CONTENT_URI, values);
+
+        List<ContentValues> fotos = convertJSONProdutoFotos2ContentValue(estoque);
+        ctx.getContentResolver().bulkInsert(DownloadedImagesProvider.CONTENT_URI, fotos.toArray(new ContentValues[0]));
 
     }
 
     public final void save(JSONArray itens) {
         try {
 
-            if (isTableEstoqueEmpty()) { // tabela vazia: bulk insert !
+            if (isTableEstoqueEmpty()) {
+                Log.d(TAG,"Tabela de estoques vazia ... fazendo bulk insert !");
+
                 ContentValues[] contentValues = new ContentValues[itens.length()];
                 List<ContentValues> fotos = new LinkedList<>();
 
                 for (int i = 0; i < itens.length(); ++i) {
                     JSONObject estoque = itens.getJSONObject(i);
-                    ContentValues cv = convertEstoqueJSONObject2ContentValue(estoque);
-                    contentValues[i] = cv;
-
+                    contentValues[i] = convertEstoqueJSONObject2ContentValue(estoque);
                     fotos.addAll(convertJSONProdutoFotos2ContentValue(estoque));
                 }
 
                 ctx.getContentResolver().bulkInsert(EstoqueProvider.CONTENT_URI, contentValues);
                 ctx.getContentResolver().bulkInsert(DownloadedImagesProvider.CONTENT_URI, fotos.toArray(new ContentValues[0]));
 
-            } else
+            } else {
+                String[] projection = {EstoqueProvider._ID};
+
                 for (int i = 0; i < itens.length(); ++i) {
                     JSONObject jsonObject = itens.getJSONObject(i);
                     long estoqueId = jsonObject.getLong("estoque_id");
 
-                    Uri uri = EstoqueProvider.CONTENT_URI.buildUpon().
-                            appendPath(String.valueOf(estoqueId)).build();
+                    Uri.Builder builder = EstoqueProvider.CONTENT_URI.buildUpon();
+                    Uri uri = builder.appendPath(String.valueOf(estoqueId)).build();
 
-                    Cursor c = ctx.getContentResolver().query(uri,
-                            new String[]{EstoqueProvider._ID}, null, null, null);
+                    Cursor c = ctx.getContentResolver().query(uri, projection, null, null, null);
 
                     // se o estoque existe, atualiza; caso contrario, salva
-                    if (c.getCount() == 1)
+                    int count = c.getCount();
+                    c.close();
+
+                    if (count == 1)
                         update(estoqueId, jsonObject);
                     else
                         save(jsonObject);
 
-                    c.close();
                 }
+            }
         } catch (JSONException e) {
             Log.d(TAG, "Erro ao converter json object de estoque em content value: ");
             e.printStackTrace();
@@ -90,20 +103,15 @@ public class EstoqueService {
     }
 
     private boolean isTableEstoqueEmpty() {
-        Cursor cursor = ctx.getContentResolver().query(EstoqueProvider.CONTENT_URI, new String[]{EstoqueProvider._ID}, null, null, null);
+        String[] projection = {EstoqueProvider._ID};
+
+        Cursor cursor = ctx.getContentResolver().query(EstoqueProvider.CONTENT_URI, projection, null, null, null);
         int count = cursor.getCount();
         cursor.close();
         return count == 0;
     }
 
-    private void save(JSONObject jsonObject) throws JSONException {
-        ContentValues values = convertEstoqueJSONObject2ContentValue(jsonObject);
-        this.ctx.getContentResolver().insert(EstoqueProvider.CONTENT_URI, values);
 
-        List<ContentValues> fotos = convertJSONProdutoFotos2ContentValue(jsonObject);
-        ctx.getContentResolver().bulkInsert(DownloadedImagesProvider.CONTENT_URI, fotos.toArray(new ContentValues[0]));
-
-    }
 
     private final List<ContentValues> convertJSONProdutoFotos2ContentValue(JSONObject estoque) throws JSONException {
         List<ContentValues> fotos = new LinkedList<>();
@@ -124,7 +132,7 @@ public class EstoqueService {
             cv.put(DownloadedImagesProvider.PRODUTO_NOME, produtoNome);
             cv.put(DownloadedImagesProvider.PRODUTO_ASCII, produtoNomeASCII);
             cv.put(DownloadedImagesProvider.UNIDADE, unidade);
-            cv.put(DownloadedImagesProvider.IS_IGNORED, 0);
+            cv.put(DownloadedImagesProvider.IS_IGNORED, 0); // false
 
             fotos.add(cv);
         }
@@ -150,20 +158,51 @@ public class EstoqueService {
         return values;
     }
 
-    public void devolverItens(List<ItemVenda> itens) {
-        for(ItemVenda item: itens){
-            long id = item.getId();
-            Uri uri = EstoqueProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+    // devolvendo itens p/ o estoque
+    public void reportItens(List<ItemVenda> itens) {
+        String selection = EstoqueProvider.PRODUTO_ID + "=? and " + EstoqueProvider.UNIDADE + "=?";
+        String[] projection = {EstoqueProvider.QUANTIDADE};
 
-            Cursor c = ctx.getContentResolver().query(uri,new String[]{EstoqueProvider.QUANTIDADE},null,null,null);
+        for (ItemVenda item : itens) {
+
+            String produtoId = item.getProdutoID().toString();
+            String unidade = item.getUnidade();
+            String[] selectionArgs = {produtoId, unidade};
+
+            Cursor c = ctx.getContentResolver().query(EstoqueProvider.CONTENT_URI,
+                    projection, selection, selectionArgs, null);
             c.moveToFirst();
-            long quantidade = c.getLong(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
+
+            int quantidadeAtual = c.getInt(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
             c.close();
 
             ContentValues cv = new ContentValues();
-            cv.put(EstoqueProvider.QUANTIDADE,quantidade + item.getQuantidade());
+            cv.put(EstoqueProvider.QUANTIDADE, quantidadeAtual + item.getQuantidade());
 
-            ctx.getContentResolver().update(uri,cv,null,null);
+            ctx.getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, selection, selectionArgs);
+
+        }
+    }
+
+    // removendo do estoque
+    public void retirarItens(List<ItemVenda> itens) {
+        String[] projection = {EstoqueProvider.QUANTIDADE};
+        String selection = EstoqueProvider.PRODUTO_ID + "=? and " + EstoqueProvider.UNIDADE + "=?";
+
+        for (ItemVenda item : itens) {
+
+            String[] selectionArgs = {item.getProdutoID().toString(), item.getUnidade()};
+            Cursor c = ctx.getContentResolver().query(EstoqueProvider.CONTENT_URI,
+                    projection, selection, selectionArgs, null);
+            c.moveToFirst();
+
+            int quantidadeAtual = c.getInt(c.getColumnIndex(EstoqueProvider.QUANTIDADE));
+            c.close();
+
+            ContentValues cv = new ContentValues();
+            cv.put(EstoqueProvider.QUANTIDADE, quantidadeAtual - item.getQuantidade());
+
+            ctx.getContentResolver().update(EstoqueProvider.CONTENT_URI, cv, selection, selectionArgs);
         }
     }
 }

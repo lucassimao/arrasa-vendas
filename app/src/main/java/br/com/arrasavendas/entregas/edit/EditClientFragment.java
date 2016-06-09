@@ -35,19 +35,9 @@ import br.com.arrasavendas.providers.ClientesProvider;
 public class EditClientFragment extends Fragment implements EditVendaListener {
 
 
+    private static final String TAG = EditClientFragment.class.getSimpleName();
     private Venda venda;
-
-    private void setCliente(Cliente cliente) {
-
-        venda.setCliente(cliente);
-        View view = getView();
-
-        ((EditText) view.findViewById(R.id.editTextNome)).setText(cliente.getNome());
-        ((EditText) view.findViewById(R.id.editTextDDDTelefone)).setText(cliente.getDddTelefone());
-        ((EditText) view.findViewById(R.id.editTextTelefone)).setText(cliente.getTelefone());
-        ((EditText) view.findViewById(R.id.editTextCelular)).setText(cliente.getCelular());
-        ((EditText) view.findViewById(R.id.editTextDDDCelular)).setText(cliente.getDddCelular());
-    }
+    private final String VENDEDOR_SITE = "Site";
 
 
     @Override
@@ -60,15 +50,13 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         Bundle args = getArguments();
         this.venda = (Venda) args.getSerializable(EditVendaDialog.VENDA);
 
-        return rootView ;
+        return rootView;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(getClass().getName(),"onViewCreated");
 
-        setCliente(venda.getCliente());
         configurarSpinnerVendedor(view);
 
         EditText editTextTelefone = (EditText) view.findViewById(R.id.editTextTelefone);
@@ -77,33 +65,56 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         EditText editTextCelular = (EditText) view.findViewById(R.id.editTextCelular);
         editTextCelular.setOnTouchListener(onTouchListener);
 
+        setupView();
     }
 
+    @Override
+    public void setupView() {
+        View view = getView();
+
+        setCliente(venda.getCliente());
+
+        // setando vendedor
+        Vendedor vendedor = this.venda.getVendedor();
+        Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spVendedor.getAdapter();
+
+        int position = (vendedor != null) ? adapter.getPosition(vendedor.name().toString()) :
+                                            adapter.getPosition(VENDEDOR_SITE);
+
+        spVendedor.setSelection(position);
+    }
+
+    private void setCliente(Cliente cliente) {
+        venda.setCliente(cliente);
+        View view = getView();
+
+        ((EditText) view.findViewById(R.id.editTextNome)).setText(cliente.getNome());
+        ((EditText) view.findViewById(R.id.editTextDDDTelefone)).setText(cliente.getDddTelefone());
+        ((EditText) view.findViewById(R.id.editTextTelefone)).setText(cliente.getTelefone());
+        ((EditText) view.findViewById(R.id.editTextCelular)).setText(cliente.getCelular());
+        ((EditText) view.findViewById(R.id.editTextDDDCelular)).setText(cliente.getDddCelular());
+    }
+
+
+
     private void configurarSpinnerVendedor(View view) {
+        Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
+        TextView txtVendedor = (TextView) view.findViewById(R.id.txtVendedor);
+
+        // importante deixar configurar mesmo que ele nao fique visivel,
+        // pois no writeChanges o vendedor selecionado sera utilizado
         if (Application.getInstance().isAdmin()) {
-            TextView txtVendedor = (TextView) view.findViewById(R.id.txtVendedor);
             txtVendedor.setVisibility(View.VISIBLE);
-
-            Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
             spVendedor.setVisibility(View.VISIBLE);
-
-            String[] vendedores = {Vendedor.Adna.name(), Vendedor.Lucas.name(),
-                    Vendedor.MariaClara.name(), "Site"};
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
-                    android.R.layout.simple_spinner_dropdown_item, vendedores);
-            spVendedor.setAdapter(adapter);
-
-            Vendedor vendedor = this.venda.getVendedor();
-            int position = 0;
-
-            if (vendedor != null)
-                position = adapter.getPosition(vendedor.name().toString());
-            else
-                position = 3; // indice no array do item "Site"
-
-            spVendedor.setSelection(position);
         }
+
+        String[] vendedores = {Vendedor.Adna.name(), Vendedor.Lucas.name(),
+                Vendedor.MariaClara.name(), VENDEDOR_SITE};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, vendedores);
+        spVendedor.setAdapter(adapter);
     }
 
     public Venda getVenda() {
@@ -116,10 +127,10 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         View view = getView();
 
         if (view == null) {
-            Log.d(getClass().getName(),"getView() == null . skiping");
+            Log.d(getClass().getName(), "getView() == null . skiping");
             return;
         }
-        Log.d(getClass().getName(),"writing changes ....");
+        Log.d(getClass().getName(), "writing changes ....");
         Cliente cliente = venda.getCliente();
 
         EditText editTextNome = (EditText) view.findViewById(R.id.editTextNome);
@@ -137,7 +148,7 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         EditText editTextCelular = (EditText) view.findViewById(R.id.editTextCelular);
         cliente.setCelular(editTextCelular.getText().toString());
 
-        if (Application.getInstance().isAdmin()){
+        if (Application.getInstance().isAdmin()) {
             Vendedor vendedor = null;
             Spinner spVendedor = (Spinner) view.findViewById(R.id.spVendedor);
             Object selectedItem = spVendedor.getSelectedItem();

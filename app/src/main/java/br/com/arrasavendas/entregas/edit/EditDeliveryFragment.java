@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
@@ -35,6 +36,7 @@ import br.com.arrasavendas.providers.CidadesProvider;
  */
 public class EditDeliveryFragment extends Fragment implements EditVendaListener, LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String TAG = EditDeliveryFragment.class.getSimpleName();
     private Venda venda;
 
     @Override
@@ -54,11 +56,26 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(getClass().getName(), "onViewCreated");
+
+        configurarSpinnerTurnoEntrega(view);
+        configurarSpinnerUF(view);
+        setupSpinnerCity(view);
         setupView();
+
     }
 
-    private void setupView() {
+    private void configurarSpinnerTurnoEntrega(View view) {
+        Spinner spTunoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
+        String[] turnos = {TurnoEntrega.Manha.name(), TurnoEntrega.Tarde.name()};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, turnos);
+
+        spTunoEntrega.setAdapter(adapter);
+
+    }
+
+    public void setupView() {
         final View view = getView();
         if (view == null)
             return;
@@ -81,13 +98,31 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
 
         ((EditText) view.findViewById(R.id.editTextEndereco)).setText(cliente.getEndereco());
         ((EditText) view.findViewById(R.id.editTextBairro)).setText(cliente.getBairro());
-        configurarSpinnerTurnoEntrega();
-        configurarSpinnerUF();
-        setupSpinnerCity();
+
+
+        // setando turno
+        Spinner spTunoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spTunoEntrega.getAdapter();
+        int position = adapter.getPosition(getVenda().getTurnoEntrega().name());
+        spTunoEntrega.setSelection(position);
+
+        //setando uf
+        Spinner spinnerUf = (Spinner) view.findViewById(R.id.spinner_uf);
+        adapter = (ArrayAdapter<String>) spinnerUf.getAdapter();
+        Uf uf = getVenda().getCliente().getUf();
+        position = adapter.getPosition(uf.name());
+        spinnerUf.setSelection(position);
+
+        //setando cidade
+        Spinner spinnerCity = (Spinner) view.findViewById(R.id.spinner_cidade);
+        CursorAdapter cursorAdapter = (CursorAdapter) spinnerCity.getAdapter();
+        Cidade cidade = getVenda().getCliente().getCidade();
+        position = adapter.getPosition(cidade.getNome());
+        spinnerCity.setSelection(position);
+
     }
 
-    private void setupSpinnerCity() {
-        View view = getView();
+    private void setupSpinnerCity(View view) {
         final Spinner spinnerCity = (Spinner) view.findViewById(R.id.spinner_cidade);
 
         CursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
@@ -99,8 +134,7 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
         spinnerCity.setAdapter(adapter);
     }
 
-    private void configurarSpinnerUF() {
-        View view = getView();
+    private void configurarSpinnerUF(View view) {
         final Spinner spinnerUf = (Spinner) view.findViewById(R.id.spinner_uf);
 
         spinnerUf.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -127,31 +161,7 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
                 android.R.layout.simple_dropdown_item_1line, ufs);
 
         spinnerUf.setAdapter(adapter);
-        Uf uf = getVenda().getCliente().getUf();
-        int position = adapter.getPosition(uf.name());
-        spinnerUf.setSelection(position);
     }
-
-    private void configurarSpinnerTurnoEntrega() {
-        View view = getView();
-
-        Spinner spTunoEntrega = (Spinner) view.findViewById(R.id.spinnerTurnoEntrega);
-        String[] turnos = {TurnoEntrega.Manha.name(), TurnoEntrega.Tarde.name()};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, turnos);
-
-        spTunoEntrega.setAdapter(adapter);
-        int position = adapter.getPosition(getVenda().getTurnoEntrega().name());
-        spTunoEntrega.setSelection(position);
-    }
-
-/*    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(getClass().getName(), "onPause");
-        writeChanges();
-    }*/
-
 
     public Venda getVenda() {
         return venda;

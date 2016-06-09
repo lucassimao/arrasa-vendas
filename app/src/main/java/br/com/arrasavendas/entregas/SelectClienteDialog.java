@@ -74,6 +74,7 @@ public class SelectClienteDialog extends DialogFragment {
                             if (radioButtonId != -1) {
                                 RadioButton selectedRadioButton = (RadioButton) radioGroup.findViewById(radioButtonId);
                                 Cliente clienteSelecionado = (Cliente) selectedRadioButton.getTag();
+
                                 listener.onOK(clienteSelecionado);
                             }else
                                 Toast.makeText(getActivity(),"Selecione um dos endereços",Toast.LENGTH_SHORT).show();

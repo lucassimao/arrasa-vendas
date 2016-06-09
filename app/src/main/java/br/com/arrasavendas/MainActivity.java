@@ -130,15 +130,16 @@ public class MainActivity extends Activity {
             public void run(Response response) {
                 progressDlg.dismiss();
 
-                switch(response.getStatus()){
+                int status = response.getStatus();
+
+                switch(status){
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_NO_CONTENT:
                         startActivity(i);
                         break;
                     default:
-                        Toast.makeText(getApplicationContext(),
-                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                        String text = "Erro " + status + ": " + response.getMessage();
+                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_LONG).show();
                 }
 
             }

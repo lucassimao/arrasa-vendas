@@ -18,6 +18,7 @@ class EditVendaPagerAdapter extends FragmentPagerAdapter {
     private final String[] tabTitles = {"Cliente", "Entrega", "Pagamento","Correios"};
     private final Venda venda;
     private Fragment[] fragments;
+    private String TAG = EditVendaPagerAdapter.class.getSimpleName();
 
 
     public EditVendaPagerAdapter(Venda venda, FragmentManager fm) {

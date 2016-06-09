@@ -6,4 +6,5 @@ package br.com.arrasavendas.entregas.edit;
 public interface EditVendaListener  {
 
     void writeChanges();
+    void setupView();
 }

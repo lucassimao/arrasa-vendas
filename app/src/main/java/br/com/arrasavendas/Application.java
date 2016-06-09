@@ -126,6 +126,10 @@ public class Application extends android.app.Application {
         return sp.getLong(ESTOQUES_LAST_UPDATED_KEY, -1);
     }
 
+    /**
+     *
+     * @return true se não existir nenhuma das chaves VENDAS_LAST_UPDATED_KEY e ESTOQUES_LAST_UPDATED_KEY
+     */
     public final static boolean isDBUpdated(){
         SharedPreferences sp = context().getSharedPreferences(PREFS_FLAG_LAST_UPDATED, MODE_PRIVATE);
         return !sp.contains(VENDAS_LAST_UPDATED_KEY) && !sp.contains(ESTOQUES_LAST_UPDATED_KEY);

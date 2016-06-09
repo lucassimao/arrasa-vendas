@@ -27,6 +27,7 @@ public class VendaService {
 
     public final void delete(Long id) {
         Log.d(TAG, "excluindo venda #" + id);
+
         Uri uri = VendasProvider.CONTENT_URI.buildUpon().appendPath(id.toString()).build();
         ctx.getContentResolver().delete(uri, null, null);
     }
@@ -47,7 +48,7 @@ public class VendaService {
 
         try {
 
-            if (isTableVendaEmpty()) { // estando vazio, faz bulk insert
+            if (isTableVendaEmpty()) {
                 Log.d(TAG,"Tabela de vendas vazia, fazendo bulk insert!");
 
                 ContentValues[] contentValues = new ContentValues[itens.length()];
@@ -56,26 +57,30 @@ public class VendaService {
 
                 ctx.getContentResolver().bulkInsert(VendasProvider.CONTENT_URI, contentValues);
 
-            } else
+            } else {
+                final String[] projection = {VendasProvider._ID};
+
                 for (int i = 0; i < itens.length(); ++i) {
                     JSONObject jsonObject = itens.getJSONObject(i);
                     long vendaId = jsonObject.getLong("id");
 
-                    Uri uri = VendasProvider.CONTENT_URI.buildUpon().
-                            appendPath(String.valueOf(vendaId)).build();
-                    Cursor c = ctx.getContentResolver().query(uri, new String[]{VendasProvider._ID}, null, null, null);
+                    Uri.Builder builder = VendasProvider.CONTENT_URI.buildUpon();
+                    builder.appendPath(String.valueOf(vendaId));
+                    Uri uri = builder.build();
 
-                    // se a venda não existe, salva; caso contrario, atualiza
-                    if (c.getCount() == 0) {
-                        Log.d(TAG,"VENDA #"+vendaId+ " nao existe, save!");
+                    Cursor c = ctx.getContentResolver().query(uri, projection, null, null, null);
+
+                    int count = c.getCount();
+                    c.close();
+                    if (count == 0) {
+                        Log.d(TAG, "VENDA #" + vendaId + " nao existe, save!");
                         save(jsonObject);
-                    }
-                    else {
-                        Log.d(TAG,"VENDA #"+vendaId+ " ja existe, update!");
+                    } else {
+                        Log.d(TAG, "VENDA #" + vendaId + " ja existe, update!");
                         update(vendaId, jsonObject);
                     }
-                    c.close();
                 }
+            }
 
         } catch (JSONException e) {
             Log.d(TAG, "Erro ao converter json object da venda em content value: ");

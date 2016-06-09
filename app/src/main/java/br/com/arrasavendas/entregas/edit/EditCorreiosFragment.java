@@ -50,9 +50,24 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(getClass().getName(),"onViewCreated");
 
-        setupCourrierDeliveryMethod(view);
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner_envio);
+
+        String[] metodos = {"Nenhum", ServicoCorreios.PAC.name(), ServicoCorreios.SEDEX.name()};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, metodos);
+
+        spinner.setAdapter(adapter);
+        setupBtnComputeShippingCost(view);
+
+        setupView();
+    }
+
+
+
+    @Override
+    public void setupView() {
+        View view = getView();
 
         EditText editTextZipCode = (EditText) view.findViewById(R.id.edit_text_cep);
         editTextZipCode.setText(venda.getCliente().getCep());
@@ -63,8 +78,15 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
         EditText editTrackingCode = (EditText) view.findViewById(R.id.edit_text_rastreio);
         editTrackingCode.setText(venda.getCodigoRastreio());
 
-        setupBtnComputeShippingCost(view);
+        // TODO melhorar essas numeros 1 e 2 em variaveis constantes
+        Spinner spinnerDeliveryMethod = (Spinner) view.findViewById(R.id.spinner_envio);
+        if (venda.getServicoCorreios() == null)
+            spinnerDeliveryMethod.setSelection(0);
+        else
+            spinnerDeliveryMethod.setSelection((venda.getServicoCorreios() == ServicoCorreios.PAC) ? 1 : 2); // ids dos array acima
     }
+
+
 
     private void setupBtnComputeShippingCost(final View view) {
         Button btn = (Button) view.findViewById(R.id.btn_calcular_frete);
@@ -121,19 +143,7 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
         });
     }
 
-    private void setupCourrierDeliveryMethod(View view) {
-        Spinner spinner = (Spinner) view.findViewById(R.id.spinner_envio);
 
-        String[] metodos = {"Nenhum", ServicoCorreios.PAC.name(), ServicoCorreios.SEDEX.name()};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, metodos);
-
-        spinner.setAdapter(adapter);
-        if (venda.getServicoCorreios() == null)
-            spinner.setSelection(0);
-        else
-            spinner.setSelection((venda.getServicoCorreios() == ServicoCorreios.PAC) ? 1 : 2); // ids dos array acima
-    }
 
     @Override
     public void writeChanges() {
