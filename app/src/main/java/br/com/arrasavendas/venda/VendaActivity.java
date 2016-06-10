@@ -53,6 +53,7 @@ import br.com.arrasavendas.venda.SalvarVendaAsyncTask.OnComplete;
 
 public class VendaActivity extends Activity {
 
+    private static final String TAG = VendaActivity.class.getSimpleName();
     private final DataSetObserver listProdutosObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
@@ -64,7 +65,6 @@ public class VendaActivity extends Activity {
     private static final int ITEM_LIMPAR = 1;
 
     private ListView list;
-    private AutoCompleteTextView txtViewProduto;
     private EditText editTextCliente;
 
     private Date dateEntrega;
@@ -72,7 +72,6 @@ public class VendaActivity extends Activity {
     private TextView txtValorTotal;
     private RadioGroup radioGroupFormaPagamento;
     private CheckBox checkboxJaPagou;
-    private Spinner spinnerTurnoEntrega;
 
 
     @Override
@@ -92,7 +91,6 @@ public class VendaActivity extends Activity {
         editTextCliente = (EditText) findViewById(R.id.editTextCliente);
         checkboxJaPagou = (CheckBox) findViewById(R.id.checkBoxJaPagou);
         txtValorTotal = (TextView) findViewById(R.id.txtValorTotal);
-        spinnerTurnoEntrega = (Spinner) findViewById(R.id.spinnerTurnoEntrega);
 
         radioGroupFormaPagamento = (RadioGroup) findViewById(R.id.radioGroupFormaPagamento);
         radioGroupFormaPagamento.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -107,15 +105,15 @@ public class VendaActivity extends Activity {
 
         String currentUser = app.getCurrentUser();
         if (currentUser != null) {
-            switch(currentUser){
+            switch (currentUser) {
                 case "lsimaocosta@gmail.com":
-                    ( (RadioButton) findViewById(R.id.radioVendedorLucas)).setChecked(true);
+                    ((RadioButton) findViewById(R.id.radioVendedorLucas)).setChecked(true);
                     break;
                 case "mariaclaravn26@gmail.com":
-                    ( (RadioButton) findViewById(R.id.radioVendedorMariaClara)).setChecked(true);
+                    ((RadioButton) findViewById(R.id.radioVendedorMariaClara)).setChecked(true);
                     break;
                 case "fisio.adnadantas@gmail.com":
-                    ( (RadioButton) findViewById(R.id.radioVendedorAdna)).setChecked(true);
+                    ((RadioButton) findViewById(R.id.radioVendedorAdna)).setChecked(true);
                     break;
             }
         }
@@ -126,47 +124,47 @@ public class VendaActivity extends Activity {
 
 
     private void configurarAutoCompleteTextViewProduto() {
-        txtViewProduto = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextViewProduto);
 
-        final String[] colunas = new String[]{EstoqueProvider.PRODUTO, EstoqueProvider._ID};
+        final String[] colunas = {EstoqueProvider.PRODUTO, EstoqueProvider._ID};
 
         SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_dropdown_item_1line, null, colunas,
                 new int[]{android.R.id.text1},
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
+        final AutoCompleteTextView txtViewProduto  = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextViewProduto);
         txtViewProduto.setAdapter(simpleCursorAdapter);
-        txtViewProduto
-                .setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view,
-                                            int position, long id) {
-                        txtViewProduto.setTag(id);
-                    }
+        txtViewProduto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                });
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // esse id é a pk do estoque, coluna _id
+                txtViewProduto.setTag(id);
+            }
+        });
 
-        simpleCursorAdapter
-                .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+        simpleCursorAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 
-                    @Override
-                    public CharSequence convertToString(Cursor cursor) {
-                        return cursor.getString(cursor
-                                .getColumnIndex(EstoqueProvider.PRODUTO));
-                    }
-                });
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                return cursor.getString(cursor.getColumnIndex(EstoqueProvider.PRODUTO));
+            }
+        });
 
         simpleCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+
             @Override
             public Cursor runQuery(CharSequence arg0) {
                 if (TextUtils.isEmpty(arg0))
                     return null;
 
-                CursorLoader cl = new CursorLoader(getApplicationContext(),
-                        EstoqueProvider.CONTENT_URI_PRODUTOS, colunas,
-                        "produto_nome_ascii like ?1 or produto_nome like ?1 ", new String[]{"%"
-                        + arg0.toString() + "%"}, null);
+                String selection = EstoqueProvider.PRODUTO_ASCII + " like ?1 or " + EstoqueProvider.PRODUTO + " like ?1 ";
+                String[] selectionArgs = {"%"+ arg0.toString() + "%"};
+
+                CursorLoader cl = new CursorLoader(VendaActivity.this,
+                        EstoqueProvider.CONTENT_URI_PRODUTOS, colunas,selection, selectionArgs, null);
+
                 return cl.loadInBackground();
             }
         });
@@ -175,23 +173,22 @@ public class VendaActivity extends Activity {
 
     public void onClickAddProduto(View v) {
 
+        final AutoCompleteTextView txtViewProduto  = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextViewProduto);
+
         if (txtViewProduto.getTag() == null) {
-
-            Toast.makeText(this, "Escolha o produto primeiro!",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Escolha o produto primeiro !",  Toast.LENGTH_SHORT).show();
             txtViewProduto.requestFocus();
-
         } else {
 
             final String produto = txtViewProduto.getText().toString();
-            UnidadeQuantidadeDialogFragment fragment = UnidadeQuantidadeDialogFragment.newInstance(produto);
+            UnidadeQuantidadeDialogFragment dialog = UnidadeQuantidadeDialogFragment.newInstance(produto);
 
-            fragment.setOnAdicionarListener(new UnidadeQuantidadeDialogFragment.OnAdicionarListener() {
+            dialog.setOnAdicionarListener(new UnidadeQuantidadeDialogFragment.OnAdicionarListener() {
 
                 @Override
                 public void onClickBtnAdicionar(long idProduto, String unidade, Integer quantidade, BigDecimal precoAVista, BigDecimal precoAPrazo) {
 
-                    listProdutosAdapter.add(idProduto, produto, unidade, quantidade,precoAVista,precoAPrazo);
+                    listProdutosAdapter.add(idProduto, produto, unidade, quantidade, precoAVista, precoAPrazo);
                     listProdutosAdapter.notifyDataSetChanged();
 
                     txtViewProduto.setText("");
@@ -200,7 +197,7 @@ public class VendaActivity extends Activity {
                 }
             });
 
-            fragment.show(getFragmentManager(), "dialog");
+            dialog.show(getFragmentManager(), "dialog");
         }
 
     }
@@ -212,21 +209,20 @@ public class VendaActivity extends Activity {
         for (int i = 0; i < listProdutosAdapter.getCount(); ++i) {
             ItemVenda item = (ItemVenda) listProdutosAdapter.getItem(i);
 
+            BigDecimal quantidade = BigDecimal.valueOf(item.getQuantidade());
+
             switch (radioGroupFormaPagamento.getCheckedRadioButtonId()) {
                 case R.id.radioFormaPagamentoAVista:
-                    valorTotal = valorTotal.add(item.getPrecoAVista().multiply(BigDecimal.valueOf(item.getQuantidade())));
+                    valorTotal = valorTotal.add(item.getPrecoAVista().multiply(quantidade));
                     break;
-
                 case R.id.radioFormaPagamentoParcelado:
-                    valorTotal = valorTotal.add(item.getPrecoAPrazo().multiply(BigDecimal.valueOf(item.getQuantidade())));
+                    valorTotal = valorTotal.add(item.getPrecoAPrazo().multiply(quantidade));
                     break;
             }
 
         }
 
-        txtValorTotal
-                .setText(String.format("R$ %.2f", valorTotal.doubleValue()));
-
+        txtValorTotal.setText(String.format("R$ %.2f", valorTotal.doubleValue()));
     }
 
     public void onClickSelecionarDataEntrega(View view) {
@@ -388,7 +384,7 @@ public class VendaActivity extends Activity {
             obj.put("carrinho", listProdutosAdapter.getItemsAsJson());
 
 
-            final ProgressDialog dlg = ProgressDialog.show(this, "Salvando activity_venda", "Aguarde ...");
+            final ProgressDialog dlg = ProgressDialog.show(this, "Salvando venda", "Aguarde ...");
 
             new SalvarVendaAsyncTask(new OnComplete() {
 
@@ -398,25 +394,23 @@ public class VendaActivity extends Activity {
 
                     int statusCode = response.getStatus();
 
-                    if (statusCode == HttpURLConnection.HTTP_CREATED){
+                    if (statusCode == HttpURLConnection.HTTP_CREATED) {
 
                         VendaService vendaService = new VendaService(VendaActivity.this);
                         EstoqueService estoqueService = new EstoqueService(VendaActivity.this);
 
                         try {
-
                             vendaService.save(new JSONObject(response.getMessage()));
                             estoqueService.retirarItens(listProdutosAdapter.getItens());
-                            Toast.makeText(getBaseContext(), "Venda salva !", Toast.LENGTH_LONG).show();
 
+                            Toast.makeText(getBaseContext(), "Venda salva!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(getBaseContext(), "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
 
                         finish();
-                    }else{
-
+                    } else {
                         Toast.makeText(getBaseContext(), "Erro " + statusCode + ": " + response.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
@@ -428,7 +422,6 @@ public class VendaActivity extends Activity {
         }
 
     }
-
 
 
     public void onClickSair(View v) {

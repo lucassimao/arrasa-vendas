@@ -36,17 +36,20 @@ import static br.com.arrasavendas.Utilities.ImageFolder.PRODUTOS;
  */
 public class Application extends android.app.Application {
 
+    public static final int ENTREGAS_LOADER = 1;
+    public static final int ESTOQUE_LOADER = 2;
+    public static final int UNIDADES_LOADER = 3;
+    public static final int CIDADES_LOADER = 10;
+
     private static final String TAG = Application.class.getName();
 
     public static final String PREFS_AUTH_KEY = "br.com.arrasavendas.auth";
     public static final String PREFS_FLAG_LAST_UPDATED = "br.com.arrasavendas.lastUpdated";
-    public static final int ENTREGAS_LOADER = 1;
-    public static final int ESTOQUE_LOADER = 2;
-    public static final int CIDADES_LOADER = 10;
+
     public static final String VENDAS_LAST_UPDATED_KEY = "vendasLastUpdated";
     public static final String ESTOQUES_LAST_UPDATED_KEY = "estoquesLastUpdated";
-    private static Application mApp = null;
 
+    private static Application mApp = null;
     private String currentUser = null;
     private String accessToken;
     private String roles;

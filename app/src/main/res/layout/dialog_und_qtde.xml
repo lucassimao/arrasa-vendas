@@ -5,40 +5,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dip"
-    android:orientation="vertical" >
+    android:orientation="vertical" android:paddingLeft="10dp">
 
     <TableLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dip" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <TableRow>
-
             <TextView android:text="Unidade:" />
 
             <Spinner
                 android:id="@+id/spinnerUnidade"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>
 
         <TableRow>
-
             <TextView android:text="Quantidade:" />
 
             <Spinner
                 android:id="@+id/spinnerQuantidade"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
+
         </TableRow>
+
     </TableLayout>
+
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal" >
 
         <Button

@@ -39,7 +39,6 @@ import br.com.arrasavendas.venda.UnidadeQuantidadeDialogFragment;
 public class EditItensVendaActivity extends Activity {
 
     public static final String VENDA = "EditItensVendaActivity.VENDA_OBJ";
-    private static final int PRODUTOS_LOADER = 1;
     private Venda venda;
     private AutoCompleteTextView autoCompleteProduto;
     private ListView listItensVenda;
@@ -77,6 +76,7 @@ public class EditItensVendaActivity extends Activity {
         } else {
 
             final String produto = autoCompleteProduto.getText().toString();
+
             UnidadeQuantidadeDialogFragment fragment = UnidadeQuantidadeDialogFragment.newInstance(produto);
 
             fragment.setOnAdicionarListener(new UnidadeQuantidadeDialogFragment.OnAdicionarListener() {
@@ -118,15 +118,12 @@ public class EditItensVendaActivity extends Activity {
 
         });
 
-        autoCompleteProdutoCursorAdapter
-                .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-
-                    @Override
-                    public CharSequence convertToString(Cursor cursor) {
-                        return cursor.getString(cursor
-                                .getColumnIndex(EstoqueProvider.PRODUTO));
-                    }
-                });
+        autoCompleteProdutoCursorAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                return cursor.getString(cursor.getColumnIndex(EstoqueProvider.PRODUTO));
+            }
+        });
 
         autoCompleteProdutoCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
@@ -134,10 +131,11 @@ public class EditItensVendaActivity extends Activity {
                 if (TextUtils.isEmpty(arg0))
                     return null;
 
-                CursorLoader cl = new CursorLoader(getApplicationContext(),
-                        EstoqueProvider.CONTENT_URI_PRODUTOS, colunas,
-                        "produto_nome_ascii like ?1 or produto_nome like ?1 ", new String[]{"%"
-                        + arg0.toString() + "%"}, null);
+                String selection = EstoqueProvider.PRODUTO_ASCII + " like ?1 or " + EstoqueProvider.PRODUTO + " like ?1 ";
+                String[] selectionArgs = {"%" + arg0.toString() + "%"};
+
+                CursorLoader cl = new CursorLoader(EditItensVendaActivity.this,
+                        EstoqueProvider.CONTENT_URI_PRODUTOS, colunas, selection, selectionArgs, null);
                 return cl.loadInBackground();
             }
         });
@@ -235,7 +233,7 @@ public class EditItensVendaActivity extends Activity {
 
                 } else {
                     Toast.makeText(EditItensVendaActivity.this,
-                            "Erro "+response.getStatus() +": " + response.getMessage(),
+                            "Erro " + response.getStatus() + ": " + response.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 }
 
