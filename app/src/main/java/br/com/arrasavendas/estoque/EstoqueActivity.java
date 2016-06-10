@@ -66,7 +66,7 @@ public class EstoqueActivity extends Activity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Bundle bundle = new Bundle();
-            bundle.putString("query",query);
+            bundle.putString("query", query);
             getLoaderManager().restartLoader(ESTOQUE_LOADER, bundle, estoqueCursorCallback);
         }
     }
@@ -77,7 +77,7 @@ public class EstoqueActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.estoque_activity_menu, menu);
 
-        SearchManager searchManager =  (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
@@ -118,7 +118,7 @@ public class EstoqueActivity extends Activity {
 
     private void sincronizarEstoque() {
 
-        final ProgressDialog progressDlg = ProgressDialog.show(this,"Atualizando informações", "Aguarde ...");
+        final ProgressDialog progressDlg = ProgressDialog.show(this, "Atualizando informações", "Aguarde ...");
         new UpdateDBAsyncTask(this, new UpdateDBAsyncTask.OnCompleteListener() {
 
             @Override
@@ -126,14 +126,14 @@ public class EstoqueActivity extends Activity {
 
                 progressDlg.dismiss();
 
-                switch(response.getStatus()){
+                switch (response.getStatus()) {
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_NO_CONTENT:
                         getLoaderManager().restartLoader(ESTOQUE_LOADER, null, estoqueCursorCallback);
                         break;
                     default:
                         Toast.makeText(getApplicationContext(),
-                                "Erro " + response.getStatus()+ ": "+ response.getMessage(),
+                                "Erro " + response.getStatus() + ": " + response.getMessage(),
                                 Toast.LENGTH_LONG).show();
                 }
 
@@ -152,6 +152,7 @@ public class EstoqueActivity extends Activity {
                 super.onPostExecute(result);
 
                 String[] projection = {DownloadedImagesProvider.LOCAL_PATH};
+                String authority = "br.com.arrasavendas.fileprovider";
 
                 for (long idProduto : itensSelecionados.keySet()) {
                     int qtdeUnidades = itensSelecionados.get(idProduto).length;
@@ -161,26 +162,28 @@ public class EstoqueActivity extends Activity {
 
                     String[] selectionArgs = new String[qtdeUnidades + 1];
                     selectionArgs[0] = String.valueOf(idProduto);
+
                     for (int j = 1; j < selectionArgs.length; ++j)
                         selectionArgs[j] = itensSelecionados.get(idProduto)[j - 1];
 
                     Cursor c = getContentResolver().query(DownloadedImagesProvider.CONTENT_URI,
                             projection, selection, selectionArgs, DownloadedImagesProvider.UNIDADE);
-                    c.moveToFirst();
 
-                    do {
-                        String localpath = c.getString(c.getColumnIndex(DownloadedImagesProvider.LOCAL_PATH));
-                        String authority = "br.com.arrasavendas.fileprovider";
-                        File file = new File(localpath);
-                        Uri uri = FileProvider.getUriForFile(EstoqueActivity.this, authority, file);
-                        imageUris.add(uri);
+                    if (c.moveToFirst()) {
+                        do {
+                            String localpath = c.getString(c.getColumnIndex(DownloadedImagesProvider.LOCAL_PATH));
+                            File file = new File(localpath);
+                            Uri uri = FileProvider.getUriForFile(EstoqueActivity.this, authority, file);
+                            imageUris.add(uri);
 
-                    } while (c.moveToNext());
+                        } while (c.moveToNext());
+                    }
 
                     c.close();
-
                 }
 
+
+                // mandando as imagens p/ zap
 
                 int grupoSize = 10;
                 int start = 0, end = 0;
@@ -223,9 +226,9 @@ public class EstoqueActivity extends Activity {
                 String selection = null;
                 String[] selectionArgs = null;
 
-                if (args!=null && args.containsKey("query")) {
+                if (args != null && args.containsKey("query")) {
                     selection = EstoqueProvider.PRODUTO_ASCII + " LIKE ?";
-                    selectionArgs = new String[]{"%"+ args.getString("query")+"%"};
+                    selectionArgs = new String[]{"%" + args.getString("query") + "%"};
                 }
                 return new CursorLoader(getApplicationContext(), EstoqueProvider.CONTENT_URI_PRODUTOS,
                         projection, selection, selectionArgs, EstoqueProvider.PRODUTO);
@@ -234,7 +237,9 @@ public class EstoqueActivity extends Activity {
         }
 
         @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) { estoqueListAdapter.setCursor(cursor); }
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            estoqueListAdapter.setCursor(cursor);
+        }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {

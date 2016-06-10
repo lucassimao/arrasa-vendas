@@ -72,34 +72,42 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
 
                 String[] selectionArgs = {String.valueOf(produtoId)};
 
-                Cursor cursor = this.ctx.getContentResolver().query(DownloadedImagesProvider.CONTENT_URI, projection, selection, selectionArgs, DownloadedImagesProvider._ID);
+                Cursor cursor = this.ctx.getContentResolver().query(DownloadedImagesProvider.CONTENT_URI,
+                        projection, selection, selectionArgs, DownloadedImagesProvider._ID);
+
                 int count = 0;
 
-                while (cursor.moveToNext()) {
-                    long downloadedImageId = cursor.getLong(cursor.getColumnIndex(DownloadedImagesProvider._ID));
-                    String imageName = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.IMAGE_NAME));
-                    String produtoNome = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.PRODUTO_NOME));
-                    String unidade = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.UNIDADE));
+                if (cursor.moveToFirst())
+                    do {
 
-                    try {
-                        byte[] imageBytes = downloadImage(imageName);
+                        long downloadedImageId = cursor.getLong(cursor.getColumnIndex(DownloadedImagesProvider._ID));
+                        String imageName = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.IMAGE_NAME));
+                        String produtoNome = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.PRODUTO_NOME));
+                        String unidade = cursor.getString(cursor.getColumnIndex(DownloadedImagesProvider.UNIDADE));
 
-                        if (imageBytes !=null) {
-                            String localPath = salvarImagem(imageName.toLowerCase(), imageBytes); // evitando bug dos caractreres especiais
+                        try {
+                            byte[] imageBytes = downloadImage(imageName);
 
-                            if (getQuantidadeDeUnidadesDoProduto(produtoId) > 1)
-                                desenharLegenda(localPath, produtoNome, unidade);
+                            if (imageBytes != null) {
+                                // evitando bug dos caractreres especiais
+                                String localPath = salvarImagem(imageName.toLowerCase(), imageBytes);
 
-                            updateLocalPath(downloadedImageId, localPath);
+                                // desenha o nome da unidade na foto apenas se o produto for multiunidade
+                                if (getQuantidadeDeUnidadesDoProduto(produtoId) > 1)
+                                    desenharLegenda(localPath, produtoNome, unidade);
 
-                            publishProgress(++count);
+                                updateLocalPath(downloadedImageId, localPath);
+
+                                publishProgress(++count);
+                            }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    } while (cursor.moveToNext());
 
-                }
+                cursor.close();
             }
         }
         return null;
@@ -119,6 +127,14 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
         }
     }
 
+    /**
+     * Dado os id's dos produtos, consulta a tabela de imagens e retorna
+     * a quantidade de imagens que ainda não foram baixadas no dispositivo local
+     *
+     * @param setOfProdutoId coleção de id's de produtos
+     * @return a quantidade de imagens de todos os produtos
+     * ( cujos id's foram informados no parametro) que ainda não foram baixadas no dispositivo local
+     */
     private int getQuantidadeDeImagensParaBaixar(Set<Long> setOfProdutoId) {
         String[] projection = {DownloadedImagesProvider._ID};
         String selection = DownloadedImagesProvider.LOCAL_PATH + " is NULL AND " +
@@ -174,7 +190,6 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
         }
 
         b.recycle();
-
     }
 
     private byte[] downloadImage(String imageName) throws IOException {
@@ -190,7 +205,7 @@ public class DownloadImagesTask extends AsyncTask<Void, Integer, Void> {
         httpConnection.connect();
 
         int responseCode = httpConnection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK){
+        if (responseCode == HttpURLConnection.HTTP_OK) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             InputStream inputStream = httpConnection.getInputStream();
             byte[] buffer = new byte[4 * 1024];

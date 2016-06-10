@@ -48,6 +48,8 @@ public class Application extends android.app.Application {
 
     public static final String VENDAS_LAST_UPDATED_KEY = "vendasLastUpdated";
     public static final String ESTOQUES_LAST_UPDATED_KEY = "estoquesLastUpdated";
+    public static final String CLIENTE_ID_KEY = "estoquesLastUpdated";
+
 
     private static Application mApp = null;
     private String currentUser = null;

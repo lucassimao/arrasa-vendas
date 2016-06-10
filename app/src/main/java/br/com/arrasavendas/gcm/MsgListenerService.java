@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,9 +16,12 @@ import java.util.Random;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.providers.EstoqueProvider;
-import br.com.arrasavendas.providers.VendasProvider;
 import br.com.arrasavendas.service.VendaService;
+
+import static br.com.arrasavendas.Application.ESTOQUES_LAST_UPDATED_KEY;
+import static br.com.arrasavendas.Application.VENDAS_LAST_UPDATED_KEY;
+import static br.com.arrasavendas.Application.CLIENTE_ID_KEY;
+
 
 /**
  * Created by lsimaocosta on 27/03/16.
@@ -58,7 +60,7 @@ public class MsgListenerService extends GcmListenerService {
         String entity = data.getString("entity", "");
         long id = Long.valueOf(data.getString("id"));
 
-        String clienteId = data.getString("clienteId", null);
+        String clienteId = data.getString(CLIENTE_ID_KEY, null);
         Application app = Application.getInstance();
 
         if (!app.getId().equals(clienteId)) {
@@ -78,14 +80,14 @@ public class MsgListenerService extends GcmListenerService {
     }
 
     private void handleUpdate(Bundle data) {
-        String clienteId = data.getString("clienteId", null);
+        String clienteId = data.getString(CLIENTE_ID_KEY, null);
         Application app = Application.getInstance();
 
         synchronized (Application.class) {
 
-            if (data.containsKey("estoquesLastUpdated")) {
+            if (data.containsKey(ESTOQUES_LAST_UPDATED_KEY)) {
 
-                long lastUpdated = Long.valueOf(data.getString("estoquesLastUpdated"));
+                long lastUpdated = Long.valueOf(data.getString(ESTOQUES_LAST_UPDATED_KEY));
 
                 if (!app.getId().equals(clienteId))
                     Application.setEstoquesLastUpdated(lastUpdated);
@@ -93,8 +95,8 @@ public class MsgListenerService extends GcmListenerService {
                     Log.d(TAG, "estoquesLastUpdated ja conhecido ... ignorando");
             }
 
-            if (data.containsKey("vendasLastUpdated")) {
-                long lastUpdated = Long.valueOf(data.getString("vendasLastUpdated"));
+            if (data.containsKey(VENDAS_LAST_UPDATED_KEY)) {
+                long lastUpdated = Long.valueOf(data.getString(VENDAS_LAST_UPDATED_KEY));
 
                 if (!app.getId().equals(clienteId))
                     Application.setVendasLastUpdated(lastUpdated);
