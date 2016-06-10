@@ -7,6 +7,12 @@ import br.com.arrasavendas.model.Venda;
 
 /**
  * Created by lsimaocosta on 26/03/16.
+ *
+ * Utilizado para ordenar as vendas baseados na seguinte ordem:
+ * - entregas pela manha
+ * - entregas pela tarde
+ * - vendas que o cliente ficou de buscar
+ *
  */
 public class VendaComparator implements Comparator<Venda> {
     @Override

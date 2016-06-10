@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.anexos;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +29,9 @@ import java.net.HttpURLConnection;
 
 import br.com.arrasavendas.R;
 import br.com.arrasavendas.Utilities;
+import br.com.arrasavendas.entregas.asyncTask.DownloadAnexoAsyncTask;
+import br.com.arrasavendas.entregas.asyncTask.UpdateVendaAsyncTask;
+import br.com.arrasavendas.entregas.asyncTask.UploadAnexoAsyncTask;
 import br.com.arrasavendas.util.Response;
 
 import static br.com.arrasavendas.Utilities.ImageFolder;

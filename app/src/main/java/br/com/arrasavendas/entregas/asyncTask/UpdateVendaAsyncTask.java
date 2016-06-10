@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.asyncTask;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -24,7 +24,7 @@ public class UpdateVendaAsyncTask extends AsyncTask<Void,Void,Response>{
 
     private final long vendaId;
 
-    interface OnComplete{
+    public interface OnComplete{
 		void run(Response response);
 	}
 

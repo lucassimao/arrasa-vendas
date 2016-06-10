@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas.edit;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -19,11 +19,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.entregas.EditVendaDialog;
 import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.TurnoEntrega;
@@ -56,12 +54,12 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG,"onViewCreated");
 
         configurarSpinnerTurnoEntrega(view);
         configurarSpinnerUF(view);
         setupSpinnerCity(view);
         setupView();
-
     }
 
     private void configurarSpinnerTurnoEntrega(View view) {
@@ -72,13 +70,12 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
                 android.R.layout.simple_spinner_dropdown_item, turnos);
 
         spTunoEntrega.setAdapter(adapter);
-
     }
 
     public void setupView() {
-        final View view = getView();
-        if (view == null)
-            return;
+        Log.d(TAG,"setupView");
+
+        View view = getView();
 
         Cliente cliente = venda.getCliente();
 
@@ -173,11 +170,11 @@ public class EditDeliveryFragment extends Fragment implements EditVendaListener,
         View view = getView();
 
         if (view == null) {
-            Log.d(getClass().getName(), "getView() == null . skiping");
+            Log.d(TAG, "getView() == null . skiping");
             return;
         }
 
-        Log.d(getClass().getName(),"writing changes ....");
+        Log.d(TAG,"writing changes ....");
         Cliente cliente = venda.getCliente();
 
         EditText editTextEndereco = (EditText) view.findViewById(R.id.editTextEndereco);

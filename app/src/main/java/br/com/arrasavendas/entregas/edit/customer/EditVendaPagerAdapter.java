@@ -1,16 +1,10 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
 
-import br.com.arrasavendas.entregas.edit.EditClientFragment;
-import br.com.arrasavendas.entregas.edit.EditCorreiosFragment;
-import br.com.arrasavendas.entregas.edit.EditDeliveryFragment;
-import br.com.arrasavendas.entregas.edit.EditPaymentFragment;
-import br.com.arrasavendas.entregas.edit.EditVendaListener;
 import br.com.arrasavendas.model.Venda;
 
 class EditVendaPagerAdapter extends FragmentPagerAdapter {

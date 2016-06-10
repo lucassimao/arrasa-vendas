@@ -1,9 +1,8 @@
-package br.com.arrasavendas.entregas.edit;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.text.TextUtilsCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +16,6 @@ import android.widget.RadioGroup;
 import java.math.BigDecimal;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.entregas.EditVendaDialog;
 import br.com.arrasavendas.model.FormaPagamento;
 import br.com.arrasavendas.model.StatusVenda;
 import br.com.arrasavendas.model.Venda;
@@ -28,6 +26,7 @@ import br.com.arrasavendas.model.Venda;
  */
 public class EditPaymentFragment extends Fragment implements EditVendaListener {
 
+    private static final String TAG = EditPaymentFragment.class.getSimpleName();
     private Venda venda;
 
     @Override
@@ -45,11 +44,14 @@ public class EditPaymentFragment extends Fragment implements EditVendaListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG,"onViewCreated");
         setupView();
     }
 
     @Override
     public void setupView() {
+        Log.d(TAG,"setupView");
+
         View view = getView();
 
         if (venda.getStatus().equals(StatusVenda.PagamentoRecebido))
@@ -74,11 +76,12 @@ public class EditPaymentFragment extends Fragment implements EditVendaListener {
         View view = getView();
 
         if (view == null) {
-            Log.d(getClass().getName(), "getView() == null . skiping");
+            Log.d(TAG, "getView() == null . skiping");
             return;
         }
 
-        Log.d(getClass().getName(), "writing changes ...");
+        Log.d(TAG, "writing changes ...");
+
         CheckBox checkBoxJaPagou = (CheckBox) view.findViewById(R.id.cbJaPagou);
         StatusVenda statusVenda = (checkBoxJaPagou.isChecked()) ? StatusVenda.PagamentoRecebido :
                 StatusVenda.AguardandoPagamento;

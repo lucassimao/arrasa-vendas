@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas.edit;
+package br.com.arrasavendas.entregas.edit.customer;
 
 /**
  * Created by lsimaocosta on 11/03/16.

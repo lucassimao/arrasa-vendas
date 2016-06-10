@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.edit.items;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -28,7 +28,7 @@ import java.net.HttpURLConnection;
 
 import br.com.arrasavendas.UpdateDBAsyncTask;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.RemotePath;
+import br.com.arrasavendas.entregas.asyncTask.UpdateVendaAsyncTask;
 import br.com.arrasavendas.model.ItemVenda;
 import br.com.arrasavendas.model.Venda;
 import br.com.arrasavendas.providers.EstoqueProvider;

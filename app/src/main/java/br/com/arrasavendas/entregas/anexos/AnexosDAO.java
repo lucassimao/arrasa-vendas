@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.anexos;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;

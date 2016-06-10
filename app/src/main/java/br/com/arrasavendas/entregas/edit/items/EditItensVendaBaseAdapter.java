@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.edit.items;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;

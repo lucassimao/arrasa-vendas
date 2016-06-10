@@ -2,12 +2,9 @@ package br.com.arrasavendas.financeiro;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,7 +14,6 @@ import java.net.URL;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.RemotePath;
-import br.com.arrasavendas.entregas.UploadAnexoAsyncTask;
 import br.com.arrasavendas.model.MovimentoCaixa;
 import br.com.arrasavendas.util.Response;
 

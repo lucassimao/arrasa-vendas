@@ -47,7 +47,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".entregas.AnexosManagerActivity"
+        <activity android:name=".entregas.anexos.AnexosManagerActivity"
             android:label="Gerenciador de Anexos"
             android:parentActivityName=".entregas.EntregasActivity" >
             >
@@ -105,7 +105,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".entregas.EditItensVendaActivity"
+            android:name=".entregas.edit.items.EditItensVendaActivity"
             android:label="@string/title_activity_edit_itens_venda"
             android:parentActivityName=".entregas.EntregasActivity" >
             <meta-data

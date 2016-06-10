@@ -118,8 +118,7 @@ public class EstoqueActivity extends Activity {
 
     private void sincronizarEstoque() {
 
-        final ProgressDialog progressDlg = ProgressDialog.show(this,
-                "Atualizando informações", "Aguarde ...");
+        final ProgressDialog progressDlg = ProgressDialog.show(this,"Atualizando informações", "Aguarde ...");
         new UpdateDBAsyncTask(this, new UpdateDBAsyncTask.OnCompleteListener() {
 
             @Override
@@ -129,7 +128,7 @@ public class EstoqueActivity extends Activity {
 
                 switch(response.getStatus()){
                     case HttpURLConnection.HTTP_OK:
-                    case HttpURLConnection.HTTP_NOT_MODIFIED:
+                    case HttpURLConnection.HTTP_NO_CONTENT:
                         getLoaderManager().restartLoader(ESTOQUE_LOADER, null, estoqueCursorCallback);
                         break;
                     default:

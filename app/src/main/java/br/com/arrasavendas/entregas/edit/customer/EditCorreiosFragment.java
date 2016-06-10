@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas.edit;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -20,7 +20,6 @@ import java.util.Map;
 
 import br.com.arrasavendas.ConsultarFreteAsyncTask;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.entregas.EditVendaDialog;
 import br.com.arrasavendas.model.Cliente;
 import br.com.arrasavendas.model.ServicoCorreios;
 import br.com.arrasavendas.model.Venda;
@@ -31,6 +30,7 @@ import br.com.arrasavendas.model.Venda;
 public class EditCorreiosFragment extends Fragment implements EditVendaListener {
 
 
+    private static final String TAG = EditCorreiosFragment.class.getSimpleName();
     private Venda venda;
 
 
@@ -51,6 +51,8 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Log.d(TAG,"onViewCreated");
+
         Spinner spinner = (Spinner) view.findViewById(R.id.spinner_envio);
 
         String[] metodos = {"Nenhum", ServicoCorreios.PAC.name(), ServicoCorreios.SEDEX.name()};
@@ -67,6 +69,8 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
 
     @Override
     public void setupView() {
+        Log.d(TAG,"setupView");
+
         View view = getView();
 
         EditText editTextZipCode = (EditText) view.findViewById(R.id.edit_text_cep);
@@ -149,10 +153,11 @@ public class EditCorreiosFragment extends Fragment implements EditVendaListener 
     public void writeChanges() {
         View view = getView();
         if (view == null) {
-            Log.d(getClass().getName(),"getView()== null skiping ...");
+            Log.d(TAG,"getView()== null skiping ...");
             return;
         }
-        Log.d(getClass().getName(),"writing changes ...");
+        Log.d(TAG, "writing changes ....");
+
 
         Spinner spinnerDeliveryMethod = (Spinner) view.findViewById(R.id.spinner_envio);
         if (spinnerDeliveryMethod.getSelectedItemPosition() == 0)

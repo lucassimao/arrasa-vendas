@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.entregas.edit.EditVendaListener;
 import br.com.arrasavendas.model.Venda;
 
 public class EditVendaDialog extends DialogFragment {
@@ -33,9 +32,6 @@ public class EditVendaDialog extends DialogFragment {
         return dlg;
     }
 
-    /**
-     * CLICK do botao OK da janela
-     */
     public void onClickOK() {
         if (listener != null) {
             writeChanges();
@@ -92,6 +88,8 @@ public class EditVendaDialog extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+
         Button btnCancelar = (Button) view.findViewById(R.id.btn_cancelar);
         btnCancelar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +97,7 @@ public class EditVendaDialog extends DialogFragment {
                 getDialog().dismiss();
             }
         });
+
         Button btnOK = (Button) view.findViewById(R.id.btn_ok);
         btnOK.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas.edit;
+package br.com.arrasavendas.entregas.edit.customer;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -21,7 +21,6 @@ import java.util.LinkedList;
 
 import br.com.arrasavendas.Application;
 import br.com.arrasavendas.R;
-import br.com.arrasavendas.entregas.EditVendaDialog;
 import br.com.arrasavendas.entregas.SelectClienteDialog;
 import br.com.arrasavendas.model.Cidade;
 import br.com.arrasavendas.model.Cliente;
@@ -57,6 +56,8 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Log.d(TAG,"onViewCreated");
+
         configurarSpinnerVendedor(view);
 
         EditText editTextTelefone = (EditText) view.findViewById(R.id.editTextTelefone);
@@ -70,6 +71,7 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
 
     @Override
     public void setupView() {
+        Log.d(TAG,"setupView");
         View view = getView();
 
         setCliente(venda.getCliente());
@@ -127,10 +129,10 @@ public class EditClientFragment extends Fragment implements EditVendaListener {
         View view = getView();
 
         if (view == null) {
-            Log.d(getClass().getName(), "getView() == null . skiping");
+            Log.d(TAG, "getView() == null . skiping");
             return;
         }
-        Log.d(getClass().getName(), "writing changes ....");
+        Log.d(TAG, "writing changes ....");
         Cliente cliente = venda.getCliente();
 
         EditText editTextNome = (EditText) view.findViewById(R.id.editTextNome);

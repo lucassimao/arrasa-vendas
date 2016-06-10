@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.anexos;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

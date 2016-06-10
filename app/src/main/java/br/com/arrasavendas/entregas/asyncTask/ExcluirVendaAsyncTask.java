@@ -1,4 +1,4 @@
-package br.com.arrasavendas.entregas;
+package br.com.arrasavendas.entregas.asyncTask;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -26,7 +26,7 @@ public class ExcluirVendaAsyncTask extends AsyncTask<Void, Void, Response> {
 
     private final Context ctx;
 
-    interface OnComplete {
+    public interface OnComplete {
         void run(Response response);
     }
 
