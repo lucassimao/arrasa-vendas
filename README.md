@@ -21,7 +21,7 @@ The main functionalities includes
   - Sales commission calculation: The app proccess all successful sales and reports seller's performance 
   and comission from the current month
   
-  #### The online store no longer exists but the source code can be found here https://github.com/lucassimao/arrasa-vendas
+  #### The online store no longer exists but the source code can be found here https://github.com/lucassimao/arrasa-amiga
   #### At the time, this project was created only for use of the store sellers. So, it was not available on the Google's PlayStore   
-  #### This android app is no longer maintained,is here only as portfolio shwocase
+  #### This android app is no longer maintained,is here only as portfolio showcase
   #### This project can be freely forked, cloned or copied   
